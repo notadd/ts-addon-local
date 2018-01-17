@@ -11,3 +11,9 @@ sharp('../../test.jpeg')
   console.log(err)
 })
 
+sharp('../../test.jpeg')
+//.resize(200, 200)
+.crop(sharp.gravity.southeast)
+.toFile('../../crop.jpeg', (err)=>{
+  console.log(err)
+})
