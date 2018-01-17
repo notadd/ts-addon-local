@@ -96,3 +96,10 @@ sharp('../../test.jpeg')
 .toFile('../../extend.jpeg', (err)=>{
   console.log(err)
 });
+
+/* 产生图像的反面，是rgb颜色上的反面*/
+sharp('../../test.jpeg')
+.negate(true)
+.toFile('../../negate.jpeg', (err)=>{
+  console.log(err)
+});
