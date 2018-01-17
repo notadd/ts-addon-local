@@ -111,9 +111,43 @@ sharp('../../test.jpeg')
   console.log(err)
 });
 
+/* 强制转换格式为png*/
+sharp('../../test.jpeg')
+.png({
+  progressive:true,
+  force:true
+})
+.toFile('../../test1.png', (err)=>{
+  console.log(err)
+})
+
 /* 强制转换格式为webp*/
 sharp('../../test.jpeg')
 .toFormat('webp')
 .toFile('../../test.webp', (err)=>{
   console.log(err)
 });
+
+sharp('../../test.jpeg')
+.webp({
+  force:true
+})
+.toFile('../../test.webp', (err)=>{
+  console.log(err)
+});
+
+/* 强制转换格式为webp*/
+sharp('../../test.jpeg')
+.toFormat('tiff')
+.toFile('../../test.tiff', (err)=>{
+  console.log(err)
+});
+
+
+/*获取图片元数据,主要为宽高格式,不能获取处理之后元数据*/
+sharp('../../test.jpeg')
+//.resize(200,200)
+.metadata()
+.then((metadata)=>{
+  console.log(metadata)
+})
