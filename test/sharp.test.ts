@@ -103,3 +103,17 @@ sharp('../../test.jpeg')
 .toFile('../../negate.jpeg', (err)=>{
   console.log(err)
 });
+
+/* 强制转换格式为png*/
+sharp('../../test.jpeg')
+.toFormat('png')
+.toFile('../../test.png', (err)=>{
+  console.log(err)
+});
+
+/* 强制转换格式为webp*/
+sharp('../../test.jpeg')
+.toFormat('webp')
+.toFile('../../test.webp', (err)=>{
+  console.log(err)
+});
