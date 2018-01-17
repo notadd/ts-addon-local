@@ -50,3 +50,11 @@ sharp('../../test.jpeg')
 .toFile('../../min.jpeg', (err)=>{
   console.log(err)
 })
+
+/* 旋转测试，旋转参数为角度，只能为90的倍数,都则会报错
+*/
+sharp('../../test.jpeg')
+.rotate(90)
+.toFile('../../rotate.jpeg', (err)=>{
+  console.log(err)
+})
