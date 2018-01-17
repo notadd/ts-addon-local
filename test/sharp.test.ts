@@ -65,3 +65,10 @@ sharp('../../test.jpeg')
 .toFile('../../extract.jpeg', (err)=>{
   console.log(err)
 });
+
+/* 翻转图片，即根据中心y轴镜像图片，实际效果为镜像之后再旋转180度 */
+sharp('../../test.jpeg')
+.flip(true)
+.toFile('../../flip.jpeg', (err)=>{
+  console.log(err)
+});
