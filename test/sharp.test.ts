@@ -58,3 +58,10 @@ sharp('../../test.jpeg')
 .toFile('../../rotate.jpeg', (err)=>{
   console.log(err)
 })
+
+/* 指定左偏移、顶部偏移、图片宽高，来提取图片的一个区域，作用等效为裁剪 */
+sharp('../../test.jpeg')
+.extract({ left: 512 ,top : 0 ,width:512 , height:640})
+.toFile('../../extract.jpeg', (err)=>{
+  console.log(err)
+});
