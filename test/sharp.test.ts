@@ -7,7 +7,9 @@ sharp('../../test.jpeg')
   console.log(err)
 });
 
-/* 锐化，暂时看不出来，图片变大 */
+/* 锐化，暂时看不出来，图片变大 
+   不添加参数时，进行快速温和的锐化
+*/
 sharp('../../test.jpeg')
 .sharpen()
 .toFile('../../sharpen.jpeg', (err)=>{
@@ -66,9 +68,31 @@ sharp('../../test.jpeg')
   console.log(err)
 });
 
-/* 翻转图片，即根据中心y轴镜像图片，实际效果为镜像之后再旋转180度 */
+/* 翻转图片，即根据中心y轴镜像图片，注意y轴为水平轴*/
 sharp('../../test.jpeg')
 .flip(true)
 .toFile('../../flip.jpeg', (err)=>{
+  console.log(err)
+});
+
+/* 翻转图片，即根据中心x轴镜像图片，x轴为垂直轴*/
+sharp('../../test.jpeg')
+.flop(true)
+.toFile('../../flop.jpeg', (err)=>{
+  console.log(err)
+});
+
+/* 高斯模糊，不提供参数时，进行快速轻微的锐化，提供标准差参数可以进行缓慢准确的锐化*/
+sharp('../../test.jpeg')
+.blur(23)
+.toFile('../../blur.jpeg', (err)=>{
+  console.log(err)
+});
+
+/* 扩展图片边缘，即加上边框*/
+sharp('../../test.jpeg')
+.background({r: 0, g: 0, b: 0, alpha: 0})
+.extend({top: 10, bottom: 20, left: 10, right: 10})
+.toFile('../../extend.jpeg', (err)=>{
   console.log(err)
 });
