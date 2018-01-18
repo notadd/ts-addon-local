@@ -152,3 +152,19 @@ sharp('../../test.jpeg')
 .then((metadata)=>{
   console.log(metadata)
 })
+
+/* 添加水印*/
+sharp('../../test.jpeg')
+.overlayWith('../../tu/shuiyin.jpeg', { 
+  left:100,
+  top:100,
+  gravity: sharp.gravity.center ,
+  raw:{
+    width:100,
+    height:100,
+    channels:3
+  }
+} )
+.toFile('../../overlay.jpeg', (err)=>{
+  console.log(err)
+});
