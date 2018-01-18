@@ -130,9 +130,10 @@ sharp('../../test.jpeg')
 
 sharp('../../test.jpeg')
 .webp({
-  force:true
+  force:true,
+  lossless:true
 })
-.toFile('../../test.webp', (err)=>{
+.toFile('../../test1.webp', (err)=>{
   console.log(err)
 });
 
