@@ -20,5 +20,6 @@ export class AudioConfig{
   format: string;
 
   @OneToOne(type => Bucket,bucket=>bucket.audio_config)
+  @JoinColumn()
   bucket: Bucket;
 }

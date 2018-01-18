@@ -34,5 +34,6 @@ export class VideoConfig{
   resolution:string;
 
   @OneToOne(type => Bucket,bucket=>bucket.video_config)
+  @JoinColumn()
   bucket: Bucket;
 }

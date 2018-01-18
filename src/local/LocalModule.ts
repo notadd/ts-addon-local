@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Document } from './model/Document'
+import { ConfigResolver } from './graphql/resolver/ConfigResolver'
+import { ConfigService } from './service/ConfigService'
 import { ImageConfig } from './model/ImageConfig';
 import { AudioConfig } from './model/AudioConfig';
 import { VideoConfig } from './model/VideoConfig';
+import { Document } from './model/Document'
 import { Bucket } from './model/Bucket';
 import { Audio } from './model/Audio'
 import { Video } from './model/Video'
@@ -13,8 +15,7 @@ const typeormOptions = require('./typeorm')
 
 @Module({
   modules: [TypeOrmModule.forRoot([ImageConfig,AudioConfig,VideoConfig,Bucket,Image,File,Video,Audio,Document],typeormOptions)],  
-  controllers: [],
-  components: [],
+  components: [ConfigResolver,ConfigService],
   exports:[]
 })
 

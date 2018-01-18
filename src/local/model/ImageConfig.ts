@@ -80,5 +80,6 @@ export class ImageConfig{
   watermark_ws: number;
 
   @OneToOne(type => Bucket,bucket=>bucket.image_config)
+  @JoinColumn()
   bucket: Bucket;
 }

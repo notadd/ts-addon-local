@@ -1,0 +1,46 @@
+#配置字段返回数据
+type ConfigData{
+    #错误码
+    code:Int
+    #错误信息
+    message:String
+}
+
+
+
+type Mutation{
+    #空间配置字段\n
+    #isPublic         是否为公有空间
+    #directory        目录名
+    #token_expire     token超时
+    #token_secret_key token密钥
+    bucket(
+        isPublic:Boolean!,
+        directory:String!,
+        token_expire:Int,
+        token_secret_key:String):ConfigData
+}
+
+
+#返回的空间配置，包含id，公有/私有字符串，目录名
+type Bucket{
+    id:Int
+    public_or_private:String
+    directory:String
+}
+
+#获取空间的字段返回对象
+type BucketData{
+    #错误码
+    code:Int
+    #信息
+    message:String
+    #空间配置数组
+    buckets:[Bucket]
+}
+
+#查询字段
+type Query{
+    #获取所有空间信息的字段
+    buckets:BucketData
+}
