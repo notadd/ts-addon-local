@@ -1,0 +1,22 @@
+{
+    "name":"local",
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "root",
+    "password": "123456",
+    "database": "local",
+    "entities": [
+      "./src/local/model/ImageConfig.ts",
+      "./src/local/model/AudioConfig.ts",
+      "./src/local/model/VideoConfig.ts",
+      "./src/local/model/Bucket.ts",
+      "./src/local/model/Image.ts",
+      "./src/local/model/Document.ts",
+      "./src/local/model/File.ts",
+      "./src/local/model/Video.ts",
+      "./src/local/model/Audio.ts"
+    ],
+    "synchronize":true,
+    "dropSchema":true
+  }
