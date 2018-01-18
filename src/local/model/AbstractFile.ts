@@ -25,10 +25,11 @@ export class AbstractFile{
     })
     tags: string[];
   
+    //sha256值有64位
     @Column({ 
-        name:'md5',
+        name:'256',
         type:'varchar',
-        length: 50,
+        length: 70,
         nullable:false 
     })
     sha256: string;
