@@ -5,6 +5,7 @@ import { Bucket } from '../model/Bucket'
 import { isArray } from 'util';
 import * as sharp from 'sharp'
 import * as crypto from 'crypto'
+import * as path from 'path'
 import * as fs from 'fs'
 
 /* 图片处理工具类 */
@@ -28,6 +29,7 @@ export class ImageProcessUtil {
        this.format = new Set(['jpeg','png','webp'])
     }
 
+    //获取指定图片、字节缓冲的图片元数据
     async getMetadata(pathOrBuffer:string|Buffer):Promise<ImageMetadata>{
         if((typeof pathOrBuffer)==='string'){
             let name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
@@ -43,7 +45,21 @@ export class ImageProcessUtil {
         }
     }
 
-    async process(imagePath,imageProcessInfo):Promise<ImageMetadata>{
+    //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据
+    async processAndStore(imagePath:string,bucket:Bucket,imageProcessInfo:ImagePostProcessInfo|ImagePreProcessInfo):Promise<ImageMetadata>{
+        let temp:Buffer = await this.processAndOutput(imagePath,imageProcessInfo)
+        let metadata:ImageMetadata = await this.getMetadata(temp)
+        let absolute_path:string = path.resolve(__dirname,'../','store',bucket.directory,metadata.name+'.'+metadata.format)
+        await new Promise((resolve,reject)=>{
+            fs.writeFile(absolute_path,temp,(err)=>{
+                if(err) reject()
+                resolve()
+            })
+        })
+    }
+
+    //根据图片处理信息处理指定路径图片，返回内存中字节存储
+    async processAndOutput(imagePath:string,imageProcessInfo:ImagePostProcessInfo&ImagePreProcessInfo):Promise<Buffer>{
 
     }
 

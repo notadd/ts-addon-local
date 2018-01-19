@@ -14,6 +14,7 @@ import { Image } from '../model/Image';
 import * as  crypto from 'crypto'
 import * as  path from 'path'
 import * as  fs from 'fs'
+import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 
 @Component()
 export class ConfigService {
@@ -24,7 +25,7 @@ export class ConfigService {
   private readonly video_resolution: Set<String>
 
   constructor(
-    private readonly imageProcessUtil:ImageProcessUtil,
+    private readonly imageProcessUtil: ImageProcessUtil,
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
     @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>,
     @InjectRepository(ImageConfig) private readonly imageConfigRepository: Repository<ImageConfig>,
@@ -129,7 +130,7 @@ export class ConfigService {
     }
   }
 
-  async saveEnableImageWatermark(data: any, body:EnableImageWatermark): Promise<void> {
+  async saveEnableImageWatermark(data: any, body: EnableImageWatermark): Promise<void> {
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
       data.code = 401
@@ -144,7 +145,7 @@ export class ConfigService {
     }
     try {
       await buckets.forEach(async (bucket) => {
-        await this.imageConfigRepository.updateById(bucket.image_config.id,{watermark_enable})
+        await this.imageConfigRepository.updateById(bucket.image_config.id, { watermark_enable })
       })
       data.code = 200
       data.message = '水印启用配置成功'
@@ -156,62 +157,36 @@ export class ConfigService {
     }
   }
 
-  async saveImageWatermark(data:any,file:any,obj:any): Promise<void> {
+  async saveImageWatermark(data: any, file: any, obj: any): Promise<void> {
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
       data.code = 401
       data.message = '空间配置不存在'
       return
     }
-    let md5 = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex')
     for (let i = 0; i < buckets.length; i++) {
-      let name , absolute_path , type , width , height
+      let metadata: ImageMetadata
       //根据format设置处理后文件类型
-      let format = buckets[i].image_config.format||'raw'
-      if(format==='raw'){
-        //从临时文件中获取元数据，包括sha256、类型、宽高
-        let metadata:ImageMetadata = await this.imageProcessUtil.getMetadata(file.path)
-        name = metadata.name
-        type = metadata.format
-        width = metadata.width
-        height = metadata.height
-        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
-        //复制临时图片到指定目录下
-        await fs.copyFileSync(file.path,absolute_path)
-      }else if(format==='webp_damage'){
-        let metadata:any = await this.imageProcessUtil.process(file.path,{
-          format:'webp',
-          shrip:true
-        })
-        name = metadata.name
-        type = metadata.format
-        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
-        width = metadata.width
-        height = metadata.height
-      }else if(format==='webp_undamage'){
-        let metadata:any = await this.imageProcessUtil.process(file.path,{
-          format:'webp',
-          lossless:true,
-          shrip:true
-        })
-        name = metadata.name
-        type = metadata.format
-        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
-        width = metadata.width
-        height = metadata.height
+      let format = buckets[i].image_config.format || 'raw'
+      //根据不同的图片保存类型，处理并且存储图片，返回处理后元数据
+      if (format === 'raw') {
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { shrip: true } as ImagePostProcessInfo)
+      } else if (format === 'webp_damage') {
+        metadata= await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', shrip: true } as ImagePostProcessInfo)
+      } else if (format === 'webp_undamage') {
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', lossless: true, shrip: true } as ImagePostProcessInfo)
       }
       let image: Image = new Image()
-      //这里有坑，如果之前使用了await bucket.images，那么这个bucket的性质会改变，即便这样关联，最后image中仍旧没有bucketId值
       image.bucket = buckets[i]
       image.raw_name = file.name
-      image.name = name
-      image.type = type
-      image.width = width
-      image.height = height
-      image.absolute_path = absolute_path
+      image.name = metadata.name
+      image.type = metadata.format
+      image.width = metadata.width
+      image.height = metadata.height
+      image.absolute_path = path.resolve(__dirname, '../', 'store', buckets[i].directory, metadata.name + '.' + metadata.format)
       //如果上传图片不存在才进行保存
-      let isExist:Image = await this.imageRepository.findOne({name})
-      if(!isExist){
+      let isExist: Image = await this.imageRepository.findOne({ name })
+      if (!isExist) {
         try {
           await this.imageRepository.save(image)
           data.code = 200
@@ -219,21 +194,21 @@ export class ConfigService {
         } catch (err) {
           data.code = 403
           data.message = '保存水印图片出现错误' + err.toString()
-          //保存图片出现错误，要删除存储图片件
+          //保存图片出现错误，要删除存储图片
           fs.unlinkSync(image.absolute_path)
         }
         if (data.code === 403) {
           break
         }
       }
-      
+      //更新图片配置，这里的水印图片路径为图片的绝对路径
       try {
-        await this.imageConfigRepository.updateById(buckets[i].image_config.id,{
-          watermark_save_key:image.absolute_path,
-          watermark_gravity:obj.gravity,
-          watermark_opacity:obj.opacity,
-          watermark_ws:obj.ws,
-          watermark_x:obj.x,
+        await this.imageConfigRepository.updateById(buckets[i].image_config.id, {
+          watermark_save_key: image.absolute_path,
+          watermark_gravity: obj.gravity,
+          watermark_opacity: obj.opacity,
+          watermark_ws: obj.ws,
+          watermark_x: obj.x,
           watermark_y: obj.y
         })
       } catch (err) {
