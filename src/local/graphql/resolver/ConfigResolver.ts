@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation } from '@nestjs/graphql'
 import { ConfigService } from '../../service/ConfigService'
 import { BucketConfig } from '../../interface/config/BucketConfig'
 import { ImageFormat } from '../../interface/config/ImageFormat'
-
+import { EnableImageWatermark   } from '../../interface/config/EnableImageWatermark'
 /* 本地存储配置的resolver */
 @Resolver('Config')
 export class ConfigResolver {
@@ -64,7 +64,7 @@ export class ConfigResolver {
     }
 
     @Mutation('enableImageWatermark')
-    async  enableImageWatermark(req , body):Promise<any>{
+    async  enableImageWatermark(req:any, body:EnableImageWatermark):Promise<any>{
       let data = {
         code:200,
         message:''

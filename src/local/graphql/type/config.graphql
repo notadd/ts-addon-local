@@ -16,7 +16,7 @@ type Mutation{
     imageFormat(format:ImageFormat!):ConfigData
 
     #图片水印启用字段
-    enableImageWatermark(enable:Boolean):ConfigData
+    enableImageWatermark(enable:Boolean!):ConfigData
 }
 
 

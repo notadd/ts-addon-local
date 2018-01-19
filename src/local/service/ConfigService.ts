@@ -1,4 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm'
+import { EnableImageWatermark } from '../interface/config/EnableImageWatermark'
 import { BucketConfig } from '../interface/config/BucketConfig'
 import { ImageFormat } from '../interface/config/ImageFormat'
 import { Component } from '@nestjs/common'
@@ -125,7 +126,7 @@ export class ConfigService {
     }
   }
 
-  async saveEnableImageWatermark(data: any, body): Promise<void> {
+  async saveEnableImageWatermark(data: any, body:EnableImageWatermark): Promise<void> {
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
       data.code = 401
