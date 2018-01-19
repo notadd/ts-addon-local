@@ -1,5 +1,7 @@
 import { Resolver , Query , Mutation } from '@nestjs/graphql'
 import { ConfigService } from '../../service/ConfigService'
+import { BucketConfig } from '../../interface/config/BucketConfig'
+
 
 /* 本地存储配置的resolver */
 @Resolver('Config')
@@ -11,7 +13,7 @@ export class ConfigResolver{
 
     /* 空间配置的resolver，与云存储不同，只配置空间目录即可，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
-    async bucket(req , body ):Promise<any>{
+    async bucket(req:any, body:BucketConfig):Promise<any>{
         let data = {
             code : 200,
             message:''
@@ -33,7 +35,7 @@ export class ConfigResolver{
             data.message = '缺少参数'
             return data
         }
-        //进行保存
+        //进行保存,如果存在就更新
         await  this.configService.saveBucketConfig(data,body)
         return data
     }

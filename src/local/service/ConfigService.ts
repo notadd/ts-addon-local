@@ -1,4 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm'
+import { BucketConfig } from '../interface/config/BucketConfig'
 import { Component } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { ImageConfig } from '../model/ImageConfig';
@@ -20,7 +21,7 @@ export class ConfigService{
         @InjectRepository(VideoConfig) private readonly videoConfigRepository: Repository<VideoConfig>
     ){}
 
-    async saveBucketConfig(data,body){
+    async saveBucketConfig(data:any,body:BucketConfig){
         let exist: Bucket, newBucket:any = {
             directory: body.directory,
           }
