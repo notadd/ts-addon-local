@@ -162,17 +162,39 @@ export class ConfigService {
     }
     let md5 = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex')
     for (let i = 0; i < buckets.length; i++) {
-      let name , type , width , height
+      let name , absolute_path , type , width , height
       //根据format设置处理后文件类型
       let format = buckets[i].image_config.format||'raw'
       if(format==='raw'){
         let metadata = await this.imageProcessUtil.getMetadata(file.path)
         name = crypto.createHash('sha256').update(fs.readFileSync(file.path)).digest('hex')
         type = file.name.substr(file.name.lastIndexOf('.') + 1).toLowerCase()
+        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
         width = metadata.width
         height = metadata.height
-        await fs.copyFileSync(file.path,path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type))
-      }else if()
+        await fs.copyFileSync(file.path,absolute_path)
+      }else if(format==='webp_damage'){
+        let metadata:any = await this.imageProcessUtil.process(file.path,{
+          format:'webp',
+          shrip:true
+        })
+        name = metadata.name
+        type = metadata.type
+        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
+        width = metadata.width
+        height = metadata.height
+      }else if(format==='webp_undamage'){
+        let metadata:any = await this.imageProcessUtil.process(file.path,{
+          format:'webp',
+          lossless:true,
+          shrip:true
+        })
+        name = metadata.name
+        type = metadata.type
+        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
+        width = metadata.width
+        height = metadata.height
+      }
       let image: Image = new Image()
       //这里有坑，如果之前使用了await bucket.images，那么这个bucket的性质会改变，即便这样关联，最后image中仍旧没有bucketId值
       image.bucket = buckets[i]
@@ -181,21 +203,28 @@ export class ConfigService {
       image.type = type
       image.width = width
       image.height = height
-      try {
-        await this.imageRepository.save(image)
-        data.code = 200
-        data.message = '保存水印图片成功'
-      } catch (err) {
-        data.code = 403
-        data.message = '保存水印图片出现错误' + err.toString()
+      image.absolute_path = absolute_path
+      //如果上传图片不存在才进行保存
+      let isExist:Image = await this.imageRepository.findOne({name})
+      if(!isExist){
+        try {
+          await this.imageRepository.save(image)
+          data.code = 200
+          data.message = '保存水印图片成功'
+        } catch (err) {
+          data.code = 403
+          data.message = '保存水印图片出现错误' + err.toString()
+          //保存图片出现错误，要删除存储图片件
+          fs.unlinkSync(image.absolute_path)
+        }
+        if (data.code === 403) {
+          break
+        }
       }
-      if (data.code === 403) {
-        break
-      }
-
+      
       try {
         await this.imageConfigRepository.updateById(buckets[i].image_config.id,{
-          watermark_save_key:'/' + buckets[i].directory + '/' + image.name + '.' + image.type,
+          watermark_save_key:image.absolute_path,
           watermark_gravity:obj.gravity,
           watermark_opacity:obj.opacity,
           watermark_ws:obj.ws,

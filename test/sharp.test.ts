@@ -224,3 +224,5 @@ function buffer() {
       console.log(value.toString('hex'))
     })
 }
+
+metadata()

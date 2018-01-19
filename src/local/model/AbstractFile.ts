@@ -31,9 +31,19 @@ export class AbstractFile{
         name:'name',
         type:'varchar',
         length: 70,
-        nullable:false 
+        nullable:false ,
+        unique:true
     })
     name: string;
+
+    //文件存储的绝对路径，方便使用
+    @Column({ 
+        name:'absolute_path',
+        type:'varchar',
+        length: 256,
+        nullable:false 
+    })
+    absolute_path: string;
   
     @Column({ 
         name:'type',
