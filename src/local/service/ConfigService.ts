@@ -152,4 +152,68 @@ export class ConfigService {
       return
     }
   }
+
+  async saveImageWatermark(data:any,file:any,obj:any): Promise<void> {
+    let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
+    if (buckets.length !== 2) {
+      data.code = 401
+      data.message = '空间配置不存在'
+      return
+    }
+    let md5 = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex')
+    for (let i = 0; i < buckets.length; i++) {
+      let name , type , width , height
+      //根据format设置处理后文件类型
+      let format = buckets[i].image_config.format||'raw'
+      if(format==='raw'){
+        let metadata = await this.imageProcessUtil.getMetadata(file.path)
+        name = crypto.createHash('sha256').update(fs.readFileSync(file.path)).digest('hex')
+        type = file.name.substr(file.name.lastIndexOf('.') + 1).toLowerCase()
+        width = metadata.width
+        height = metadata.height
+        await fs.copyFileSync(file.path,path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type))
+      }else if()
+      let image: Image = new Image()
+      //这里有坑，如果之前使用了await bucket.images，那么这个bucket的性质会改变，即便这样关联，最后image中仍旧没有bucketId值
+      image.bucket = buckets[i]
+      image.raw_name = file.name
+      image.name = name
+      image.type = type
+      image.width = width
+      image.height = height
+      try {
+        await this.imageRepository.save(image)
+        data.code = 200
+        data.message = '保存水印图片成功'
+      } catch (err) {
+        data.code = 403
+        data.message = '保存水印图片出现错误' + err.toString()
+      }
+      if (data.code === 403) {
+        break
+      }
+
+      try {
+        await this.imageConfigRepository.updateById(buckets[i].image_config.id,{
+          watermark_save_key:'/' + buckets[i].directory + '/' + image.name + '.' + image.type,
+          watermark_gravity:obj.gravity,
+          watermark_opacity:obj.opacity,
+          watermark_ws:obj.ws,
+          watermark_x:obj.x,
+          watermark_y: obj.y
+        })
+      } catch (err) {
+        data.code = 403
+        data.message = '保存水印配置出现错误' + err.toString()
+      }
+      if (data.code === 403) {
+        break
+      }
+    }
+    //删除临时文件
+    fs.unlinkSync(file.path)
+    if (data.code === 402 || data.code === 403) {
+      return
+    }
+  }
 }

@@ -25,14 +25,15 @@ export class AbstractFile{
     })
     tags: string[];
   
-    //sha256值有64位
+    //本地存储中，文件名为它的sha256值有64位
+    //为了与云存储统一，也称做name
     @Column({ 
-        name:'256',
+        name:'name',
         type:'varchar',
         length: 70,
         nullable:false 
     })
-    sha256: string;
+    name: string;
   
     @Column({ 
         name:'type',
