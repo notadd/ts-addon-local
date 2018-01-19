@@ -1,5 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm'
 import { BucketConfig } from '../interface/config/BucketConfig'
+import { ImageFormat } from '../interface/config/ImageFormat'
 import { Component } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { ImageConfig } from '../model/ImageConfig';
@@ -54,9 +55,9 @@ export class ConfigService{
           }
           let bucket: Bucket = new Bucket()
           bucket.directory = body.directory
-          let audio_config = new AudioConfig()
-          let video_config = new VideoConfig()
-          let image_config = new ImageConfig()
+          let audio_config:AudioConfig = new AudioConfig()
+          let video_config:VideoConfig = new VideoConfig()
+          let image_config:ImageConfig = new ImageConfig()
           if (body.isPublic) {
             bucket.id = 1
             bucket.public_or_private = 'public'
@@ -85,7 +86,7 @@ export class ConfigService{
           }
     }
 
-    async saveImageFormat(data: any, body): Promise<any> {
+    async saveImageFormat(data: any, body:ImageFormat): Promise<any> {
       let { format } = body
       format = format.toLowerCase()
       if (!this.image_format.has(format)) {

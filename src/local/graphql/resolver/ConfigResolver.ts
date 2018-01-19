@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation } from '@nestjs/graphql'
 import { ConfigService } from '../../service/ConfigService'
 import { BucketConfig } from '../../interface/config/BucketConfig'
-
+import { ImageFormat } from '../../interface/config/ImageFormat'
 
 /* 本地存储配置的resolver */
 @Resolver('Config')
@@ -44,7 +44,7 @@ export class ConfigResolver {
 
     /* 图片保存格式配置*/
     @Mutation('imageFormat')
-    async  imageFormat(req, body): Promise<any> {
+    async  imageFormat(req:any, body:ImageFormat): Promise<any> {
         let data = {
             code: 200,
             message: ""
