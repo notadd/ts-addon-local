@@ -46,20 +46,31 @@ export class ImageProcessUtil {
     }
 
     //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据
-    async processAndStore(imagePath:string,bucket:Bucket,imageProcessInfo:ImagePostProcessInfo|ImagePreProcessInfo):Promise<ImageMetadata>{
-        let temp:Buffer = await this.processAndOutput(imagePath,imageProcessInfo)
+    async processAndStore(data:any,imagePath:string,bucket:Bucket,imageProcessInfo:ImagePostProcessInfo|ImagePreProcessInfo):Promise<ImageMetadata>{
+        //根据处理信息处理图片，获取处理后Buffer
+        let temp:Buffer = await this.processAndOutput(data,imagePath,imageProcessInfo)
+        //获取处理后元数据
         let metadata:ImageMetadata = await this.getMetadata(temp)
+        //保存处理后图片
         let absolute_path:string = path.resolve(__dirname,'../','store',bucket.directory,metadata.name+'.'+metadata.format)
         await new Promise((resolve,reject)=>{
             fs.writeFile(absolute_path,temp,(err)=>{
-                if(err) reject()
+                if(err) {
+                    data.code = 402
+                    data.message = '文件写入错误'
+                }
                 resolve()
             })
         })
+        //出现错误返回null
+        if(data.code !==200){
+            return null
+        }
+        return metadata
     }
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储
-    async processAndOutput(imagePath:string,imageProcessInfo:ImagePostProcessInfo&ImagePreProcessInfo):Promise<Buffer>{
+    async processAndOutput(data:any,imagePath:string,imageProcessInfo:ImagePostProcessInfo&ImagePreProcessInfo):Promise<Buffer>{
 
     }
 
