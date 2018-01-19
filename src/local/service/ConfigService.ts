@@ -1,9 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm'
+import { Component } from '@nestjs/common'
+import { Repository } from 'typeorm'
 import { EnableImageWatermark } from '../interface/config/EnableImageWatermark'
 import { BucketConfig } from '../interface/config/BucketConfig'
 import { ImageFormat } from '../interface/config/ImageFormat'
-import { Component } from '@nestjs/common'
-import { Repository } from 'typeorm'
+import { ImageProcessUtil } from '../util/ImageProcessUtil'
 import { ImageConfig } from '../model/ImageConfig';
 import { AudioConfig } from '../model/AudioConfig';
 import { VideoConfig } from '../model/VideoConfig';
@@ -22,6 +23,7 @@ export class ConfigService {
   private readonly video_resolution: Set<String>
 
   constructor(
+    private readonly imageProcessUtil:ImageProcessUtil,
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
     @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>,
     @InjectRepository(ImageConfig) private readonly imageConfigRepository: Repository<ImageConfig>,
