@@ -1,15 +1,11 @@
-#配置字段返回数据
-type ConfigData{
-    #错误码
-    code:Int
-    #错误信息
-    message:String
+#查询字段
+type Query{
+    #获取所有空间信息的字段
+    buckets:BucketData
 }
 
-
-
 type Mutation{
-    #空间配置字段\n
+    #空间配置字段
     #isPublic         是否为公有空间
     #directory        目录名
     #token_expire     token超时
@@ -19,13 +15,20 @@ type Mutation{
         directory:String!,
         token_expire:Int,
         token_secret_key:String):ConfigData
+
+    #图片保存格式配置字段
+    #format  图片保存格式，只能为枚举之一
+    imageFormat(format:ImageFormat):ConfigData
 }
 
 
-#返回的空间配置，包含id，公有/私有字符串，目录名
+#返回的空间配置
 type Bucket{
+    #空间id
     id:Int
+    #公有或者私有空间
     public_or_private:String
+    #目录名
     directory:String
 }
 
@@ -39,8 +42,22 @@ type BucketData{
     buckets:[Bucket]
 }
 
-#查询字段
-type Query{
-    #获取所有空间信息的字段
-    buckets:BucketData
+
+
+#配置字段返回数据
+type ConfigData{
+    #错误码
+    code:Int
+    #错误信息
+    message:String
+}
+
+#图片保存格式枚举
+enum ImageFormat {
+  #原图
+  raw
+  #webp有损
+  webp_damage
+  #webp无损
+  webp_undamage
 }

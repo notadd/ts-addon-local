@@ -15,4 +15,8 @@ mutation config{
     code
     message
   }
+  imageFormat(format:webp_damage){
+    code
+    message
+  }
 }
