@@ -225,4 +225,7 @@ function buffer() {
     })
 }
 
-metadata()
+
+let a = sharp('../../test.jpeg')
+a.resize(199,199)
+a.toFile('./a.jpeg')
