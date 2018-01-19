@@ -4,6 +4,7 @@ import { BucketConfig } from '../../interface/config/BucketConfig'
 import { ImageFormat } from '../../interface/config/ImageFormat'
 import { EnableImageWatermark   } from '../../interface/config/EnableImageWatermark'
 import * as fs from 'fs'
+import { KindUtil } from '../../util/KindUtil';
 
 /* 本地存储配置的resolver */
 @Resolver('Config')
@@ -12,6 +13,7 @@ export class ConfigResolver {
     private readonly gravity: Set<string>
 
     constructor(
+        private readonly kindUtil:KindUtil,
         private readonly configService: ConfigService
     ) {
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
