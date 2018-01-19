@@ -224,8 +224,4 @@ function buffer() {
       console.log(value.toString('hex'))
     })
 }
-
-
-let a = sharp('../../test.jpeg')
-a.resize(199,199)
-a.toFile('./a.jpeg')
+sharp('../../jiu.jpg').resize(900,900).toFile('../../jiu.jpeg')
