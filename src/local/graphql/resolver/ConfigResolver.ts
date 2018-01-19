@@ -7,19 +7,11 @@ import { BucketConfig } from '../../interface/config/BucketConfig'
 @Resolver('Config')
 export class ConfigResolver {
 
-    private readonly image_format: Set<String>
-    private readonly audio_format: Set<String> 
-    private readonly video_format: Set<String>
-    private readonly video_resolution: Set<String>
+    
 
     constructor(
         private readonly configService: ConfigService
-    ) {
-        this.image_format = new Set(['raw','webp_damage','webp_undamage'])
-        this.audio_format = new Set(['raw','mp3','aac'])
-        this.video_format = new Set(['raw', 'vp9', 'h264','h265'])
-        this.video_resolution = new Set(['raw', 'p1080', 'p720','p480'])
-    }
+    ) {}
 
     /* 空间配置的resolver，与云存储不同，只配置空间目录即可，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
@@ -62,11 +54,6 @@ export class ConfigResolver {
         if (format == undefined || format.length == 0) {
             data.code = 400
             data.message = '缺少参数'
-            return data
-        }
-        if (!this.image_format.has(format)){
-            data.code = 400
-            data.message = 'format参数不正确'
             return data
         }
         //保存格式

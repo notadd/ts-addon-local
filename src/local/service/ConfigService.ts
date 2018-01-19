@@ -13,13 +13,23 @@ import * as  fs   from 'fs'
 @Component()
 export class ConfigService{
 
+  private readonly image_format: Set<String>
+  private readonly audio_format: Set<String> 
+  private readonly video_format: Set<String>
+  private readonly video_resolution: Set<String>
+
     constructor(
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>,
         @InjectRepository(ImageConfig) private readonly imageConfigRepository: Repository<ImageConfig>,
         @InjectRepository(AudioConfig) private readonly audioConfigRepository: Repository<AudioConfig>,
         @InjectRepository(VideoConfig) private readonly videoConfigRepository: Repository<VideoConfig>
-    ){}
+    ){
+      this.image_format = new Set(['raw','webp_damage','webp_undamage'])
+      this.audio_format = new Set(['raw','mp3','aac'])
+      this.video_format = new Set(['raw', 'vp9', 'h264','h265'])
+      this.video_resolution = new Set(['raw', 'p1080', 'p720','p480'])
+    }
 
     async saveBucketConfig(data:any,body:BucketConfig){
         let exist: Bucket, newBucket:any = {
@@ -73,6 +83,35 @@ export class ConfigService{
             data.message = '空间保存失败' + err.toString()
             return null
           }
+    }
+
+    async saveImageFormat(data: any, body): Promise<any> {
+      let { format } = body
+      format = format.toLowerCase()
+      if (!this.image_format.has(format)) {
+        data.code = 401
+        data.message = '保存格式不正确'
+        return
+      }
+  
+      let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
+      if (buckets.length !== 2) {
+        data.code = 402
+        data.message = '空间配置不存在'
+        return
+      }
+      try {
+        await buckets.forEach(async (bucket) => {
+          await this.imageConfigRepository.updateById(bucket.image_config.id,{format})
+        })
+        data.code = 200
+        data.message = '图片保存格式配置成功'
+        return
+      } catch (err) {
+        data.code = 403
+        data.message = '图片保存格式配置失败' + err.toString()
+        return
+      }
     }
 
 
