@@ -7,8 +7,6 @@ import { ImageFormat } from '../../interface/config/ImageFormat'
 @Resolver('Config')
 export class ConfigResolver {
 
-    
-
     constructor(
         private readonly configService: ConfigService
     ) {}
@@ -65,4 +63,29 @@ export class ConfigResolver {
         return data
     }
 
+    @Mutation('enableImageWatermark')
+    async  enableImageWatermark(req , body):Promise<any>{
+      let data = {
+        code:200,
+        message:''
+      }
+      //验证参数
+      let {enable} = body
+      if(enable===null||enable===undefined){
+        data.code = 400
+        data.message = '缺少参数'
+        return data
+      }
+      if(enable!==true&&enable!==false){
+        data.code = 400
+        data.message  = '参数错误'
+        return data
+      }
+      await this.configService.saveEnableImageWatermark(data,body)
+      //保存启用水印到数据库失败，无法模仿这个错误
+      if(data.code === 401 || data.code === 402){
+        return data
+      }
+      return data
+    }
 }
