@@ -125,7 +125,7 @@ export class ConfigService {
     }
   }
 
-  async saveEnableImageWatermarkConfig(data: any, body): Promise<void> {
+  async saveEnableImageWatermark(data: any, body): Promise<void> {
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
       data.code = 401

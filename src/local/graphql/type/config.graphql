@@ -1,4 +1,4 @@
-#查询字段
+
 type Query{
     #获取所有空间信息的字段
     buckets:BucketData
@@ -6,10 +6,6 @@ type Query{
 
 type Mutation{
     #空间配置字段
-    #isPublic         是否为公有空间
-    #directory        目录名
-    #token_expire     token超时
-    #token_secret_key token密钥
     bucket(
         isPublic:Boolean!,
         directory:String!,
@@ -17,8 +13,10 @@ type Mutation{
         token_secret_key:String):ConfigData
 
     #图片保存格式配置字段
-    #format  图片保存格式，只能为枚举之一
-    imageFormat(format:ImageFormat):ConfigData
+    imageFormat(format:ImageFormat!):ConfigData
+
+    #图片水印启用字段
+    enableImageWatermark(enable:Boolean):ConfigData
 }
 
 

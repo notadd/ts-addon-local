@@ -19,4 +19,8 @@ mutation config{
     code
     message
   }
+  enableImageWatermark(enable:true){
+		code
+    message
+  }
 }
