@@ -1,8 +1,11 @@
 import { Component, Inject } from '@nestjs/common';
-import { isArray } from 'util';
-import { Bucket } from '../model/Bucket'
 import { ImagePostProcessInfo,ImagePreProcessInfo } from '../interface/file/ImageProcessInfo'
-
+import { ImageMetadata } from '../interface/file/ImageMetadata'
+import { Bucket } from '../model/Bucket'
+import { isArray } from 'util';
+import * as sharp from 'sharp'
+import * as crypto from 'crypto'
+import * as fs from 'fs'
 
 /* 图片处理工具类 */
 @Component()
@@ -25,11 +28,22 @@ export class ImageProcessUtil {
        this.format = new Set(['jpeg','png','webp'])
     }
 
-    getMetadata(imagePath:string){
-
+    async getMetadata(pathOrBuffer:string|Buffer):Promise<ImageMetadata>{
+        if((typeof pathOrBuffer)==='string'){
+            let name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
+        }else{
+            let name = crypto.createHash('sha256').update(pathOrBuffer).digest('hex')
+        }
+        let {format,width,height}  = await sharp(pathOrBuffer).metadata()
+        return {
+            name,
+            format,
+            width,
+            height
+        }
     }
 
-    process(imagePath,imageProcessInfo){
+    async process(imagePath,imageProcessInfo):Promise<ImageMetadata>{
 
     }
 

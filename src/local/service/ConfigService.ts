@@ -4,6 +4,7 @@ import { Repository } from 'typeorm'
 import { EnableImageWatermark } from '../interface/config/EnableImageWatermark'
 import { BucketConfig } from '../interface/config/BucketConfig'
 import { ImageFormat } from '../interface/config/ImageFormat'
+import { ImageMetadata } from '../interface/file/ImageMetadata'
 import { ImageProcessUtil } from '../util/ImageProcessUtil'
 import { ImageConfig } from '../model/ImageConfig';
 import { AudioConfig } from '../model/AudioConfig';
@@ -168,12 +169,14 @@ export class ConfigService {
       //根据format设置处理后文件类型
       let format = buckets[i].image_config.format||'raw'
       if(format==='raw'){
-        let metadata = await this.imageProcessUtil.getMetadata(file.path)
-        name = crypto.createHash('sha256').update(fs.readFileSync(file.path)).digest('hex')
-        type = file.name.substr(file.name.lastIndexOf('.') + 1).toLowerCase()
-        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
+        //从临时文件中获取元数据，包括sha256、类型、宽高
+        let metadata:ImageMetadata = await this.imageProcessUtil.getMetadata(file.path)
+        name = metadata.name
+        type = metadata.format
         width = metadata.width
         height = metadata.height
+        absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
+        //复制临时图片到指定目录下
         await fs.copyFileSync(file.path,absolute_path)
       }else if(format==='webp_damage'){
         let metadata:any = await this.imageProcessUtil.process(file.path,{
@@ -181,7 +184,7 @@ export class ConfigService {
           shrip:true
         })
         name = metadata.name
-        type = metadata.type
+        type = metadata.format
         absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
         width = metadata.width
         height = metadata.height
@@ -192,7 +195,7 @@ export class ConfigService {
           shrip:true
         })
         name = metadata.name
-        type = metadata.type
+        type = metadata.format
         absolute_path = path.resolve(__dirname,'../','store',buckets[i].directory,name+'.'+type)
         width = metadata.width
         height = metadata.height
