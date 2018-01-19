@@ -125,5 +125,30 @@ export class ConfigService {
     }
   }
 
-
+  async saveEnableImageWatermarkConfig(data: any, body): Promise<void> {
+    let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
+    if (buckets.length !== 2) {
+      data.code = 401
+      data.message = '空间配置不存在'
+      return
+    }
+    let watermark_enable: number
+    if (body.enable) {
+      watermark_enable = 1
+    } else {
+      watermark_enable = 0
+    }
+    try {
+      await buckets.forEach(async (bucket) => {
+        await this.imageConfigRepository.updateById(bucket.image_config.id,{watermark_enable})
+      })
+      data.code = 200
+      data.message = '水印启用配置成功'
+      return
+    } catch (err) {
+      data.code = 402
+      data.message = '水印启用保存失败' + err.toString()
+      return
+    }
+  }
 }
