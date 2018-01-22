@@ -241,7 +241,6 @@ export class ConfigResolver {
         message:'',
         buckets:[]
       }
-  
       let buckets:Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
                                                          .select(['bucket.id','bucket.public_or_private','bucket.name'])
                                                          .getMany()

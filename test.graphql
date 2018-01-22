@@ -44,3 +44,15 @@ mutation config{
     message
   }
 }
+
+query buckets{
+  buckets{
+    code
+    message
+    buckets{
+			id
+      public_or_private
+      name
+  	}
+  }
+}
