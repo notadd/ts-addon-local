@@ -35,13 +35,13 @@ export class ImageProcessUtil {
     async getMetadata(pathOrBuffer: string | Buffer): Promise<ImageMetadata> {
         //使用sharp获取，格式、宽度、高度
         let { format, width, height } = await sharp(pathOrBuffer).metadata()
-        let size ,name
+        let size, name
         //为路径时
         if ((typeof pathOrBuffer) === 'string') {
-            await new Promise((resolver,reject)=>{
+            await new Promise((resolver, reject) => {
                 //获取图片大小
-                fs.stat(pathOrBuffer,(err,stats)=>{
-                    if(err){
+                fs.stat(pathOrBuffer, (err, stats) => {
+                    if (err) {
                         resolver()
                     }
                     size = stats.size
@@ -68,22 +68,22 @@ export class ImageProcessUtil {
     //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据，用于上传时保存图片
     async processAndStore(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata> {
         //根据处理信息处理图片，获取处理后实例
-        let instance:SharpInstance = await this.process(data, imagePath, bucket,imageProcessInfo)
+        let instance: SharpInstance = await this.process(data, imagePath, bucket, imageProcessInfo)
         //处理参数有错误，直接返回null
         if (data.code !== 200) {
             return null
         }
         //获取处理后Buffer，这里必须先获取BUffer，再获取format、name，才能写入文件，因为文件名需要使用name、format
         //不能直接使用toFile
-        let buffer:Buffer  = await instance.toBuffer()
+        let buffer: Buffer = await instance.toBuffer()
         //获取处理后元数据
-        let metadata:ImageMetadata = await this.getMetadata(buffer)
+        let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.directory, metadata.name + '.' + metadata.format)
         //根据绝对路径保存图片
-        await new Promise((resolver,reject)=>{
-            fs.writeFile(absolute_path,buffer,(err)=>{
-                if(err){
+        await new Promise((resolver, reject) => {
+            fs.writeFile(absolute_path, buffer, (err) => {
+                if (err) {
                     data.code = 402
                     data.message = '写入文件错误'
                     resolver()
@@ -99,8 +99,8 @@ export class ImageProcessUtil {
     }
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
-    async processAndOutput(data: any, bucket:Bucket,imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
-        let instance:SharpInstance = await this.process(data,imagePath,bucket,imageProcessInfo)
+    async processAndOutput(data: any, bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
+        let instance: SharpInstance = await this.process(data, imagePath, bucket, imageProcessInfo)
         if (data.code !== 200) {
             return null
         }
@@ -110,34 +110,42 @@ export class ImageProcessUtil {
 
 
     //根据图片处理参数，获取指定路径图片的SharpInstance实例
-    async process( data:any ,imagePath: string,bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo):Promise<SharpInstance>{
+    async process(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<SharpInstance> {
         let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo as ImagePostProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
         let instance: SharpInstance = sharp(imagePath)
         try {
+            let width2, height2
             //缩放与裁剪都需要之前一步得到的图片宽高
             //如果存在裁剪，且为缩放之前裁剪
             if (tailor && tailor.isBefore) {
                 //裁剪，获取裁剪之后宽高
-                let { width:width1, height:height1 } = this.tailor(instance, tailor, metadata.width, metadata.height)
+                let result1 = this.tailor(instance, tailor, metadata.width, metadata.height)
                 //如果缩放存在，使用裁剪之后宽高，进行缩放
-                if (resize){
-                    let { width:width2, height:height2} = this.resize(instance, resize, width1, height1)
+                if (resize) {
+                    let result2 = this.resize(instance, resize, result1.width, result1.height)
+                    width2 = result2.width
+                    height2 = result2.height
                 }
-                let width2 = width1 , height2 = height1
+                width2 = result1.width
+                height2 = result1.height
             }
             //如果裁剪存在，且为缩放之后裁剪
             else if (tailor && !tailor.isBefore) {
                 //如果缩放存在
                 if (resize) {
                     //先缩放，获取缩放后宽高
-                    let { width:width1, height:height1 } = this.resize(instance, resize, metadata.width, metadata.height)
+                    let result1 = this.resize(instance, resize, metadata.width, metadata.height)
                     //使用缩放后宽高进行裁剪
-                    let { width:width2, height:height2}  = this.tailor(instance, tailor, width1, height1)
+                    let result2 = this.tailor(instance, tailor, result1.width, result1.height)
+                    width2 = result2.width
+                    height2 = result2.height
                 } else {
                     //缩放不存在，直接使用原图大小进行裁剪
-                    let { width:width2, height:height2}  = this.tailor(instance, tailor, metadata.width, metadata.height)
+                    let result1 = this.tailor(instance, tailor, metadata.width, metadata.height)
+                    width2 = result1.width
+                    height2 = result1.height
                 }
             }
             //如果裁剪不存在
@@ -145,11 +153,14 @@ export class ImageProcessUtil {
                 //如果缩放存在
                 if (resize) {
                     //直接使用原图大小缩放
-                    let { width:width2, height:height2}  = this.resize(instance, resize, metadata.width, metadata.height)
+                    let result1 = this.resize(instance, resize, metadata.width, metadata.height)
+                    width2 = result1.width
+                    height2 = result1.height
                 }
-                let width2 = metadata.width , height2 = metadata.height
+                width2 = metadata.width
+                height2 = metadata.height
             }
-            this.watermark(bucket,instance, watermark,width2,height2)
+            this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate)
             if (roundrect) this.roundrect(instance, roundrect)
             if (blur) this.blur(instance, blur)
@@ -361,70 +372,70 @@ export class ImageProcessUtil {
             top = 0
         }
         //方位为东北
-        else if(gravity === 'northeast'){
+        else if (gravity === 'northeast') {
             //初始偏移,左偏移为原始宽度减去裁剪宽度
             left = preWidth - width
             top = 0
         }
         //方位为西南
-        else if(gravity === 'southwest'){
+        else if (gravity === 'southwest') {
             left = 0
             top = preHeight - height
         }
         //方位为东南
-        else if(gravity === 'southeast'){
+        else if (gravity === 'southeast') {
             left = preWidth - width
             top = preHeight - height
         }
         //方位为东
-        else if(gravity === 'east'){
+        else if (gravity === 'east') {
             left = preWidth - width
-            top = preHeight/2 - height/2
+            top = preHeight / 2 - height / 2
         }
         //方位为西
-        else if(gravity === 'west'){
+        else if (gravity === 'west') {
             left = 0
-            top = preHeight/2 - height/2
+            top = preHeight / 2 - height / 2
         }
         //方位为南
-        else if(gravity === 'south'){
-            left = preWidth/2 - width/2
+        else if (gravity === 'south') {
+            left = preWidth / 2 - width / 2
             top = preHeight - height
         }
         //方位为北
-        else if(gravity === 'north'){
-            left = preWidth/2 - width/2
+        else if (gravity === 'north') {
+            left = preWidth / 2 - width / 2
             top = 0
         }
         //方位为中心
-        else if(gravity === 'center'){
-            left = preWidth/2 - width/2
-            top = preHeight/2 - height/2
-        }else{
+        else if (gravity === 'center') {
+            left = preWidth / 2 - width / 2
+            top = preHeight / 2 - height / 2
+        } else {
             throw new Error('裁剪方位不正确')
         }
         //偏移加上x、y
-        left+=x
-        top+=y
+        left += x
+        top += y
         //如果偏移为负，修改为0,同时修改宽高
-        if(left<0){
-            width +=left
+        if (left < 0) {
+            width += left
             left = 0
         }
-        if(top<0){
+        if (top < 0) {
             height += top
             top = 0
         }
         //如果偏移加上宽度大于了原始宽高
-        if((left+width)>preWidth){
-            width  = preWidth - left
+        if ((left + width) > preWidth) {
+            width = preWidth - left
         }
-        if((top+height)>preHeight){
+        if ((top + height) > preHeight) {
             height = preHeight - top
         }
         //为sharp实例添加裁剪处理
-        instance.extract({left,top,width,height})
-        return {width,height}
+        instance.extract({ left, top, width, height })
+        return { width, height }
     }
 
     //水印处理函数
@@ -432,94 +443,94 @@ export class ImageProcessUtil {
     //根据gravity给水印图片定位，如果是四个角，则角点重合，如果是四条边，则边重合，关于中心线对称，如果是中心，则关于两条中心线对称
     //根据x、y进行偏移，x、y只支持正整数，如果是四个角，都是向原图内部偏移，东西两条边，只向内部偏移x，南北两条边，只向内部偏移y，重心不偏移
     //且水印图片宽高都不能超过原图，超过不能输出，如果水印图片宽高加上相应偏移超过了超过了原图宽高，则偏移会自动调整
-    async watermark(bucket:Bucket,instance: SharpInstance,watermark:boolean,preWidth:number,preHeight:number):any{
-        let enable:boolean
-        if(watermark===true) enable = true
-        else if(watermark===false) enable = false
-        else if(watermark==undefined) enable = !!bucket.image_config.watermark_enable
+    async watermark(bucket: Bucket, instance: SharpInstance, watermark: boolean, preWidth: number, preHeight: number): any {
+        let enable: boolean
+        if (watermark === true) enable = true
+        else if (watermark === false) enable = false
+        else if (watermark == undefined) enable = !!bucket.image_config.watermark_enable
         else throw new Error('水印参数错误')
-        if(watermark){
-        //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
-        let x  = bucket.image_config.watermark_x
-        let y  = bucket.image_config.watermark_y
-        let ws = bucket.image_config.watermark_ws
-        //透明度暂时不使用
-        let optcity = bucket.image_config.watermark_opacity
-        let gravity = bucket.image_config.watermark_gravity
-        let shuiyin_path = bucket.image_config.watermark_save_key
-        //水印图片宽高
-        let {width,height} = await this.getMetadata(shuiyin_path) 
-        //计算短边自适应后水印图片宽高
-        if(preWidth<preHeight){
-            width = preWidth*ws/100
-            height = height*preWidth*ws/100/width
-        }else{
-            height = preHeight*ws/100
-            width = width*preHeight*ws/100/height
-        }
-        //水印图片左偏移，顶部偏移
-        let left, top
-        //方位为西北
-        if (gravity === 'northwest') {
-            //初始偏移为0、0
-            left = x
-            top = y
-        }
-        //方位为东北
-        else if(gravity === 'northeast'){
-            //初始偏移,左偏移为原始宽度减去裁剪宽度
-            left = preWidth - width-x
-            top = y
-        }
-        //方位为西南
-        else if(gravity === 'southwest'){
-            left = x
-            top = preHeight - height-y
-        }
-        //方位为东南
-        else if(gravity === 'southeast'){
-            left = preWidth - width-x
-            top = preHeight - height-y
-        }
-        //方位为东
-        else if(gravity === 'east'){
-            left = preWidth - width-x
-            top = preHeight/2 - height/2
-        }
-        //方位为西
-        else if(gravity === 'west'){
-            left = x
-            top = preHeight/2 - height/2
-        }
-        //方位为南
-        else if(gravity === 'south'){
-            left = preWidth/2 - width/2
-            top = preHeight - height-y
-        }
-        //方位为北
-        else if(gravity === 'north'){
-            left = preWidth/2 - width/2
-            top = y
-        }
-        //方位为中心
-        else if(gravity === 'center'){
-            left = preWidth/2 - width/2
-            top = preHeight/2 - height/2
-        }else{
-            throw new Error('水印方位不正确')
-        }
-        //如果偏移为负，不能输出
-        if(left<0||top<0){
-            throw new Error('水印图片超出界限')
-        }
-        //水印图片大于原始宽高也不能输出
-        if(width>preWidth||height>preHeight){
-           throw new Error('水印图片过大')
-        }
-        //获取缩放后水印图片buffer
-        let buffer:Buffer = await sharp(shuiyin_path).resize(width,height).ignoreAspectRatio().toBuffer()
-        //为sharp实例添加水印处理
-        instance.overlayWith(buffer,{left,top})
+        if (watermark) {
+            //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
+            let x = bucket.image_config.watermark_x
+            let y = bucket.image_config.watermark_y
+            let ws = bucket.image_config.watermark_ws
+            //透明度暂时不使用
+            let optcity = bucket.image_config.watermark_opacity
+            let gravity = bucket.image_config.watermark_gravity
+            let shuiyin_path = bucket.image_config.watermark_save_key
+            //水印图片宽高
+            let { width, height } = await this.getMetadata(shuiyin_path)
+            //计算短边自适应后水印图片宽高
+            if (preWidth < preHeight) {
+                width = preWidth * ws / 100
+                height = height * preWidth * ws / 100 / width
+            } else {
+                height = preHeight * ws / 100
+                width = width * preHeight * ws / 100 / height
+            }
+            //水印图片左偏移，顶部偏移
+            let left, top
+            //方位为西北
+            if (gravity === 'northwest') {
+                //初始偏移为0、0
+                left = x
+                top = y
+            }
+            //方位为东北
+            else if (gravity === 'northeast') {
+                //初始偏移,左偏移为原始宽度减去裁剪宽度
+                left = preWidth - width - x
+                top = y
+            }
+            //方位为西南
+            else if (gravity === 'southwest') {
+                left = x
+                top = preHeight - height - y
+            }
+            //方位为东南
+            else if (gravity === 'southeast') {
+                left = preWidth - width - x
+                top = preHeight - height - y
+            }
+            //方位为东
+            else if (gravity === 'east') {
+                left = preWidth - width - x
+                top = preHeight / 2 - height / 2
+            }
+            //方位为西
+            else if (gravity === 'west') {
+                left = x
+                top = preHeight / 2 - height / 2
+            }
+            //方位为南
+            else if (gravity === 'south') {
+                left = preWidth / 2 - width / 2
+                top = preHeight - height - y
+            }
+            //方位为北
+            else if (gravity === 'north') {
+                left = preWidth / 2 - width / 2
+                top = y
+            }
+            //方位为中心
+            else if (gravity === 'center') {
+                left = preWidth / 2 - width / 2
+                top = preHeight / 2 - height / 2
+            } else {
+                throw new Error('水印方位不正确')
+            }
+            //如果偏移为负，不能输出
+            if (left < 0 || top < 0) {
+                throw new Error('水印图片超出界限')
+            }
+            //水印图片大于原始宽高也不能输出
+            if (width > preWidth || height > preHeight) {
+                throw new Error('水印图片过大')
+            }
+            //获取缩放后水印图片buffer
+            let buffer: Buffer = await sharp(shuiyin_path).resize(width, height).ignoreAspectRatio().toBuffer()
+            //为sharp实例添加水印处理
+            instance.overlayWith(buffer, { left, top })
         }
     }
 }
