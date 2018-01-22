@@ -5,6 +5,7 @@ import { EnableImageWatermark } from '../interface/config/EnableImageWatermark'
 import { BucketConfig } from '../interface/config/BucketConfig'
 import { ImageFormat } from '../interface/config/ImageFormat'
 import { AudioFormat } from '../interface/config/AudioFormat'
+import { VideoFormat } from '../interface/config/VideoFormat'
 import { ImageMetadata } from '../interface/file/ImageMetadata'
 import { ImageProcessUtil } from '../util/ImageProcessUtil'
 import { ImageConfig } from '../model/ImageConfig';
@@ -254,6 +255,41 @@ export class ConfigService {
     } catch (err) {
       data.code = 403
       data.message = '音频保存格式配置失败' + err.toString()
+      return
+    }
+  }
+
+  async saveVideoFormat(data: any, body: VideoFormat): Promise<any> {
+    let { format, resolution } = body
+    format = format.toLowerCase()
+    if (format != 'raw' && format != 'vp9' && format != 'h264' && format != 'h265') {
+      data.code = 401
+      data.message = '编码格式不正确'
+      return
+    }
+    resolution = resolution.toLowerCase()
+    if (resolution != 'raw' && resolution != 'p1080' && resolution != 'p720' && resolution != 'p480') {
+      data.code = 401
+      data.message = '分辨率格式不正确'
+      return
+    }
+
+    let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["video_config"] })
+    if (buckets.length !== 2) {
+      data.code = 402
+      data.message = '空间配置不存在'
+      return
+    }
+    try {
+      await buckets.forEach(async (bucket) => {
+        await this.videoConfigRepository.updateById(bucket.video_config.id,{format,resolution})
+      })
+      data.code = 200
+      data.message = '视频保存格式配置成功'
+      return
+    } catch (err) {
+      data.code = 403
+      data.message = '视频保存格式配置失败' + err.toString()
       return
     }
   }
