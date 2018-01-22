@@ -198,25 +198,24 @@ function metadata() {
 }
 //metadata()
 
-function pverlayWith() {
+async function overlayWith() {
   /* 添加水印*/
   sharp('../../test.jpeg')
-    .overlayWith('../../tu/shuiyin.jpeg', {
+    .overlayWith(await sharp('../../tu/shuiyin.jpeg').resize(400,600).ignoreAspectRatio().toBuffer(), {
       left: 100,
-      top: 100,
-      gravity: sharp.gravity.center,
-      raw: {
-        width: 100,
-        height: 100,
-        channels: 3
-      }
+      top: 0,
+      //gravity: sharp.gravity.centre,
+      //raw: {
+        //width: 100,
+        //height: 100,
+        //channels: 3
+      //}
     })
     .toFile('../../overlay.jpeg', (err) => {
       console.log(err)
     });
-
 }
-
+//overlayWith()
 function buffer() {
   /* 测试字节输出*/
   sharp('../../test.jpeg')
@@ -225,9 +224,9 @@ function buffer() {
       console.log(value.toString('hex'))
     })
 }
-
-import * as fs from 'fs'
+sharp('../../tu/shuiyin.jpeg').resize(300,200).ignoreAspectRatio().toFile('../../shuiyin.jpeg')
+/* import * as fs from 'fs'
 fs.stat('../../test.jpeg',(err,stats)=>{
   console.log(err)
   console.log(stats)
-})
+}) */
