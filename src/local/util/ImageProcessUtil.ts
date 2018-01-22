@@ -157,9 +157,9 @@ export class ImageProcessUtil {
             //if (roundrect) this.roundrect(instance, roundrect)
             if (blur) this.blur(instance, blur)
             if (sharpen) this.sharpen(instance, sharpen)
-            if (format) this.format(instance, format, lossless)
+            if (format) this.format(instance, format)
             if (strip) this.strip(instance, strip)
-            if (quality || progressive) this.output(instance, quality, progressive)
+            if (quality || progressive) this.output(instance,lossless,quality,progressive)
             return instance
         } catch (err) {
             data.code = 404
@@ -558,4 +558,16 @@ export class ImageProcessUtil {
             throw new Error('格式参数错误')
         }
     }
+
+    strip(instance:SharpInstance,strip:boolean){
+        if(strip===true){
+            
+        }else if(strip===false){
+            instance.withMetadata()
+        }else{
+            throw new Error('去除元信息参数错误')
+        }
+    }
+
+    
 }
