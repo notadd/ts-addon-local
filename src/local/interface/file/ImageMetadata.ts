@@ -3,4 +3,5 @@ export interface ImageMetadata{
     format:string
     width:number
     height:number
+    size:number
 }

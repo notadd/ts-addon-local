@@ -32,49 +32,70 @@ export class ImageProcessUtil {
 
     //获取指定图片、字节缓冲的图片元数据
     async getMetadata(pathOrBuffer: string | Buffer): Promise<ImageMetadata> {
-        if ((typeof pathOrBuffer) === 'string') {
-            let name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
-        } else {
-            let name = crypto.createHash('sha256').update(pathOrBuffer).digest('hex')
-        }
         let { format, width, height } = await sharp(pathOrBuffer).metadata()
+        let size ,name
+        if ((typeof pathOrBuffer) === 'string') {
+            await new Promise((resolver,reject)=>{
+                fs.stat(pathOrBuffer,(err,stats)=>{
+                    if(err){
+                        resolver()
+                    }
+                    size = stats.size
+                    resolver()
+                })
+            })
+            name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
+        } else {
+            size = Buffer.byteLength(pathOrBuffer)
+            name = crypto.createHash('sha256').update(pathOrBuffer).digest('hex')
+        }
         return {
             name,
             format,
             width,
-            height
+            height,
+            size
         }
     }
 
-    //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据
+    //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据，用于上传时保存图片
     async processAndStore(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata> {
-        //根据处理信息处理图片，获取处理后Buffer
-        let temp: Buffer = await this.processAndOutput(data, imagePath, imageProcessInfo)
+        //根据处理信息处理图片，获取处理后实例
+        let instance:SharpInstance = await this.process(data, imagePath, bucket,imageProcessInfo)
         if (data.code !== 200) {
             return null
         }
-        //获取处理后元数据
-        let metadata: ImageMetadata = await this.getMetadata(temp)
+        let buffer:Buffer  = await instance.toBuffer()
+        let metadata:ImageMetadata = await this.getMetadata(buffer)
         //保存处理后图片
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.directory, metadata.name + '.' + metadata.format)
-        await new Promise((resolve, reject) => {
-            fs.writeFile(absolute_path, temp, (err) => {
-                if (err) {
+        await new Promise((resolver,reject)=>{
+            fs.writeFile(absolute_path,buffer,(err)=>{
+                if(err){
                     data.code = 402
-                    data.message = '文件写入错误'
+                    data.message = '写入文件错误'
+                    resolver()
                 }
-                resolve()
+                resolver()
             })
         })
-        //出现错误返回null
         if (data.code !== 200) {
             return null
         }
         return metadata
     }
 
-    //根据图片处理信息处理指定路径图片，返回内存中字节存储
-    async processAndOutput(data: any, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
+    //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
+    async processAndOutput(data: any, bucket:Bucket,imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
+        let instance:SharpInstance = await this.process(data,imagePath,bucket,imageProcessInfo)
+        if (data.code !== 200) {
+            return null
+        }
+        return await instance.toBuffer()
+    }
+
+
+    async process( data:any ,imagePath: string,bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo):Promise<SharpInstance>{
         let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo as ImagePostProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
@@ -109,7 +130,7 @@ export class ImageProcessUtil {
                     let { width, height } = this.resize(instance, resize, metadata.width, metadata.height)
                 }
             }
-            this.watermark(instance, watermark)
+            this.watermark(bucket,instance, watermark)
             if (rotate) this.rotate(instance, rotate)
             if (roundrect) this.roundrect(instance, roundrect)
             if (blur) this.blur(instance, blur)
@@ -117,13 +138,14 @@ export class ImageProcessUtil {
             if (format) this.format(instance, format, lossless)
             if (strip) this.strip(instance, strip)
             if (quality || progressive) this.output(instance, quality, progressive)
-            return await instance.toBuffer()
+            return instance
         } catch (err) {
             data.code = 404
             data.message = err.toString()
             return null
         }
     }
+
 
     resize(instance: SharpInstance, resize: Resize, preWidth: number, preHeight: number): any {
         //获取参数
@@ -384,5 +406,10 @@ export class ImageProcessUtil {
         //为sharp实例添加裁剪处理
         instance.extract({left,top,width,height})
         return {width,height}
+    }
+
+    //水印处理函数
+    watermark(bucket:Bucket,instance: SharpInstance,watermark:boolean ):any{
+
     }
 }

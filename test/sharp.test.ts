@@ -1,14 +1,14 @@
 import * as sharp from 'sharp'
 
-function resize() {
+async function  resize():Promise<void>{
   /* 指定宽高缩放，成功*/
-  sharp('../../test.jpeg')
+  let result = await sharp('../../test.jpeg')
     .resize(300, 200)
-    .toFile('../../resize.jpeg', (err) => {
-      console.log(err)
-    });
+    .toFile('../../resize.jpeg');
+    console.log(result)
 }
 
+//resize()
 
 function sharpen() {
   /* 锐化，暂时看不出来，图片变大 
@@ -196,6 +196,7 @@ function metadata() {
       console.log(metadata)
     })
 }
+//metadata()
 
 function pverlayWith() {
   /* 添加水印*/
@@ -224,4 +225,9 @@ function buffer() {
       console.log(value.toString('hex'))
     })
 }
-sharp('../../jiu.jpg').resize(900,900).toFile('../../jiu.jpeg')
+
+import * as fs from 'fs'
+fs.stat('../../test.jpeg',(err,stats)=>{
+  console.log(err)
+  console.log(stats)
+})
