@@ -3,6 +3,7 @@ import { ConfigService } from '../../service/ConfigService'
 import { BucketConfig } from '../../interface/config/BucketConfig'
 import { ImageFormat } from '../../interface/config/ImageFormat'
 import { AudioFormat } from '../../interface/config/AudioFormat'
+import { VideoFormat } from '../../interface/config/VideoFormat'
 import { ImageWatermark } from '../../interface/config/ImageWatermark'
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark'
 import * as fs from 'fs'
@@ -207,7 +208,7 @@ export class ConfigResolver {
 
     /* 视频保存配置，目前公有空间、私有空间采用一个保存格式，会在两个配置信息中各保存一次 */
     @Mutation('videoFormat')
-    async videoFormat(req, body): Promise<any> {
+    async videoFormat(req:any, body:VideoFormat): Promise<any> {
         let data = {
             code: 200,
             message: ""
