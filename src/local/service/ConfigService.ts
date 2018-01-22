@@ -188,8 +188,6 @@ export class ConfigService {
       image.width = metadata.width
       image.height = metadata.height
       image.absolute_path = path.resolve(__dirname,'../','store', buckets[i].directory, metadata.name + '.' + metadata.format)
-      //如果上传图片不存在才进行保存
-      console.log(image)
       let isExist: Image = await this.imageRepository.findOne({ name:metadata.name })
       if (!isExist) {
         try {

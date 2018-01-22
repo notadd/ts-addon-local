@@ -21,6 +21,10 @@ type Mutation{
     #图片水印配置字段
     imageWatermark(name:String,base64:String,gravity:Gravity,opacity:Int,x:Int,y:Int,ws:Int):ConfigData
 
+    #音频保存格式配置
+    #format   保存格式，只能为枚举之一
+    audioFormat(format:AudioFormat):ConfigData
+
 }
 
 
@@ -75,4 +79,11 @@ enum Gravity {
   southwest
   south
   southeast
+}
+
+#音频保存格式枚举
+enum AudioFormat {
+  raw
+  mp3
+  aac
 }
