@@ -535,20 +535,28 @@ export class ImageProcessUtil {
         }
     }
 
-    rotate(instance:SharpInstance,rotate:number){
-        if(rotate!==90&&rotate!==180&&rotate!==270){
+    rotate(instance: SharpInstance, rotate: number) {
+        if (rotate !== 90 && rotate !== 180 && rotate !== 270) {
             throw new Error('旋转角度不正确')
         }
         instance.rotate(rotate)
     }
 
-    blur(instance:SharpInstance,blur:Blur){
-        if(!Number.isInteger(blur.sigma)){
+    blur(instance: SharpInstance, blur: Blur) {
+        if (!Number.isInteger(blur.sigma)) {
             throw new Error('模糊标准差错误')
         }
         //sharp不支持模糊半径
         instance.blur(blur.sigma)
     }
 
-    
+    sharpen(instance: SharpInstance, sharpen: boolean) {
+        if (sharpen === true) {
+            instance.sharpen()
+        }
+        else if (sharpen == false) {
+
+        }
+        else throw new Error('锐化参数错误')
+    }
 }
