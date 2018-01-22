@@ -1,0 +1,37 @@
+export let buckets = [{
+    id: 1,
+    public_or_private: 'public',
+    name: 'public',
+    token_secret_key: null,
+    token_expire: null,
+    audio_config: { id: 1, format: 'raw' },
+    image_config:{
+       id: 1,
+       format: 'webp_damage',
+       watermark_enable: 1,
+       watermark_save_key: '/home/bc-040/桌面/Local/src/local/store/public/cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25.webp',
+       watermark_gravity: 'southeast',
+       watermark_x: 20,
+       watermark_y: 20,
+       watermark_opacity: 80,
+       watermark_ws: 20 },
+    video_config:{ id: 1, format: 'raw', resolution: 'raw' } },
+ {
+    id: 2,
+    public_or_private: 'private',
+    name: 'private',
+    token_secret_key: 'adasdaesdawddsdassd',
+    token_expire: 1800,
+    audio_config:{ id: 2, format: 'raw' },
+    image_config:
+     {
+       id: 2,
+       format: 'webp_damage',
+       watermark_enable: 1,
+       watermark_save_key: '/home/bc-040/桌面/Local/src/local/store/private/cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25.webp',
+       watermark_gravity: 'southeast',
+       watermark_x: 20,
+       watermark_y: 20,
+       watermark_opacity: 80,
+       watermark_ws: 20 },
+    video_config:{ id: 2, format: 'raw', resolution: 'raw' } } ]

@@ -62,6 +62,7 @@ export class ImageProcessUtil {
         let instance: SharpInstance = await this.process(data, imagePath, bucket, imageProcessInfo)
         //处理参数有错误，直接返回null
         if (data.code !== 200) {
+            console.log(data)
             return null
         }
         //获取处理后Buffer，这里必须先获取BUffer，再获取format、name，才能写入文件，因为文件名需要使用name、format
@@ -69,6 +70,7 @@ export class ImageProcessUtil {
         let buffer: Buffer = await instance.toBuffer()
         //获取处理后元数据
         let metadata: ImageMetadata = await this.getMetadata(buffer)
+        console.log(metadata)
         //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
         //根据绝对路径保存图片
@@ -147,6 +149,7 @@ export class ImageProcessUtil {
                     let result1 = this.resize(instance, resize, metadata.width, metadata.height)
                     width2 = result1.width
                     height2 = result1.height
+                    
                 }
                 width2 = metadata.width
                 height2 = metadata.height
@@ -172,6 +175,7 @@ export class ImageProcessUtil {
 
 
     resize(instance: SharpInstance, resize: Resize, preWidth: number, preHeight: number): any {
+        console.log('进入方法')
         //获取参数
         let { mode, data } = resize
         //声明resize方法的参数

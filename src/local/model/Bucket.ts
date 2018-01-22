@@ -91,33 +91,33 @@ export class Bucket {
     cascadeUpdate: true,
     lazy: true
   })
-  files: Promise<File[]>;
+  files?: Promise<File[]>;
 
   @OneToMany(type => Image, image => image.bucket, {
     cascadeInsert: true,
     cascadeUpdate: true,
     lazy: true
   })
-  images: Promise<Image[]>;
+  images?: Promise<Image[]>;
 
   @OneToMany(type => Audio, audio=> audio.bucket, {
     cascadeInsert: true,
     cascadeUpdate: true,
     lazy: true
   })
-  audios: Promise<Audio[]>;
+  audios?: Promise<Audio[]>;
 
   @OneToMany(type => Video, video => video.bucket, {
     cascadeInsert: true,
     cascadeUpdate: true,
     lazy: true
   })
-  videos:Promise<Video[]>;
+  videos?:Promise<Video[]>;
 
   @OneToMany(type => Document, document => document.bucket, {
     cascadeInsert: true,
     cascadeUpdate: true,
     lazy: true
   })
-  documents:Promise<Document[]>;
+  documents?:Promise<Document[]>;
 }

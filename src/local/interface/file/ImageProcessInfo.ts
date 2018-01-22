@@ -1,12 +1,12 @@
 
 
 export interface ResizeData{
-    scale:number
-    wscale:number
-    hscale:number
-    width:number
-    height:number
-    pixel:number
+    scale?:number
+    wscale?:number
+    hscale?:number
+    width?:number
+    height?:number
+    pixel?:number
 }
 
 export interface Resize{

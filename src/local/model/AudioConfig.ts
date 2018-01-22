@@ -21,5 +21,5 @@ export class AudioConfig{
 
   @OneToOne(type => Bucket,bucket=>bucket.audio_config)
   @JoinColumn()
-  bucket: Bucket;
+  bucket?: Bucket;
 }

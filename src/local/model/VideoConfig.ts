@@ -35,5 +35,5 @@ export class VideoConfig{
 
   @OneToOne(type => Bucket,bucket=>bucket.video_config)
   @JoinColumn()
-  bucket: Bucket;
+  bucket?: Bucket;
 }

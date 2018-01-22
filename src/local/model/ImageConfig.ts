@@ -81,5 +81,5 @@ export class ImageConfig{
 
   @OneToOne(type => Bucket,bucket=>bucket.image_config)
   @JoinColumn()
-  bucket: Bucket;
+  bucket?: Bucket;
 }
