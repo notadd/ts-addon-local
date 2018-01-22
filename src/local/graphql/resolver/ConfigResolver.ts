@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation } from '@nestjs/graphql'
 import { ConfigService } from '../../service/ConfigService'
 import { BucketConfig } from '../../interface/config/BucketConfig'
 import { ImageFormat } from '../../interface/config/ImageFormat'
+import { AudioFormat } from '../../interface/config/AudioFormat'
 import { ImageWatermark } from '../../interface/config/ImageWatermark'
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark'
 import * as fs from 'fs'
@@ -99,7 +100,7 @@ export class ConfigResolver {
     }
 
     @Mutation('imageWatermark')
-    async  imageWatermarkConfig(req: any, body:ImageWatermark): Promise<any> {
+    async  imageWatermark(req: any, body:ImageWatermark): Promise<any> {
         let data = {
             code: 200,
             message: ''
@@ -184,7 +185,7 @@ export class ConfigResolver {
 
     /* 音频保存格式配置，目前公有空间、私有空间采用一个保存格式，会在两个配置信息中各保存一次 */
     @Mutation('audioFormat')
-    async  audioFormat(req, body): Promise<any> {
+    async  audioFormat(req, body:AudioFormat): Promise<any> {
         let data = {
             code: 200,
             message: ""

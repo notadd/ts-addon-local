@@ -4,6 +4,7 @@ import { Repository } from 'typeorm'
 import { EnableImageWatermark } from '../interface/config/EnableImageWatermark'
 import { BucketConfig } from '../interface/config/BucketConfig'
 import { ImageFormat } from '../interface/config/ImageFormat'
+import { AudioFormat } from '../interface/config/AudioFormat'
 import { ImageMetadata } from '../interface/file/ImageMetadata'
 import { ImageProcessUtil } from '../util/ImageProcessUtil'
 import { ImageConfig } from '../model/ImageConfig';
@@ -230,7 +231,7 @@ export class ConfigService {
     }
   }
 
-  async saveAudioFormat(data: any, body: AudioFormatConfig): Promise<any> {
+  async saveAudioFormat(data: any, body: AudioFormat): Promise<any> {
     let { format } = body
     format = format.toLowerCase()
     if (format != 'raw' && format != 'mp3' && format != 'aac') {
