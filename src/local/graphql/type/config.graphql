@@ -25,6 +25,11 @@ type Mutation{
     #format   保存格式，只能为枚举之一
     audioFormat(format:AudioFormat):ConfigData
 
+     #视频保存格式配置
+    #format   视频保存编码格式，只能为枚举之一
+    #resolution 视频保存分辨率
+    videoFormat(format:VideoFormat,resolution:VideoResolution):ConfigData
+
 }
 
 
@@ -86,4 +91,20 @@ enum AudioFormat {
   raw
   mp3
   aac
+}
+
+#视频保存编码格式枚举
+enum VideoFormat {
+  raw
+  vp9
+  h264
+  h265
+}
+
+#视频保存分辨率枚举
+enum VideoResolution {
+  raw
+  p1080
+  p720
+  p480
 }
