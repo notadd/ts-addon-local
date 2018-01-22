@@ -297,14 +297,52 @@ export class ImageProcessUtil {
         return { width, height }
     }
 
-    tailor(instance: SharpInstance, tailor: Tailor, rawWidth: number, rawHeight: number) {
+    //裁剪函数
+    //裁剪原理：首先选定九宫格方位，然后在不同方位按照宽高选定裁剪区域，九宫格暂定按照三分之一线划分
+    //四个角：northwest、southwest、northeast、southeast，宽度、高度都是相对于角点的
+    //南北：north、south，高度从顶边、底边开始算，宽度对称于垂直中间线
+    //东西：west、east，宽度从左边、右边开始算，高度对称于水平中间线
+    //中心：center，宽度、高度分别对称于垂直、水平中间线
+    //然后计算偏移，x正向为右、负向为左，y正向为下，负向为上，如果偏移后超出外边界，则自动丢弃
+    //在测试中出现了超出内边界出现not found错误的问题，可能是暂时错误，暂时不管
+    tailor(instance: SharpInstance, tailor: Tailor, preWidth: number, preHeight: number) {
+        //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
         let { x, y, gravity } = tailor
+        //声明裁剪宽高，初始值为参数值
         let width = tailor.width
         let height = tailor.height
+        //声明左偏移，顶部偏移，不能为负
         let left, top
+        //方位为西北
         if (gravity === 'northwest') {
-            left = x
-            top = y
+            //初始偏移为0、0
+            left = 0
+            top = 0
+        }
+        //方位为东北
+        else if(gravity === 'northeast'){
+            //初始偏移,左偏移为原始宽度减去裁剪宽度
+            left = preWidth - width
+            top = 0
+        }
+        //加上x、y
+        left+=x
+        top+=y
+        //如果偏移为负，修改为0,同时修改宽高
+        if(left<0){
+            width +=left
+            left = 0
+        }
+        if(top<0){
+            height += top
+            top = 0
+        }
+        //如果偏移加上宽度大于了原始宽度
+        if((left+width)>preWidth){
+            width  = preWidth - left
+        }
+        if((top+height)>preHeight){
+            height = preHeight - top
         }
 
     }
