@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation } from '@nestjs/graphql'
 import { ConfigService } from '../../service/ConfigService'
 import { BucketConfig } from '../../interface/config/BucketConfig'
 import { ImageFormat } from '../../interface/config/ImageFormat'
+import { ImageWatermark } from '../../interface/config/ImageWatermark'
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark'
 import * as fs from 'fs'
 import { KindUtil } from '../../util/KindUtil';
@@ -98,7 +99,7 @@ export class ConfigResolver {
     }
 
     @Mutation('imageWatermark')
-    async  imageWatermarkConfig(req: any, body): Promise<any> {
+    async  imageWatermarkConfig(req: any, body:ImageWatermark): Promise<any> {
         let data = {
             code: 200,
             message: ''

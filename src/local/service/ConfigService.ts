@@ -229,4 +229,33 @@ export class ConfigService {
       return
     }
   }
+
+  async saveAudioFormat(data: any, body: AudioFormatConfig): Promise<any> {
+    let { format } = body
+    format = format.toLowerCase()
+    if (format != 'raw' && format != 'mp3' && format != 'aac') {
+      data.code = 401
+      data.message = '保存格式不正确'
+      return
+    }
+
+    let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["audio_config"] })
+    if (buckets.length !== 2) {
+      data.code = 402
+      data.message = '空间配置不存在'
+      return
+    }
+    try {
+      await buckets.forEach(async (bucket) => {
+        await this.audioConfigRepository.updateById(bucket.audio_config.id,{format})
+      })
+      data.code = 200
+      data.message = '音频保存格式配置成功'
+      return
+    } catch (err) {
+      data.code = 403
+      data.message = '音频保存格式配置失败' + err.toString()
+      return
+    }
+  }
 }
