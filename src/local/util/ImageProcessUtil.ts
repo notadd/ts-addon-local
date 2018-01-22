@@ -325,7 +325,44 @@ export class ImageProcessUtil {
             left = preWidth - width
             top = 0
         }
-        //加上x、y
+        //方位为西南
+        else if(gravity === 'southwest'){
+            left = 0
+            top = preHeight - height
+        }
+        //方位为东南
+        else if(gravity === 'southeast'){
+            left = preWidth - width
+            top = preHeight - height
+        }
+        //方位为东
+        else if(gravity === 'east'){
+            left = preWidth - width
+            top = preHeight/2 - height/2
+        }
+        //方位为西
+        else if(gravity === 'west'){
+            left = 0
+            top = preHeight/2 - height/2
+        }
+        //方位为南
+        else if(gravity === 'south'){
+            left = preWidth/2 - width/2
+            top = preHeight - height
+        }
+        //方位为北
+        else if(gravity === 'north'){
+            left = preWidth/2 - width/2
+            top = 0
+        }
+        //方位为中心
+        else if(gravity === 'center'){
+            left = preWidth/2 - width/2
+            top = preHeight/2 - height/2
+        }else{
+            throw new Error('裁剪方位不正确')
+        }
+        //偏移加上x、y
         left+=x
         top+=y
         //如果偏移为负，修改为0,同时修改宽高
@@ -337,13 +374,15 @@ export class ImageProcessUtil {
             height += top
             top = 0
         }
-        //如果偏移加上宽度大于了原始宽度
+        //如果偏移加上宽度大于了原始宽高
         if((left+width)>preWidth){
             width  = preWidth - left
         }
         if((top+height)>preHeight){
             height = preHeight - top
         }
-
+        //为sharp实例添加裁剪处理
+        instance.extract({left,top,width,height})
+        return {width,height}
     }
 }
