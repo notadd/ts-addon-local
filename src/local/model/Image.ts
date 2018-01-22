@@ -5,6 +5,7 @@ import { Bucket } from './Bucket'
 @Entity({
   name: 'image'
 })
+@Index('name_bucket_id',['name','bucketId'],{unique:true})
 export class Image extends AbstractFile{
 
   @Column({

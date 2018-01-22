@@ -18,5 +18,6 @@
       "./src/local/model/Audio.ts"
     ],
     "synchronize":true,
-    "dropSchema":true
+    "dropSchema":true,
+    "charset":"UTF8"
   }

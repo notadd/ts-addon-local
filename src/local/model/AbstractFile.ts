@@ -14,7 +14,8 @@ export class AbstractFile{
         name:'raw_name',
         type:'varchar',
         length: 50,
-        nullable:false
+        nullable:false,
+        charset:'utf8'
     })
     raw_name: string;
 
@@ -30,9 +31,8 @@ export class AbstractFile{
     @Column({ 
         name:'name',
         type:'varchar',
-        length: 70,
-        nullable:false ,
-        unique:true
+        length: 100,
+        nullable:false 
     })
     name: string;
 
@@ -40,8 +40,9 @@ export class AbstractFile{
     @Column({ 
         name:'absolute_path',
         type:'varchar',
-        length: 256,
-        nullable:false 
+        length: 200,
+        nullable:false,
+        unique:true
     })
     absolute_path: string;
   

@@ -33,7 +33,7 @@ export class ImageConfig{
   @Column({
     name: 'watermark_save_key',
     type: 'varchar',
-    length: 80,
+    length: 200,
     nullable: true
   })
   watermark_save_key: string;
