@@ -162,7 +162,8 @@ export class ImageProcessUtil {
             }
             this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate)
-            if (roundrect) this.roundrect(instance, roundrect)
+            //没有圆角功能
+            //if (roundrect) this.roundrect(instance, roundrect)
             if (blur) this.blur(instance, blur)
             if (sharpen) this.sharpen(instance, sharpen)
             if (format) this.format(instance, format, lossless)
@@ -533,4 +534,21 @@ export class ImageProcessUtil {
             instance.overlayWith(buffer, { left, top })
         }
     }
+
+    rotate(instance:SharpInstance,rotate:number){
+        if(rotate!==90&&rotate!==180&&rotate!==270){
+            throw new Error('旋转角度不正确')
+        }
+        instance.rotate(rotate)
+    }
+
+    blur(instance:SharpInstance,blur:Blur){
+        if(!Number.isInteger(blur.sigma)){
+            throw new Error('模糊标准差错误')
+        }
+        //sharp不支持模糊半径
+        instance.blur(blur.sigma)
+    }
+
+    
 }
