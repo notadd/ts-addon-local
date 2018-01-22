@@ -43,9 +43,9 @@ export class ConfigService {
   async saveBucketConfig(data: any, body: BucketConfig) {
     let exist: Bucket
     let newBucket: any = {
-      directory: body.directory,
+      name: body.name,
     }
-    let directory_path = path.resolve(__dirname, '../', 'store', body.directory)
+    let directory_path = path.resolve(__dirname, '../', 'store', body.name)
     if (body.isPublic) {
       exist = await this.bucketRepository.findOneById(1)
     } else {
@@ -65,6 +65,7 @@ export class ConfigService {
       } catch (err) {
         data.code = 401
         data.message = '空间配置更新失败' + err.toString()
+        return 
       }
       return exist
     }
@@ -81,7 +82,7 @@ export class ConfigService {
       bucket.token_expire = +body.token_expire
       bucket.token_secret_key = body.token_secret_key
     }
-    bucket.directory = body.directory
+    bucket.name = body.name
     audio_config.id = bucket.id
     video_config.id = bucket.id
     image_config.id = bucket.id
@@ -188,7 +189,7 @@ export class ConfigService {
       image.type = metadata.format
       image.width = metadata.width
       image.height = metadata.height
-      image.absolute_path = path.resolve(__dirname,'../','store', buckets[i].directory, metadata.name + '.' + metadata.format)
+      image.absolute_path = path.resolve(__dirname,'../','store', buckets[i].name, metadata.name + '.' + metadata.format)
       let isExist: Image = await this.imageRepository.findOne({ name:metadata.name })
       if (!isExist) {
         try {

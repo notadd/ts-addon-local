@@ -1,6 +1,6 @@
 export interface  BucketConfig{
     isPublic:boolean
-    directory:string
+    name:string
     token_expire?:number
     token_secret_key?:string
 }

@@ -33,12 +33,12 @@ export class Bucket {
 
   //此空间下所有文件都存储于这个目录里,与虚拟目录无关
   @Column({
-    name: 'directory',
+    name: 'name',
     type: 'varchar',
     length: 20,
     nullable: false
   })
-  directory: string;
+  name: string;
 
   //token密钥
   @Column({

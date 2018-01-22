@@ -1,5 +1,9 @@
+import { InjectRepository } from '@nestjs/typeorm'
+import { Component } from '@nestjs/common'
+import { Repository } from 'typeorm'
 import { Resolver, Query, Mutation } from '@nestjs/graphql'
 import { ConfigService } from '../../service/ConfigService'
+import { Bucket } from '../../model/Bucket'
 import { BucketConfig } from '../../interface/config/BucketConfig'
 import { ImageFormat } from '../../interface/config/ImageFormat'
 import { AudioFormat } from '../../interface/config/AudioFormat'
@@ -17,7 +21,8 @@ export class ConfigResolver {
 
     constructor(
         private readonly kindUtil: KindUtil,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
     ) {
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
     }
@@ -29,9 +34,9 @@ export class ConfigResolver {
             code: 200,
             message: ''
         }
-        let { isPublic, directory, token_expire, token_secret_key } = body
+        let { isPublic, name, token_expire, token_secret_key } = body
         //验证参数
-        if (isPublic === undefined || !directory) {
+        if (isPublic === undefined || !name) {
             data.code = 400
             data.message = '缺少参数'
             return data
@@ -225,7 +230,29 @@ export class ConfigResolver {
         if (data.code == 401 || data.code == 402 || data.code == 403) {
             return data
         }
-
         return data
+    }
+
+    /* 获取所有空间信息字段 */
+    @Query('buckets')
+    async buckets(){
+      let data = {
+        code:200,
+        message:'',
+        buckets:[]
+      }
+  
+      let buckets:Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
+                                                         .select(['bucket.id','bucket.public_or_private','bucket.name'])
+                                                         .getMany()
+      if(buckets.length!==2){
+        data.code = 401
+        data.message = '空间配置不存在'
+        return data
+      }
+      data.code = 200
+      data.message = '获取空间配置成功'
+      data.buckets = buckets
+      return data
     }
 }

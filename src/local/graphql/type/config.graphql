@@ -8,7 +8,7 @@ type Mutation{
     #空间配置字段
     bucket(
         isPublic:Boolean!,
-        directory:String!,
+        name:String!,
         token_expire:Int,
         token_secret_key:String):ConfigData
 
@@ -39,8 +39,8 @@ type Bucket{
     id:Int
     #公有或者私有空间
     public_or_private:String
-    #目录名
-    directory:String
+    #空间名
+    name:String
 }
 
 #获取空间的字段返回对象

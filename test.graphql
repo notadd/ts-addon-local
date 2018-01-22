@@ -1,14 +1,14 @@
 mutation config{
   public:bucket(
     isPublic:true,
-    directory:"public"
+    name:"public"
   ){
     code
     message
   }
   private:bucket(
     isPublic:false,
-    directory:"private",
+    name:"private",
     token_expire:1800,
     token_secret_key:"adasdaesdawddsdassd"
   ){
