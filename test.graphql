@@ -35,4 +35,12 @@ mutation config{
 		code
     message
   }
+  audioFormat(format:raw){
+    code
+    message
+  }
+   videoFormat(format:raw,resolution:raw){
+		code
+    message
+  }
 }
