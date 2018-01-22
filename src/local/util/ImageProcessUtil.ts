@@ -151,7 +151,7 @@ export class ImageProcessUtil {
                 width2 = metadata.width
                 height2 = metadata.height
             }
-            this.watermark(bucket, instance, watermark, width2, height2)
+            await this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate)
             //没有圆角功能
             //if (roundrect) this.roundrect(instance, roundrect)
@@ -159,7 +159,9 @@ export class ImageProcessUtil {
             if (sharpen) this.sharpen(instance, sharpen)
             if (format) this.format(instance, format)
             if (strip) this.strip(instance, strip)
-            if (quality || progressive) this.output(instance,lossless,quality,progressive)
+            if (lossless || quality || progressive){
+                this.output(instance,format?format:metadata.format,lossless,quality,progressive)
+            } 
             return instance
         } catch (err) {
             data.code = 404
@@ -349,7 +351,7 @@ export class ImageProcessUtil {
     //中心：center，宽度、高度分别对称于垂直、水平中间线
     //然后计算偏移，x正向为右、负向为左，y正向为下，负向为上，如果偏移后超出外边界，则自动丢弃
     //在测试中出现了超出内边界出现not found错误的问题，可能是暂时错误，暂时不管
-    tailor(instance: SharpInstance, tailor: Tailor, preWidth: number, preHeight: number) {
+    tailor(instance: SharpInstance, tailor: Tailor, preWidth: number, preHeight: number):any{
         //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
         let { x, y, gravity } = tailor
         //声明裁剪宽高，初始值为参数值
@@ -435,7 +437,7 @@ export class ImageProcessUtil {
     //根据gravity给水印图片定位，如果是四个角，则角点重合，如果是四条边，则边重合，关于中心线对称，如果是中心，则关于两条中心线对称
     //根据x、y进行偏移，x、y只支持正整数，如果是四个角，都是向原图内部偏移，东西两条边，只向内部偏移x，南北两条边，只向内部偏移y，重心不偏移
     //且水印图片宽高都不能超过原图，超过不能输出，如果水印图片宽高加上相应偏移超过了超过了原图宽高，则偏移会自动调整
-    async watermark(bucket: Bucket, instance: SharpInstance, watermark: boolean, preWidth: number, preHeight: number): any {
+    async watermark(bucket: Bucket, instance: SharpInstance, watermark: boolean, preWidth: number, preHeight: number):Promise<void>{
         let enable: boolean
         if (watermark === true) enable = true
         else if (watermark === false) enable = false
@@ -569,5 +571,37 @@ export class ImageProcessUtil {
         }
     }
 
-    
+    output(instance:SharpInstance,format:string,lossless:boolean,quality:number,progressive:boolean){
+        if(lossless!==undefined&&lossless!==true&&lossless!==false){
+            throw new Error('无损参数错误')
+        }
+        if(quality!==undefined&&!Number.isInteger(quality)){
+            throw new Error('质量参数错误')
+        }
+        if(progressive!==undefined&&progressive!==true&&progressive!==false){
+            throw new Error('渐进参数错误')
+        }
+        let options:any =  {
+            force:true
+        }
+        if(format==='jpeg'){
+            if(quality!==undefined) options.quality = quality
+            if(progressive!==undefined) options.progressive = progressive
+            instance.jpeg(options)
+        }else if(format==='png'){
+            if(progressive!==undefined) options.progressive = progressive
+            instance.png(options)
+        }else if(format==='webp'){
+            if(lossless!==undefined) options.lossless = lossless
+            if(quality!==undefined) options.quality = quality
+            if(progressive!==undefined) options.progressive = progressive
+            instance.webp(options)
+        }else if(format==='tiff'){
+            if(quality!==undefined) options.quality = quality
+            instance.tiff(options)
+        }else{
+            //不支持对其他类型的无损、质量、渐进处理，但是不报错
+        }
+    }
+
 }
