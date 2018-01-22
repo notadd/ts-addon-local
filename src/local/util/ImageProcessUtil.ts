@@ -30,12 +30,16 @@ export class ImageProcessUtil {
         this.format = new Set(['jpeg', 'png', 'webp'])
     }
 
-    //获取指定图片、字节缓冲的图片元数据
+    //获取指定图片、字节缓冲的图片元数据，参数可以为图片路径或者Buffer对象
+    //根据路径获取元数据目前不使用，主要是根据获得的Buffer获取元数据
     async getMetadata(pathOrBuffer: string | Buffer): Promise<ImageMetadata> {
+        //使用sharp获取，格式、宽度、高度
         let { format, width, height } = await sharp(pathOrBuffer).metadata()
         let size ,name
+        //为路径时
         if ((typeof pathOrBuffer) === 'string') {
             await new Promise((resolver,reject)=>{
+                //获取图片大小
                 fs.stat(pathOrBuffer,(err,stats)=>{
                     if(err){
                         resolver()
@@ -44,9 +48,12 @@ export class ImageProcessUtil {
                     resolver()
                 })
             })
+            //计算sha256为图片名称
             name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
         } else {
+            //获取BUffer字节大小
             size = Buffer.byteLength(pathOrBuffer)
+            //计算sha256为名称
             name = crypto.createHash('sha256').update(pathOrBuffer).digest('hex')
         }
         return {
@@ -62,13 +69,18 @@ export class ImageProcessUtil {
     async processAndStore(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata> {
         //根据处理信息处理图片，获取处理后实例
         let instance:SharpInstance = await this.process(data, imagePath, bucket,imageProcessInfo)
+        //处理参数有错误，直接返回null
         if (data.code !== 200) {
             return null
         }
+        //获取处理后Buffer，这里必须先获取BUffer，再获取format、name，才能写入文件，因为文件名需要使用name、format
+        //不能直接使用toFile
         let buffer:Buffer  = await instance.toBuffer()
+        //获取处理后元数据
         let metadata:ImageMetadata = await this.getMetadata(buffer)
-        //保存处理后图片
+        //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.directory, metadata.name + '.' + metadata.format)
+        //根据绝对路径保存图片
         await new Promise((resolver,reject)=>{
             fs.writeFile(absolute_path,buffer,(err)=>{
                 if(err){
@@ -82,6 +94,7 @@ export class ImageProcessUtil {
         if (data.code !== 200) {
             return null
         }
+        //返回处理后元数据
         return metadata
     }
 
@@ -91,10 +104,12 @@ export class ImageProcessUtil {
         if (data.code !== 200) {
             return null
         }
+        //返回Buffer对象
         return await instance.toBuffer()
     }
 
 
+    //根据图片处理参数，获取指定路径图片的SharpInstance实例
     async process( data:any ,imagePath: string,bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo):Promise<SharpInstance>{
         let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo as ImagePostProcessInfo
         //获取处理之前元数据
