@@ -74,4 +74,52 @@ export class FileResolver {
       data.message = '获取下载预处理信息成功'
       return data
     }
+
+    /*文件表单上传预处理接口
+    @Param bucket_name：上传空间名
+    @Param md5：文件md5,在本地存储中没有用
+    @Param contentName：文件名
+    @Param tags:文件标签数组
+    @Param contentSecret：文件密钥，暂时不支持这个功能
+    @Param imagePreProcessInfo：图片预处理信息
+    @Return data.code：状态码，200为成功，其他为错误
+            data.message：响应信息
+            data.u：上传时的url
+            data.method： 上传方法
+            data.form：   表单上传的字段对象，包含了imagePreProcessInfo字段，上传时需要加上file字段
+  */
+  @Mutation('uploadProcess')
+  async uploadProcess(req , body):Promise<any>{
+    let data = {
+      code:200,
+      message:'',
+      method:'post',
+      url:'http://'+req.headers.host+'/local/file/download',
+      form:{
+        imagePreProcessInfo:'',
+        contentSecret:'',
+        tags:'',
+        md5:''
+      }
+    }
+    //可以根据md5对文件内容进行校验
+    let {bucket_name,md5,contentName,contentSecret,tags,imagePreProcessInfo} = body
+    if(!bucket_name||!contentName){
+      data.code = 400
+      data.message = '缺少参数'
+      return data
+    }
+    let bucket:Bucket = await this.bucketRepository.findOne({name:bucket_name})
+    if(!bucket){
+      data.code = 401
+      data.message = '指定空间'+bucket_name+'不存在'
+      return
+    }
+    data.url+='/'+bucket.name+'/'+contentName
+    data.form.md5 = md5
+    data.form.contentSecret = contentSecret
+    data.form.tags = JSON.stringify(tags)
+    data.form.imagePreProcessInfo = JSON.stringify(imagePreProcessInfo)
+    return data
+  }
 }
