@@ -555,7 +555,7 @@ export class ImageProcessUtil {
         instance.blur(blur.sigma)
     }
 
-    /* 去除元信息后图片会变大 */
+    /* 锐化后图片会变大 */
     sharpen(instance: SharpInstance, sharpen: boolean) {
         if (sharpen === true) {
             instance.sharpen()
@@ -578,9 +578,9 @@ export class ImageProcessUtil {
         }
     }
 
+    /* 去除元信息后稍微变大一点 */
     strip(instance:SharpInstance,strip:boolean){
         if(strip===true){
-            
         }else if(strip===false){
             instance.withMetadata()
         }else{
@@ -588,6 +588,10 @@ export class ImageProcessUtil {
         }
     }
 
+    /* 图片质量下降，会变小
+       渐进显示会变大
+
+    */
     output(instance:SharpInstance,format:string,lossless:boolean,quality:number,progressive:boolean){
         if(lossless!==undefined&&lossless!==true&&lossless!==false){
             throw new Error('无损参数错误')
@@ -601,20 +605,23 @@ export class ImageProcessUtil {
         let options:any =  {
             force:true
         }
+        if(lossless!==undefined) options.lossless = lossless
+        if(quality!==undefined) options.quality = quality
+        if(progressive!==undefined) options.progressive = progressive
+        //jpeg不支持无损，加上了也无所谓
         if(format==='jpeg'){
-            if(quality!==undefined) options.quality = quality
-            if(progressive!==undefined) options.progressive = progressive
             instance.jpeg(options)
-        }else if(format==='png'){
-            if(progressive!==undefined) options.progressive = progressive
+        }
+        //png不支持质量、无损选项，加上了也不影响
+        else if(format==='png'){
             instance.png(options)
-        }else if(format==='webp'){
-            if(lossless!==undefined) options.lossless = lossless
-            if(quality!==undefined) options.quality = quality
-            if(progressive!==undefined) options.progressive = progressive
+        }
+        //webp则三个都支持
+        else if(format==='webp'){
             instance.webp(options)
-        }else if(format==='tiff'){
-            if(quality!==undefined) options.quality = quality
+        }
+        //tiff不支持渐进、无损选项，加上也无所谓
+        else if(format==='tiff'){
             instance.tiff(options)
         }else{
             //不支持对其他类型的无损、质量、渐进处理，但是不报错

@@ -25,6 +25,10 @@ let info:ImagePostProcessInfo = {
     }, */
     //sharpen:true,
     format:'tiff',
-    watermark:false
+    //strip:true,
+    watermark:false,
+    //quality:60,
+    //progressive:true
+    //lossless:true
 }
 process.processAndStore({code:200,data:''},'../../test.jpeg',buckets[1],info)
