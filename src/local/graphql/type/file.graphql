@@ -1,0 +1,17 @@
+#查询字段
+type Query{
+  #下载预处理字段
+  downloadProcess(bucket_name:String,name:String,type:String):DownloadProcessData
+} 
+
+#文件下载预处理返回数据类型
+type DownloadProcessData{
+   #错误码
+   code:Int
+   #信息
+   message:String
+   #发起下载请求的方法
+   method:String
+   #发起下载请求的url
+   url:String
+}
