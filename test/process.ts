@@ -24,9 +24,9 @@ let info:ImagePostProcessInfo = {
         sigma:1
     }, */
     //sharpen:true,
-    format:'tiff',
+    //format:'webp',
     //strip:true,
-    watermark:false,
+    //watermark:false,
     //quality:60,
     //progressive:true
     //lossless:true

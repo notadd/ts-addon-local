@@ -1,14 +1,15 @@
 import { Component, Inject } from '@nestjs/common';
 import { ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor, Blur } from '../interface/file/ImageProcessInfo'
 import { ImageMetadata } from '../interface/file/ImageMetadata'
+import { KindUtil } from './KindUtil';
 import { Bucket } from '../model/Bucket'
+import { SharpInstance } from 'sharp'
 import { isArray } from 'util';
 import * as sharp from 'sharp'
-import { SharpInstance } from 'sharp'
 import * as crypto from 'crypto'
 import * as path from 'path'
 import * as fs from 'fs'
-import { KindUtil } from './KindUtil';
+import * as gm from 'gm'
 
 /* 图片处理工具类 */
 @Component()
@@ -526,7 +527,23 @@ export class ImageProcessUtil {
             if (width > preWidth || height > preHeight) {
                 throw new Error('水印图片过大')
             }
-            //获取缩放后水印图片buffer，目前水印图片透明度未支持
+            //获取缩放后水印图片buffer，目前水印图片透明度未支持,修改alpha质量不起作用
+            /* let buffer1:Buffer 
+            await new Promise((resolve,reject)=>{
+                //.resize(Math.floor(width),Math.floor(height))
+                gm(shuiyin_path).toBuffer((err,buffer)=>{
+                    if(err){
+                        console.log('获取buffer失败')
+                        console.log(err)
+                        resolve()
+                        return
+                    }
+                    console.log(buffer)
+                    buffer1 = buffer
+                    resolve()
+                    return 
+                })
+            }) */
             let buffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
             //为sharp实例添加水印处理
             instance.overlayWith(buffer, { 
