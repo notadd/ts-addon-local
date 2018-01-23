@@ -230,3 +230,14 @@ fs.stat('../../test.jpeg',(err,stats)=>{
   console.log(err)
   console.log(stats)
 }) */
+
+function extractChannel(){
+   /* 添加水印*/
+   sharp('../../test.jpeg')
+   .extractChannel(2)
+   .toFile('../../channel2.jpeg', (err) => {
+     console.log(err)
+   });
+}
+
+extractChannel()
