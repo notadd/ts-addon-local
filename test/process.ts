@@ -7,7 +7,7 @@ let info:ImagePostProcessInfo = {
     resize:{
         mode:'scale',
         data:{
-            scale:50
+            scale:100
         }
     },
     /* tailor:{
@@ -18,7 +18,13 @@ let info:ImagePostProcessInfo = {
         y:0,
         gravity:'center'
     }, */
-    rotate:90,
+    //rotate:90,
+    /* blur:{
+        redius:10,
+        sigma:1
+    }, */
+    //sharpen:true,
+    format:'tiff',
     watermark:false
 }
 process.processAndStore({code:200,data:''},'../../test.jpeg',buckets[1],info)

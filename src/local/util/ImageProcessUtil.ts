@@ -165,6 +165,7 @@ export class ImageProcessUtil {
             } 
             return instance
         } catch (err) {
+            console.log(err)
             data.code = 404
             data.message = err.toString()
             return null
@@ -525,9 +526,8 @@ export class ImageProcessUtil {
             if (width > preWidth || height > preHeight) {
                 throw new Error('水印图片过大')
             }
-            //获取缩放后水印图片buffer
+            //获取缩放后水印图片buffer，目前水印图片透明度未支持
             let buffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
-            console.log(await this.getMetadata(buffer))
             //为sharp实例添加水印处理
             instance.overlayWith(buffer, { 
                 left:Math.floor(left), 
@@ -535,6 +535,7 @@ export class ImageProcessUtil {
         }
     }
 
+    /* 旋转，sharp只支持90、180、270度，由于sharp的旋转，不会改变宽高，所以90、180度旋转后需要宽高倒置 */
     rotate(instance: SharpInstance, rotate: number ,width:number , height:number) {
         if (rotate !== 90 && rotate !== 180 && rotate !== 270) {
             throw new Error('旋转角度不正确')
@@ -545,6 +546,7 @@ export class ImageProcessUtil {
         }
     }
 
+    /* 高斯模糊，sharp不支持模糊半径，sigma越大越模糊，20已经很模糊了 */
     blur(instance: SharpInstance, blur: Blur) {
         if (!Number.isInteger(blur.sigma)) {
             throw new Error('模糊标准差错误')
@@ -553,6 +555,7 @@ export class ImageProcessUtil {
         instance.blur(blur.sigma)
     }
 
+    /* 去除元信息后图片会变大 */
     sharpen(instance: SharpInstance, sharpen: boolean) {
         if (sharpen === true) {
             instance.sharpen()
@@ -563,6 +566,10 @@ export class ImageProcessUtil {
         else throw new Error('锐化参数错误')
     }
 
+    /* 转换图片格式，png格式比jpeg大很多，webp默认内为有损格式，比jpeg小 
+       toFormat方法也支持选项，其中质量、渐进、无损等选项可以设置,虽然函数定义中没有无损选项，但实际上可以处理无损参数
+       目前质量、无损、渐进等在output中设置，format只支持jpeg、png、webp、tiff等格式，不支持bmp、gif等格式
+    */
     format(instance:SharpInstance,format:string){
         if(this.kindUtil.isImage(format)){
             instance.toFormat(format)
