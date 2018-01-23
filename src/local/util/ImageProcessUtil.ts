@@ -62,7 +62,6 @@ export class ImageProcessUtil {
         let instance: SharpInstance = await this.process(data, imagePath, bucket, imageProcessInfo)
         //处理参数有错误，直接返回null
         if (data.code !== 200) {
-            console.log(data)
             return null
         }
         //获取处理后Buffer，这里必须先获取BUffer，再获取format、name，才能写入文件，因为文件名需要使用name、format
@@ -70,7 +69,6 @@ export class ImageProcessUtil {
         let buffer: Buffer = await instance.toBuffer()
         //获取处理后元数据
         let metadata: ImageMetadata = await this.getMetadata(buffer)
-        console.log(metadata)
         //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
         //根据绝对路径保存图片
@@ -155,7 +153,7 @@ export class ImageProcessUtil {
                 height2 = metadata.height
             }
             await this.watermark(bucket, instance, watermark, width2, height2)
-            if (rotate) this.rotate(instance, rotate)
+            if (rotate) this.rotate(instance, rotate, width2, height2)
             //没有圆角功能
             //if (roundrect) this.roundrect(instance, roundrect)
             if (blur) this.blur(instance, blur)
@@ -175,7 +173,6 @@ export class ImageProcessUtil {
 
 
     resize(instance: SharpInstance, resize: Resize, preWidth: number, preHeight: number): any {
-        console.log('进入方法')
         //获取参数
         let { mode, data } = resize
         //声明resize方法的参数
@@ -278,8 +275,7 @@ export class ImageProcessUtil {
             throw new Error('缩放模式不正确')
         }
         //为sharp实例添加缩放处理,默认宽高不足时不裁剪，只缩放
-        instance.resize(width, height).ignoreAspectRatio()
-
+        instance.resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio()
         //下面要计算缩放后宽高，以及添加限制函数
         //只有fwfh、fwfh2两个模式要特殊处理
         //当限制宽高最大值时
@@ -432,7 +428,11 @@ export class ImageProcessUtil {
             height = preHeight - top
         }
         //为sharp实例添加裁剪处理
-        instance.extract({ left, top, width, height })
+        instance.extract({ 
+            left:Math.floor(left), 
+            top:Math.floor(top), 
+            width:Math.floor(width), 
+            height:Math.floor(height) })
         return { width, height }
     }
 
@@ -447,7 +447,7 @@ export class ImageProcessUtil {
         else if (watermark === false) enable = false
         else if (watermark == undefined) enable = !!bucket.image_config.watermark_enable
         else throw new Error('水印参数错误')
-        if (watermark) {
+        if (enable) {
             //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
             let x = bucket.image_config.watermark_x
             let y = bucket.image_config.watermark_y
@@ -460,11 +460,11 @@ export class ImageProcessUtil {
             let { width, height } = await this.getMetadata(shuiyin_path)
             //计算短边自适应后水印图片宽高
             if (preWidth < preHeight) {
+                height = height * preWidth * ws / (100*width)
                 width = preWidth * ws / 100
-                height = height * preWidth * ws / 100 / width
             } else {
-                height = preHeight * ws / 100
-                width = width * preHeight * ws / 100 / height
+                width = width * preHeight * ws / (100*height)
+                height = preHeight * ws / 100  
             }
             //水印图片左偏移，顶部偏移
             let left, top
@@ -526,17 +526,23 @@ export class ImageProcessUtil {
                 throw new Error('水印图片过大')
             }
             //获取缩放后水印图片buffer
-            let buffer: Buffer = await sharp(shuiyin_path).resize(width, height).ignoreAspectRatio().toBuffer()
+            let buffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
+            console.log(await this.getMetadata(buffer))
             //为sharp实例添加水印处理
-            instance.overlayWith(buffer, { left, top })
+            instance.overlayWith(buffer, { 
+                left:Math.floor(left), 
+                top:Math.floor(top) })
         }
     }
 
-    rotate(instance: SharpInstance, rotate: number) {
+    rotate(instance: SharpInstance, rotate: number ,width:number , height:number) {
         if (rotate !== 90 && rotate !== 180 && rotate !== 270) {
             throw new Error('旋转角度不正确')
         }
         instance.rotate(rotate)
+        if(rotate===90||rotate===270){
+            instance.resize(Math.floor(height),Math.floor(width))
+        }
     }
 
     blur(instance: SharpInstance, blur: Blur) {
