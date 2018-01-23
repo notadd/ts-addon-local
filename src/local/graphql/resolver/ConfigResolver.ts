@@ -244,8 +244,6 @@ export class ConfigResolver {
       let buckets:Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
                                                          .select(['bucket.id','bucket.public_or_private','bucket.name'])
                                                          .getMany()
-      console.log(await this.bucketRepository.find({ relations: ["audio_config",'image_config','video_config'] }))
-
       if(buckets.length!==2){
         data.code = 401
         data.message = '空间配置不存在'

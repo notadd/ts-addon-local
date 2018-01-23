@@ -1,8 +1,7 @@
 import { Query, Resolver, ResolveProperty, Mutation } from '@nestjs/graphql';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { ConfigService } from '../../service/ConfigService';
-import { FileService } from '../../service/FileService';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DownloadProcess } from '../../interface/file/DownloadProcess'
 import { KindUtil } from '../../util/KindUtil'
 import { Document } from '../../model/Document'
 import { Bucket } from '../../model/Bucket';
@@ -21,8 +20,6 @@ export class FileResolver {
 
     constructor(
         private readonly kindUtil: KindUtil,
-        private readonly fileService: FileService,
-        private readonly configService: ConfigService,
         @InjectRepository(File) private readonly fileRepository: Repository<File>,
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
@@ -41,15 +38,14 @@ export class FileResolver {
              data.method： 下载方法
   */
   @Query('downloadProcess')
-  async downloadProcess(req , body):Promise<any>{
+  async downloadProcess(req , body:DownloadProcess):Promise<any>{
       let data = {
         code:200,
         message:'',
         //下载文件使用get方法
         method:'get',
-        url:''
+        url:'http://'+req.headers.host
       }
-      console.log(req.host)
       let {bucket_name,name,type} =body
       if(!bucket_name || !name || !type){
         data.message = '缺少参数'
@@ -60,7 +56,7 @@ export class FileResolver {
       if(!bucket){
         data.code = 401
         data.message = '指定空间'+bucket_name+'不存在'
-        return
+        return data
       }
       let kind
       let file:File|Audio|Video|Image|Document
