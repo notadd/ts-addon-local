@@ -7,7 +7,7 @@ let info:ImagePostProcessInfo = {
     resize:{
         mode:'scale',
         data:{
-            scale:100
+            scale:50
         }
     },
     /* tailor:{

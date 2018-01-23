@@ -147,10 +147,10 @@ export class ImageProcessUtil {
                     let result1 = this.resize(instance, resize, metadata.width, metadata.height)
                     width2 = result1.width
                     height2 = result1.height
-                    
-                }
-                width2 = metadata.width
-                height2 = metadata.height
+                }else{
+                    width2 = metadata.width
+                    height2 = metadata.height
+                } 
             }
             await this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate, width2, height2)
