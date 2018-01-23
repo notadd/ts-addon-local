@@ -96,9 +96,9 @@ export class FileResolver {
       method:'post',
       url:'http://'+req.headers.host+'/local/file/download',
       form:{
-        imagePreProcessInfo:'',
+        imagePreProcessString:'',
         contentSecret:'',
-        tags:'',
+        tagsString:'',
         md5:''
       }
     }

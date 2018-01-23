@@ -19,15 +19,15 @@ type DownloadProcessData{
    #发起下载请求的url
    url:String
 }
-
+ 
 #上传预处理表单信息类型
 type UploadProcessForm{
     #图片预处理信息
-    imagePreProcessInfo:String,
+    imagePreProcessString:String,
     #文件密钥
     contentSecret:String
     #文件标签数组
-    tags:String,
+    tagsString:String,
     #文件md5,用于对文件进行校验
     md5:String
 }
