@@ -27,7 +27,7 @@ export class AbstractFile{
     tags: string[];
   
     //本地存储中，文件名为它的sha256值有64位
-    //为了与云存储统一，也称做name
+    //为了与云存储统一，也称做name,这里统一空间下name不可以重复
     @Column({ 
         name:'name',
         type:'varchar',
@@ -37,6 +37,7 @@ export class AbstractFile{
     name: string;
 
     //文件存储的绝对路径，方便使用
+    //绝对路径必须唯一
     @Column({ 
         name:'absolute_path',
         type:'varchar',

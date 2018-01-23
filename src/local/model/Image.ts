@@ -5,6 +5,7 @@ import { Bucket } from './Bucket'
 @Entity({
   name: 'image'
 })
+//同一空间下name不能重复，创建唯一性约束
 @Index('name_bucket_id',['name','bucketId'],{unique:true})
 export class Image extends AbstractFile{
 

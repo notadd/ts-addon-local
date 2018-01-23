@@ -189,8 +189,10 @@ export class ConfigService {
       image.type = metadata.format
       image.width = metadata.width
       image.height = metadata.height
+      image.size = metadata.size
       image.absolute_path = path.resolve(__dirname,'../','store', buckets[i].name, metadata.name + '.' + metadata.format)
-      let isExist: Image = await this.imageRepository.findOne({ name:metadata.name })
+      let isExist: Image = await this.imageRepository.findOne({ absolute_path:image.absolute_path })
+      //只有指定路径图片不存在时才会保存
       if (!isExist) {
         try {
           await this.imageRepository.save(image)
@@ -207,6 +209,7 @@ export class ConfigService {
         }
       }
       //更新图片配置，这里的水印图片路径为图片的绝对路径
+      //不管图片是否已经存在，图片配置都需要更新
       try {
         await this.imageConfigRepository.updateById(buckets[i].image_config.id, {
           watermark_save_key: image.absolute_path,
