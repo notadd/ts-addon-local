@@ -44,7 +44,7 @@ export class FileResolver {
         message:'',
         //下载文件使用get方法
         method:'get',
-        url:'http://'+req.headers.host
+        url:'http://'+req.headers.host+'/local/file/download'
       }
       let {bucket_name,name,type} =body
       if(!bucket_name || !name || !type){

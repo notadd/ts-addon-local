@@ -56,3 +56,12 @@ query buckets{
   	}
   }
 }
+
+query downprocess{
+  downloadProcess(bucket_name:"public",name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25",type:"webp"){
+    code
+    message
+    url
+    method
+  }
+}
