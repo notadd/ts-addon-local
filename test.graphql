@@ -65,3 +65,31 @@ query downprocess{
     method
   }
 }
+
+mutation uploadprocess{
+  uploadProcess(
+    bucket_name:"public",
+    md5:"4f58f848b46a2ac6a817c9f5289a0f97",
+    contentName:"test.jpeg",
+    tags:["微信","商城"],
+    imagePreProcessInfo:{
+      resize:{
+        mode:"scale",
+        data:{
+          scale:50
+        }
+      }
+    }
+  ){
+    code
+    message
+    url
+    method
+    form{
+      imagePreProcessInfo
+      contentSecret
+      tags
+      md5
+    }
+  }
+}

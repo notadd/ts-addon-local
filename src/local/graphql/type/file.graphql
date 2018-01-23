@@ -5,7 +5,7 @@ type Query{
 } 
 
 type Mutation{
-   uploadProcess(bucket_name:String,md5:String,contentName:String,contentSecret:String,imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
+   uploadProcess(bucket_name:String,md5:String,contentName:String,contentSecret:String,tags:[String],imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
 }
 
 #文件下载预处理返回数据类型
@@ -22,10 +22,14 @@ type DownloadProcessData{
 
 #上传预处理表单信息类型
 type UploadProcessForm{
-    #表单中上传参数的base64编码
-    policy:String
-    #签名字段
-    authorization:String
+    #图片预处理信息
+    imagePreProcessInfo:String,
+    #文件密钥
+    contentSecret:String
+    #文件标签数组
+    tags:String,
+    #文件md5,用于对文件进行校验
+    md5:String
 }
 
 #上传预处理字段返回类型
