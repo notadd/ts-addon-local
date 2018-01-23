@@ -42,8 +42,8 @@ export class FileResolver {
       let data = {
         code:200,
         message:'',
-        //下载文件使用get方法
         method:'get',
+        headers:null,
         url:'http://'+req.headers.host+'/local/file/download'
       }
       let {bucket_name,name,type} =body
