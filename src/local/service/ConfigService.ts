@@ -219,6 +219,8 @@ export class ConfigService {
           watermark_x: obj.x,
           watermark_y: obj.y
         })
+        data.code = 200
+        data.message = '更新水印配置成功'
       } catch (err) {
         data.code = 403
         data.message = '保存水印配置出现错误' + err.toString()

@@ -2,6 +2,7 @@ import { Query, Resolver, ResolveProperty, Mutation } from '@nestjs/graphql';
 import { DownloadProcess } from '../../interface/file/DownloadProcess';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OneData } from '../../interface/file/OneData';
+import { FileService } from '../../service/FileService'
 import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
 import { Document } from '../../model/Document'
@@ -22,6 +23,7 @@ export class FileResolver {
   constructor(
     private readonly kindUtil: KindUtil,
     private readonly tokenUtil: TokenUtil,
+    private readonly fileService: FileService,
     @InjectRepository(File) private readonly fileRepository: Repository<File>,
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
     @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
@@ -187,5 +189,45 @@ export class FileResolver {
     }
     console.log(data.url)
     return data
+  }
+
+  /* 获取指定空间下文件信息以及相关访问url
+     @Param bucket_name：文件所属空间
+     @Return data.code： 状态码，200为成功，其他为错误
+            data.message：响应信息
+            data.baseUrl：访问文件的基本url
+            data.files    分页后的文件信息数组，里面添加了访问文件url信息，url不包含域名，包含了文件密钥、token
+            data.imges：   图片信息数组
+            data.audios:  音频信息数组
+            data.videos:  视频信息数组
+            data.documents: 文档信息数组
+  */
+  @Query('all')
+  async  files(req , body):Promise<any>{
+     let data  = {
+       code:200,
+       message:'',
+       baseUrl:'',
+       files:[],
+       images:[],
+       audios:[],
+       videos:[],
+       documents:[]
+     }
+     let {bucket_name} = body
+     if(!bucket_name){
+       data.code = 400
+       data.message = '缺少参数'
+       return data
+     }
+     let bucket:Bucket = await this.bucketRepository.findOne({name:bucket_name})
+     if(!bucket){
+       data.code = 401
+       data.message = '空间'+bucket_name+'不存在'
+       return
+     }
+     data.baseUrl = req.protocol + '://' + req.get('host') + '/local/file/visit'
+     await this.fileService.getAll(data,bucket)
+     return data
   }
 }
