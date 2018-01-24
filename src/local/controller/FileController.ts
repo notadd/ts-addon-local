@@ -5,7 +5,7 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CommonData } from '../interface/common'
+import { CommonData } from '../interface/Common'
 import { Document } from '../model/Document';
 import { KindUtil } from '../util/KindUtil';
 import * as  formidable from 'formidable';
@@ -65,6 +65,7 @@ export class FileController {
             data.message = '缺少参数'
             return data
         }
+        //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.image_config", "image_config")
             .leftJoinAndSelect("bucket.audio_config", "audio_config")
@@ -103,13 +104,14 @@ export class FileController {
         }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
         //对上传文件进行md5校验
-        let pass = crypto.createVerify('md5').update(fs.readFileSync(file.path)).verify(null, Buffer.from(md5,'hex'))
-        if(!pass) {
+        let pass = crypto.createVerify('md5').update(fs.readFileSync(file.path)).verify(null, Buffer.from(md5, 'hex'))
+        if (!pass) {
+            console.log('上传文件md5校验失败')
             data.code = 403
             data.message = '文件md5校验失败'
             return data
         }
-        await this.fileService.saveUploadFile(data, bucket, param, obj)
+        await this.fileService.saveUploadFile(data, bucket, file, param, obj)
 
         return data
     }

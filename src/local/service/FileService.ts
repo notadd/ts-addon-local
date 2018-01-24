@@ -1,9 +1,15 @@
+import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
+import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { Component, Inject, forwardRef } from '@nestjs/common';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
+import { UploadFile } from '../interface/file/UploadFile';
+import { UploadForm } from '../interface/file/UploadForm';
+import { PathParam } from '../interface/file/PathParam';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from './ConfigService'
-import { Document } from '../model/Document'
-import { KindUtil } from '../util/KindUtil'
+import { CommonData } from '../interface/Common';
+import { ConfigService } from './ConfigService';
+import { Document } from '../model/Document';
+import { KindUtil } from '../util/KindUtil';
 import { Bucket } from '../model/Bucket';
 import { Audio } from '../model/Audio';
 import { Video } from '../model/Video';
@@ -12,23 +18,66 @@ import { Repository } from 'typeorm';
 import { File } from '../model/File';
 import * as crypto from 'crypto';
 import { isArray } from 'util';
+import * as path from 'path';
 
 
 /* 文件Service*/
 @Component()
 export class FileService {
 
-  constructor(
-    private readonly kindUtil:KindUtil,
-    private readonly imageProcessUtil:ImageProcessUtil,
-    @InjectRepository(File) private readonly fileRepository: Repository<File>,
-    @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-    @InjectRepository(Audio) private readonly audioRepository: Repository<Audio>,
-    @InjectRepository(Video) private readonly videoRepository: Repository<Video>,   
-    @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>){}
+    constructor(
+        private readonly kindUtil: KindUtil,
+        private readonly imageProcessUtil: ImageProcessUtil,
+        @InjectRepository(File) private readonly fileRepository: Repository<File>,
+        @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
+        @InjectRepository(Audio) private readonly audioRepository: Repository<Audio>,
+        @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
+        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) { }
 
 
-    saveUploadFile(data:{code:number,message:string},bucket:Bucket,param:any,obj:any){
-        
+    async saveUploadFile(data: CommonData, bucket: Bucket, file: UploadFile, param: PathParam, obj: UploadForm): Promise<void> {
+        let { bucket_name, fileName } = param
+        let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
+        let imageProcessInfo: ImagePreProcessInfo = JSON.parse(imagePreProcessString)
+        //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
+        let metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(data, file.path, bucket, imageProcessInfo)
+        let type: string = fileName.substring(fileName.lastIndexOf('.') + 1)
+        let kind: string = this.kindUtil.getKind(type)
+        if (kind === 'image') {
+            let exist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id })
+            //如果处理后得到文件已存在，不保存，正确返回
+            if (exist) {
+                data.code = 200
+                data.message = '文件已经存在'
+                return
+            }
+            //不存在，保存处理后文件
+            let image: Image = new Image()
+            image.bucket = bucket
+            image.raw_name = fileName
+            image.name = metadata.name
+            image.size = metadata.size
+            image.type = metadata.format
+            image.width = metadata.width
+            image.height = metadata.height
+            image.absolute_path = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
+            if (tagsString) {
+                image.tags = JSON.parse(tagsString)
+            }
+            if (contentSecret) {
+                image.content_secret = contentSecret
+            }
+            try{
+                await this.imageRepository.save(image)
+                data.code = 200
+                data.message = '上传图片保存成功'
+            }catch(err){
+                data.code = 404
+                data.message = '上传文件保存失败'
+            }
+        } else {
+            //暂时不支持其他种类文件
+        }
+        return
     }
-  }
+}
