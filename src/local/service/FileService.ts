@@ -38,7 +38,28 @@ export class FileService {
     async saveUploadFile(data: CommonData, bucket: Bucket, file: UploadFile, param: PathParam, obj: UploadForm): Promise<void> {
         let { bucket_name, fileName } = param
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
-        let imageProcessInfo: ImagePreProcessInfo = JSON.parse(imagePreProcessString)
+        let imageProcessInfo: ImagePreProcessInfo,tags:string[]
+        try{
+            if (tagsString) {
+                tags = JSON.parse(tagsString)
+            }
+            if(imagePreProcessString){
+                imageProcessInfo = JSON.parse(imagePreProcessString)
+            }
+        }catch(err){
+            data.code = 406
+            data.message = 'JSON解析错误'+err.toString()
+            return 
+        }
+        if(bucket.image_config.format==='webp_damage'){
+            (imageProcessInfo as ImagePostProcessInfo).format = 'webp'
+        }else if(bucket.image_config.format==='webp_undamage'){
+            //这样写。后面需要分号
+            (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
+            (imageProcessInfo as ImagePostProcessInfo).lossless = true
+        }else{
+            //原图情况下不管
+        }
         //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
         let metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(data, file.path, bucket, imageProcessInfo)
         let type: string = fileName.substring(fileName.lastIndexOf('.') + 1)
@@ -54,15 +75,15 @@ export class FileService {
             //不存在，保存处理后文件
             let image: Image = new Image()
             image.bucket = bucket
-            image.raw_name = fileName
+            image.raw_name = file.name
             image.name = metadata.name
             image.size = metadata.size
             image.type = metadata.format
             image.width = metadata.width
             image.height = metadata.height
             image.absolute_path = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
-            if (tagsString) {
-                image.tags = JSON.parse(tagsString)
+            if (tags) {
+                image.tags = tags
             }
             if (contentSecret) {
                 image.content_secret = contentSecret
@@ -72,12 +93,12 @@ export class FileService {
                 data.code = 200
                 data.message = '上传图片保存成功'
             }catch(err){
-                data.code = 404
+                data.code = 405
                 data.message = '上传文件保存失败'
             }
+            return 
         } else {
             //暂时不支持其他种类文件
         }
-        return
     }
 }

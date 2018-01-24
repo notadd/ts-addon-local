@@ -52,10 +52,12 @@ export class FileController {
     }
 
 
-    /* 上传文件接口，空间名、文件原名在路径中*/
+    /* 上传文件接口，空间名、文件原名在路径中
+       小bug，如果参数中出现了@Response装饰器，那么直接使用return返回不成功，需要使用res.end
+    */
     @Post('/upload/:bucket_name/:fileName')
-    async upload( @Param() param: PathParam, @Response() res, @Request() req): Promise<CommonData> {
-        let data: CommonData = {
+    async upload( @Param() param: PathParam, @Request() req): Promise<CommonData> {
+        let data:CommonData= {
             code: 200,
             message: ''
         }
@@ -102,17 +104,20 @@ export class FileController {
         if (data.code === 400 || data.code === 402) {
             return data
         }
+        if (file.name !== fileName) {
+            data.code = 403
+            data.message = '文件名不符'
+            return data
+        }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
         //对上传文件进行md5校验
-        let pass = crypto.createVerify('md5').update(fs.readFileSync(file.path)).verify(null, Buffer.from(md5, 'hex'))
+        let pass = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5
         if (!pass) {
-            console.log('上传文件md5校验失败')
-            data.code = 403
+            data.code = 404
             data.message = '文件md5校验失败'
             return data
         }
         await this.fileService.saveUploadFile(data, bucket, file, param, obj)
-
         return data
     }
 

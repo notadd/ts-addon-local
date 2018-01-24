@@ -103,10 +103,13 @@ export class ImageProcessUtil {
 
     //根据图片处理参数，获取指定路径图片的SharpInstance实例
     async process(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<SharpInstance> {
+        let instance: SharpInstance = sharp(imagePath)
+        if(!imageProcessInfo){
+            return instance
+        }
         let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo as ImagePostProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
-        let instance: SharpInstance = sharp(imagePath)
         try {
             let width2, height2
             //缩放与裁剪都需要之前一步得到的图片宽高

@@ -94,7 +94,7 @@ export class FileResolver {
       code:200,
       message:'',
       method:'post',
-      url:'http://'+req.headers.host+'/local/file/download',
+      url:'http://'+req.headers.host+'/local/file/upload',
       form:{
         imagePreProcessString:'',
         contentSecret:'',
@@ -120,6 +120,7 @@ export class FileResolver {
     data.form.contentSecret = contentSecret
     data.form.tagsString = JSON.stringify(tags)
     data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
+    console.log(data.form)
     return data
   }
 }
