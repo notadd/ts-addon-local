@@ -52,8 +52,11 @@ export class FileController {
             res.end()
             return
         }
-        res.download(realPath, fileName)
-        res.end()
+        let buffer:Buffer = fs.readFileSync(realPath)
+        res.setHeader('Content-Type', mime.getType(fileName))
+        res.setHeader('Content-Length', Buffer.byteLength(buffer))
+        res.setHeader('Content-Disposition','attachment; filename='+fileName)
+        res.end(buffer)
         return
     }
 
