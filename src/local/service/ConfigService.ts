@@ -1,3 +1,4 @@
+
 import { InjectRepository } from '@nestjs/typeorm'
 import { Component } from '@nestjs/common'
 import { Repository } from 'typeorm'
@@ -98,7 +99,6 @@ export class ConfigService {
       data.message = '空间保存成功'
       return bucket
     } catch (err) {
-      console.log(err)
       data.code = 401
       data.message = '空间保存失败' + err.toString()
       return null

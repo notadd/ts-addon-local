@@ -207,7 +207,7 @@ export class ImageProcessUtil {
         else if (mode == 'hscale') {
             if (data.hscale && Number.isInteger(data.hscale) && data.hscale >= 1 && data.hscale <= 1000) {
                 //只缩放高度，给高度乘以比例
-                width = width
+                width = preWidth
                 height = preHeight * data.hscale / 100
             } else {
                 throw new Error('高度缩放比例错误')
