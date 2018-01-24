@@ -8,6 +8,7 @@ import { ImageConfig } from './model/ImageConfig';
 import { AudioConfig } from './model/AudioConfig';
 import { VideoConfig } from './model/VideoConfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TokenUtil } from './util/TokenUtil';
 import { Document } from './model/Document'
 import { KindUtil } from './util/KindUtil'
 import { Module } from '@nestjs/common';
@@ -22,8 +23,8 @@ const typeormOptions = require('./typeorm')
 @Module({
   modules: [TypeOrmModule.forRoot([ImageConfig,AudioConfig,VideoConfig,Bucket,Image,File,Video,Audio,Document],typeormOptions)],  
   controllers:[FileController],
-  components: [ConfigResolver,ConfigService,FileResolver,FileService,KindUtil,ImageProcessUtil],
-  exports:[ConfigResolver,ConfigService,FileResolver,FileService,KindUtil,ImageProcessUtil]
+  components: [ConfigResolver,ConfigService,FileResolver,FileService,KindUtil,TokenUtil,ImageProcessUtil],
+  exports:[ConfigResolver,ConfigService,FileResolver,FileService,KindUtil,TokenUtil,ImageProcessUtil]
 })
 
 export class LocalModule {}

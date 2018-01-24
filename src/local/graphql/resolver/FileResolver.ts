@@ -3,7 +3,8 @@ import { DownloadProcess } from '../../interface/file/DownloadProcess';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OneData } from '../../interface/file/OneData';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Document } from '../../model/Document';
+import { TokenUtil } from '../../util/TokenUtil';
+import { Document } from '../../model/Document'
 import { KindUtil } from '../../util/KindUtil';
 import { Bucket } from '../../model/Bucket';
 import { Audio } from '../../model/Audio';
@@ -20,6 +21,7 @@ export class FileResolver {
 
   constructor(
     private readonly kindUtil: KindUtil,
+    private readonly tokenUtil: TokenUtil,
     @InjectRepository(File) private readonly fileRepository: Repository<File>,
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
     @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
@@ -139,7 +141,7 @@ export class FileResolver {
       message: "",
       url: 'http://' + req.headers.host
     }
-    let u  = req.protocol + '://' + req.get('host') + req.originalUrl
+    let u = req.protocol + '://' + req.get('host') + req.originalUrl
     console.log(u)
     //空间名、目录数组、文件名
     let { bucket_name, name, type, imagePostProcessInfo } = body
@@ -171,16 +173,16 @@ export class FileResolver {
       //所有文件调用统一的拼接Url方法 
       data.url += '/local/file/visit/' + bucket_name + '/' + name + '.' + type
       //存储图片处理信息时
-      if(imagePostProcessInfo){
+      if (imagePostProcessInfo) {
         //拼接图片处理的查询字符串
-        data.url+='?imagePostProcessInfo=' + JSON.stringify(imagePostProcessInfo)
+        data.url += '?imagePostProcessInfo=' + JSON.stringify(imagePostProcessInfo)
         //私有空间要拼接token，token使用它之前的完整路径计算
-        if(bucket.public_or_private === 'private'){
-          data.url+='&token='+this.tokenUtil.getToken(data.url,bucket)
+        if (bucket.public_or_private === 'private') {
+          data.url += '&token=' + this.tokenUtil.getToken(data.url, bucket)
         }
-      }else{
-        if(bucket.public_or_private === 'private'){
-          data.url+='?token='+this.tokenUtil.getToken(data.url,bucket)
+      } else {
+        if (bucket.public_or_private === 'private') {
+          data.url += '?token=' + this.tokenUtil.getToken(data.url, bucket)
         }
       }
     } else {
