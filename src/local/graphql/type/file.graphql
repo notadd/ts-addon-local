@@ -26,7 +26,7 @@ type UploadProcessForm{
     imagePreProcessString:String,
     #文件密钥
     contentSecret:String
-    #文件标签数组
+    #文件标签数组的JSON字符串
     tagsString:String,
     #文件md5,用于对文件进行校验
     md5:String

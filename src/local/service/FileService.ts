@@ -38,26 +38,26 @@ export class FileService {
     async saveUploadFile(data: CommonData, bucket: Bucket, file: UploadFile, param: PathParam, obj: UploadForm): Promise<void> {
         let { bucket_name, fileName } = param
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
-        let imageProcessInfo: ImagePreProcessInfo,tags:string[]
-        try{
+        let imageProcessInfo: ImagePreProcessInfo, tags: string[]
+        try {
             if (tagsString) {
                 tags = JSON.parse(tagsString)
             }
-            if(imagePreProcessString){
+            if (imagePreProcessString) {
                 imageProcessInfo = JSON.parse(imagePreProcessString)
             }
-        }catch(err){
+        } catch (err) {
             data.code = 406
-            data.message = 'JSON解析错误'+err.toString()
-            return 
+            data.message = 'JSON解析错误' + err.toString()
+            return
         }
-        if(bucket.image_config.format==='webp_damage'){
+        if (bucket.image_config.format === 'webp_damage') {
             (imageProcessInfo as ImagePostProcessInfo).format = 'webp'
-        }else if(bucket.image_config.format==='webp_undamage'){
+        } else if (bucket.image_config.format === 'webp_undamage') {
             //这样写。后面需要分号
             (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
             (imageProcessInfo as ImagePostProcessInfo).lossless = true
-        }else{
+        } else {
             //原图情况下不管
         }
         //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
@@ -88,15 +88,15 @@ export class FileService {
             if (contentSecret) {
                 image.content_secret = contentSecret
             }
-            try{
+            try {
                 await this.imageRepository.save(image)
                 data.code = 200
                 data.message = '上传图片保存成功'
-            }catch(err){
+            } catch (err) {
                 data.code = 405
                 data.message = '上传文件保存失败'
             }
-            return 
+            return
         } else {
             //暂时不支持其他种类文件
         }

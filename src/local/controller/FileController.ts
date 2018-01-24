@@ -57,7 +57,7 @@ export class FileController {
     */
     @Post('/upload/:bucket_name/:fileName')
     async upload( @Param() param: PathParam, @Request() req): Promise<CommonData> {
-        let data:CommonData= {
+        let data: CommonData = {
             code: 200,
             message: ''
         }
