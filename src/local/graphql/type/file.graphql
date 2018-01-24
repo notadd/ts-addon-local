@@ -2,9 +2,12 @@
 type Query{
   #下载预处理字段
   downloadProcess(bucket_name:String,name:String,type:String):DownloadProcessData
+  #获取单个图片访问url的字段
+  one(bucket_name:String,name:String,type:String,imagePostProcessInfo:ImagePostProcessInfo):OneData
 } 
 
 type Mutation{
+   #上传预处理字段
    uploadProcess(bucket_name:String,md5:String,contentName:String,contentSecret:String,tags:[String],imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
 }
 
@@ -82,4 +85,25 @@ input ImagePreProcessInfo{
     tailor:Tailor
     watermark:Boolean
     rotate:Int
+}
+
+input ImagePostProcessInfo{
+    resize:Resize
+    tailor:Tailor
+    roundrect:Int
+    watermark:Boolean
+    rotate:Int
+    blur:Blur
+    sharpen:Boolean
+    format:String
+    lossless:Boolean
+    quality:Int
+    progressive:Boolean
+    strip:Boolean
+}
+
+type OneData{
+    code:Int
+    message:String
+    url:String
 }
