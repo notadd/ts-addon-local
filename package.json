@@ -28,7 +28,7 @@
     "gm": "^1.23.1",
     "graphql": "^0.11.7",
     "graphql-tools": "^2.18.0",
-    "mime": "^2.1.0",
+    "mime": "^2.2.0",
     "mysql": "^2.15.0",
     "redis": "^2.7.1",
     "reflect-metadata": "^0.1.10",

@@ -45,20 +45,20 @@ export class FileService {
             }
             if (imagePreProcessString) {
                 imageProcessInfo = JSON.parse(imagePreProcessString)
+                if (bucket.image_config.format === 'webp_damage') {
+                    (imageProcessInfo as ImagePostProcessInfo).format = 'webp'
+                } else if (bucket.image_config.format === 'webp_undamage') {
+                    //这样写。后面需要分号
+                    (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
+                    (imageProcessInfo as ImagePostProcessInfo).lossless = true
+                } else {
+                    //原图情况下不管
+                }
             }
         } catch (err) {
             data.code = 406
             data.message = 'JSON解析错误' + err.toString()
             return
-        }
-        if (bucket.image_config.format === 'webp_damage') {
-            (imageProcessInfo as ImagePostProcessInfo).format = 'webp'
-        } else if (bucket.image_config.format === 'webp_undamage') {
-            //这样写。后面需要分号
-            (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
-            (imageProcessInfo as ImagePostProcessInfo).lossless = true
-        } else {
-            //原图情况下不管
         }
         //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
         let metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(data, file.path, bucket, imageProcessInfo)

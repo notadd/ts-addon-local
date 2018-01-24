@@ -1,4 +1,6 @@
 import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query } from '@nestjs/common';
+import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
+import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { UploadFile } from '../interface/file/UploadFile';
 import { UploadForm } from '../interface/file/UploadForm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -6,6 +8,7 @@ import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommonData } from '../interface/Common'
+import { TokenUtil } from '../util/TokenUtil';
 import { Document } from '../model/Document';
 import { KindUtil } from '../util/KindUtil';
 import * as  formidable from 'formidable';
@@ -16,7 +19,9 @@ import { Image } from '../model/Image';
 import { File } from '../model/File';
 import * as crypto from 'crypto';
 import * as path from 'path';
+import * as mime from 'mime';
 import * as fs from 'fs';
+
 /*文件控制器，包含了文件下载、上传、访问功能
 */
 @Controller('local/file')
@@ -24,7 +29,9 @@ export class FileController {
 
     constructor(
         private readonly kindUtil: KindUtil,
+        private readonly tokenUtil: TokenUtil,
         private readonly fileService: FileService,
+        private readonly imageProcessUtil: ImageProcessUtil,
         @InjectRepository(File) private readonly fileRepository: Repository<File>,
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
@@ -35,20 +42,19 @@ export class FileController {
     async download( @Param() param: PathParam, @Response() res): Promise<CommonData> {
         let { bucket_name, fileName } = param
         if (!bucket_name || !fileName) {
-            return {
-                code: 400,
-                message: '缺少文件路径'
-            }
-        }
-        let realPath = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
-        if (fs.existsSync(realPath)) {
-            res.download(realPath, fileName)
+            res.json({ code: 400, message: '缺少文件路径' })
+            res.end()
             return
         }
-        return {
-            code: 404,
-            message: '请求文件不存在'
+        let realPath = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        if (!fs.existsSync(realPath)) {
+            res.json({ code: 404, message: '请求文件不存在' })
+            res.end()
+            return
         }
+        res.download(realPath, fileName)
+        res.end()
+        return
     }
 
 
@@ -120,5 +126,98 @@ export class FileController {
         await this.fileService.saveUploadFile(data, bucket, file, param, obj)
         return data
     }
+
+    /* 访问文件接口，文件路径在url中，文件存在且token正确，处理后返回，不存在返回错误 */
+    @Get('/visit/:bucket_name/:fileName')
+    async visit( @Param() param: PathParam, @Query() query, @Response() res, @Request() req): Promise<CommonData> {
+        let data = {
+            code: 200,
+            message: ''
+        }
+        let { bucket_name, fileName } = param
+        let { imagePostProcessString, token } = query
+        //判断路径参数
+        if (!bucket_name || !fileName) {
+            data.code = 400
+            data.message = '缺少文件路径'
+            res.json(data)
+            res.end()
+            return
+        }
+        //判断文件是否存在
+        let realPath = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        if (!fs.existsSync(realPath)) {
+            data.code = 404
+            data.message = '请求文件不存在'
+            res.json(data)
+            res.end()
+            return
+        }
+        //判断空间是否存在
+        let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+            .leftJoinAndSelect("bucket.image_config", "image_config")
+            .leftJoinAndSelect("bucket.audio_config", "audio_config")
+            .leftJoinAndSelect("bucket.video_config", "video_config")
+            .where("bucket.name = :name", { name: bucket_name })
+            .getOne()
+        if (!bucket) {
+            data.code = 401
+            data.message = '指定空间不存在'
+            res.json(data)
+            res.end()
+            return
+        }
+        //判断token是否正确且未超时
+        if (bucket.public_or_private === 'private') {
+            if (!token) {
+                data.code = 402
+                data.message = '需要token'
+                res.json(data)
+                res.end()
+                return
+            }
+            let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+            console.log(fullUrl)
+            if (imagePostProcessString) {
+                fullUrl += 'imagePostProcessString=' + imagePostProcessString
+            }
+            console.log(fullUrl)
+            let pass = this.tokenUtil.verify(fullUrl, bucket, token)
+            if (!pass) {
+                data.code = 403
+                data.message = 'token不正确'
+                res.json(data)
+                res.end()
+                return
+            }
+        }
+        let imagePostProcessInfo: ImagePostProcessInfo
+        if (imagePostProcessString) {
+            try {
+                imagePostProcessInfo = JSON.parse(imagePostProcessString)
+            } catch (err) {
+                data.code = 405
+                data.message = '图片处理字符串解析错误'
+                res.json(data)
+                res.end()
+                return
+            }
+
+        }
+        let type: string = fileName.substring(fileName.lastIndexOf('.') + 1)
+        let kind: string = this.kindUtil.getKind(type)
+        if (kind === 'image') {
+            let buffer = await this.imageProcessUtil.processAndOutput(data, bucket, realPath, imagePostProcessInfo)
+            res.setHeader('Content-Type', mime.getType(fileName))
+            res.setHeader('Content-Length', Buffer.byteLength(buffer))
+            res.setHeader('Cache-Control', ['no-store', 'no-cache'])
+            res.end(buffer)
+        } else {
+            //其他类型暂不支持
+        }
+
+    }
+
+
 
 }

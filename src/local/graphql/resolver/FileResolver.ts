@@ -45,7 +45,7 @@ export class FileResolver {
       message: '',
       method: 'get',
       headers: null,
-      url: 'http://' + req.headers.host + '/local/file/download'
+      url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
     let { bucket_name, name, type } = body
     if (!bucket_name || !name || !type) {
@@ -95,7 +95,7 @@ export class FileResolver {
       code: 200,
       message: '',
       method: 'post',
-      url: 'http://' + req.headers.host + '/local/file/upload',
+      url: req.protocol + '://' + req.get('host') + '/local/file/upload',
       form: {
         imagePreProcessString: '',
         contentSecret: '',
@@ -132,17 +132,15 @@ export class FileResolver {
      @Param imagePostProcessInfo 图片后处理信息，转化为JSON字符串
      @Return data.code：状态码，200为成功，其他为错误
              data.message：响应信息
-             data.url：访问文件的全部url，包括域名、目录、文件名、扩展名、token、处理字符串
+             data.url：访问文件的全部url，包括域名、目录、文件名、扩展名、token、处理字符串,访问图片方法必须是get，不说明
   */
   @Query('one')
   async  getFile(req, body): Promise<any> {
     let data: OneData = {
       code: 200,
-      message: "",
-      url: 'http://' + req.headers.host
+      message: "获取文件url成功",
+      url: req.protocol + '://' + req.get('host') + '/local/file/visit'
     }
-    let u = req.protocol + '://' + req.get('host') + req.originalUrl
-    console.log(u)
     //空间名、目录数组、文件名
     let { bucket_name, name, type, imagePostProcessInfo } = body
     if (!bucket_name || !name || !type) {
@@ -171,11 +169,11 @@ export class FileResolver {
         return data
       }
       //所有文件调用统一的拼接Url方法 
-      data.url += '/local/file/visit/' + bucket_name + '/' + name + '.' + type
+      data.url += '?' + bucket_name + '/' + name + '.' + type
       //存储图片处理信息时
       if (imagePostProcessInfo) {
         //拼接图片处理的查询字符串
-        data.url += '?imagePostProcessInfo=' + JSON.stringify(imagePostProcessInfo)
+        data.url += '?imagePostProcessString=' + JSON.stringify(imagePostProcessInfo)
         //私有空间要拼接token，token使用它之前的完整路径计算
         if (bucket.public_or_private === 'private') {
           data.url += '&token=' + this.tokenUtil.getToken(data.url, bucket)
