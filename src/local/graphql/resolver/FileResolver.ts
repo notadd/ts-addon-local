@@ -12,8 +12,8 @@ import { Audio } from '../../model/Audio';
 import { Video } from '../../model/Video';
 import { Image } from '../../model/Image';
 import { File } from '../../model/File';
-import * as  path from 'path';
-
+import * as path from 'path';
+import * as fs from 'fs'
 /*文件Resolver，包含了文件下载预处理、上传预处理、下载、上传、
   获取单个文件url、获取多个文件信息以及url、根据url访问文件、删除文件等接口
 */
@@ -206,8 +206,8 @@ export class FileResolver {
   async  files(req , body):Promise<any>{
      let data  = {
        code:200,
-       message:'',
-       baseUrl:'',
+       message:'获取空间下所有文件成功',
+       baseUrl:req.protocol + '://' + req.get('host') + '/local/file/visit',
        files:[],
        images:[],
        audios:[],
@@ -226,8 +226,55 @@ export class FileResolver {
        data.message = '空间'+bucket_name+'不存在'
        return
      }
-     data.baseUrl = req.protocol + '://' + req.get('host') + '/local/file/visit'
      await this.fileService.getAll(data,bucket)
      return data
+  }
+
+  /* 文件删除接口
+     当客户端需要删除某个文件时使用，
+     @Param bucket_name：文件所属空间名
+     @Param type：       文件扩展名，即文件类型
+     @Param name：       文件名
+     @Return data.code：状态码，200为成功，其他为错误
+             data.message：响应信息
+  */
+  @Mutation('deleteFile')
+  async deleteFile(req , body):Promise<any>{
+      let data = {
+          code : 200,
+          message:'删除成功'
+      }
+      let {bucket_name,type,name} =body
+      if(!bucket_name || !name || !type){
+        data.code = 400
+        data.message = '缺少参数'
+        return data
+      }
+      let bucket:Bucket = await this.bucketRepository.findOne({name:bucket_name})
+      if(!bucket){
+        data.code = 401
+        data.message = '空间'+bucket_name+'不存在'
+        return
+      }
+      let kind = this.kindUtil.getKind(type)
+      if(kind==='image'){
+        let image:Image = await this.imageRepository.findOne({name,bucketId:bucket.id})
+        if(!image){
+          data.code = 402
+          data.message = '文件'+name+'不存在于数据库中'
+          return
+        }
+        await this.imageRepository.delete({name,bucketId:bucket.id})
+      }else{
+        //其他类型暂不支持
+      }
+      let realPath = path.resolve(__dirname, '../../', 'store', bucket_name,name+'.'+type)
+      if (!fs.existsSync(realPath)) {
+          data.code = 404
+          data.message = '要删除的文件不存在'
+          return data
+      }
+      fs.unlinkSync(realPath)
+      return data
   }
 }
