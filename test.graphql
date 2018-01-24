@@ -134,3 +134,48 @@ query one{
     url
   }
 }
+
+query allFile{
+  public:all(bucket_name:"public"){
+    code
+    message
+    baseUrl
+    files{
+      id
+      name
+    }
+    images{
+      id
+      raw_name
+      name
+      size
+      type
+      create_date
+      update_date
+      width
+      height
+      url
+    }
+  }
+   private:all(bucket_name:"private"){
+    code
+    message
+    baseUrl
+    files{
+      id
+      name
+    }
+    images{
+      id
+      raw_name
+      name
+      size
+      type
+      create_date
+      update_date
+      width
+      height
+      url
+    }
+  }
+}

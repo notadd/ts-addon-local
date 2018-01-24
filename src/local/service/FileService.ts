@@ -8,6 +8,7 @@ import { PathParam } from '../interface/file/PathParam';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommonData } from '../interface/Common';
 import { ConfigService } from './ConfigService';
+import { TokenUtil } from '../util/TokenUtil';
 import { Document } from '../model/Document';
 import { KindUtil } from '../util/KindUtil';
 import { Bucket } from '../model/Bucket';
@@ -27,6 +28,7 @@ export class FileService {
 
     constructor(
         private readonly kindUtil: KindUtil,
+        private readonly tokenUtil: TokenUtil,
         private readonly imageProcessUtil: ImageProcessUtil,
         @InjectRepository(File) private readonly fileRepository: Repository<File>,
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
@@ -101,4 +103,26 @@ export class FileService {
             //暂时不支持其他种类文件
         }
     }
+
+    async getAll(data:any,bucket:Bucket){
+        data.files = await bucket.files
+        data.images = await bucket.images
+        data.audios  = await bucket.audios
+        data.videos = await bucket.videos
+        data.documents = await bucket.documents
+       
+        let tokenUtil = this.tokenUtil
+        let addUrl = async function (value){
+          value.url = '/'+bucket.name+'/'+value.name+'.'+value.type
+          if(bucket.public_or_private==='private'){
+            value.url+='?token='+await tokenUtil.getToken(data.baseUrl+value.url,bucket)
+          }
+        }
+        await data.files.forEach(addUrl)
+        await data.images.forEach(addUrl)
+        await data.audios.forEach(addUrl)
+        await data.videos.forEach(addUrl)
+        await data.documents.forEach(addUrl)
+        return 
+      }
 }
