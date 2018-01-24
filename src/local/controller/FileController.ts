@@ -146,7 +146,6 @@ export class FileController {
         }
         //判断文件是否存在
         let realPath = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
-        console.log(realPath)
         if (!fs.existsSync(realPath)) {
             data.code = 404
             data.message = '请求文件不存在'

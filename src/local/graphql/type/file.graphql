@@ -11,6 +11,8 @@ type Query{
 type Mutation{
    #上传预处理字段
    uploadProcess(bucket_name:String,md5:String,contentName:String,contentSecret:String,tags:[String],imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
+   #删除文件字段
+   deleteFile(bucket_name:String,name:String,type:String):DeleteFileData
 }
 
 #文件下载预处理返回数据类型
@@ -184,5 +186,10 @@ type AllData{
     audios:[Audio]
     videos:[Video]
     documents:[Document]
+}
+
+type DeleteFileData{
+    code:Int
+    message:String
 }
 

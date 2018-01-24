@@ -254,7 +254,7 @@ export class FileResolver {
       if(!bucket){
         data.code = 401
         data.message = '空间'+bucket_name+'不存在'
-        return
+        return data
       }
       let kind = this.kindUtil.getKind(type)
       if(kind==='image'){
@@ -262,7 +262,7 @@ export class FileResolver {
         if(!image){
           data.code = 402
           data.message = '文件'+name+'不存在于数据库中'
-          return
+          return data
         }
         await this.imageRepository.delete({name,bucketId:bucket.id})
       }else{
