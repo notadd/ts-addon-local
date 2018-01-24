@@ -9,7 +9,7 @@ mutation config{
   private:bucket(
     isPublic:false,
     name:"private",
-    token_expire:1800,
+    token_expire:20,
     token_secret_key:"adasdaesdawddsdassd"
   ){
     code
@@ -95,5 +95,42 @@ mutation uploadprocess{
       tagsString
       md5
     }
+  }
+}
+
+query one{
+  public:one(
+    type:"webp",
+    bucket_name:"public",
+    name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25",
+    imagePostProcessInfo:{
+      resize:{
+        mode:"scale",
+        data:{
+					scale:50
+        }
+      }
+    }
+  ){
+    code 
+    message
+    url
+  }
+  private:one(
+    type:"webp",
+    bucket_name:"private",
+    name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25",
+    imagePostProcessInfo:{
+      resize:{
+        mode:"scale",
+        data:{
+					scale:50
+        }
+      }
+    }
+  ){
+    code 
+    message
+    url
   }
 }

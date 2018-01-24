@@ -176,12 +176,12 @@ export class FileController {
                 res.end()
                 return
             }
-            let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-            console.log(fullUrl)
+            let fullUrl =  decodeURI(req.protocol + '://' + req.get('host') + req.originalUrl)
             if (imagePostProcessString) {
-                fullUrl += 'imagePostProcessString=' + imagePostProcessString
+                fullUrl= fullUrl.substring(0,fullUrl.lastIndexOf('&token='))
+            }else{
+                fullUrl= fullUrl.substring(0,fullUrl.lastIndexOf('?token='))
             }
-            console.log(fullUrl)
             let pass = this.tokenUtil.verify(fullUrl, bucket, token)
             if (!pass) {
                 data.code = 403
@@ -211,11 +211,11 @@ export class FileController {
             res.setHeader('Content-Type', mime.getType(fileName))
             res.setHeader('Content-Length', Buffer.byteLength(buffer))
             res.setHeader('Cache-Control', ['no-store', 'no-cache'])
+            res.setHeader('Content-Disposition','inline')
             res.end(buffer)
         } else {
             //其他类型暂不支持
         }
-
     }
 
 

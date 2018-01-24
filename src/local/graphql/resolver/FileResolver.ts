@@ -121,7 +121,6 @@ export class FileResolver {
     data.form.contentSecret = contentSecret
     data.form.tagsString = JSON.stringify(tags)
     data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
-    console.log(data.form)
     return data
   }
 
@@ -169,7 +168,7 @@ export class FileResolver {
         return data
       }
       //所有文件调用统一的拼接Url方法 
-      data.url += '?' + bucket_name + '/' + name + '.' + type
+      data.url += '/' + bucket_name + '/' + name + '.' + type
       //存储图片处理信息时
       if (imagePostProcessInfo) {
         //拼接图片处理的查询字符串
@@ -186,6 +185,7 @@ export class FileResolver {
     } else {
       //暂不支持
     }
+    console.log(data.url)
     return data
   }
 }
