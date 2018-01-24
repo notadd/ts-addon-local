@@ -118,8 +118,8 @@ export class FileResolver {
     data.url+='/'+bucket.name+'/'+contentName
     data.form.md5 = md5
     data.form.contentSecret = contentSecret
-    data.form.tags = JSON.stringify(tags)
-    data.form.imagePreProcessInfo = JSON.stringify(imagePreProcessInfo)
+    data.form.tagsString = JSON.stringify(tags)
+    data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
     return data
   }
 }

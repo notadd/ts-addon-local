@@ -1,14 +1,16 @@
 import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query } from '@nestjs/common';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { KindUtil } from '../util/KindUtil'
+import { FileService } from '../service/FileService'
 import { Document } from '../model/Document'
+import { KindUtil } from '../util/KindUtil'
+import * as  formidable from 'formidable'
 import { Bucket } from '../model/Bucket';
 import { Audio } from '../model/Audio'
 import { Video } from '../model/Video'
 import { Image } from '../model/Image';
 import { File } from '../model/File'
-import * as  formidable from 'formidable'
+
 import * as crypto from 'crypto'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -19,6 +21,7 @@ export class FileController {
 
     constructor(
         private readonly kindUtil: KindUtil,
+        private readonly fileService: FileService,
         @InjectRepository(File) private readonly fileRepository: Repository<File>,
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
