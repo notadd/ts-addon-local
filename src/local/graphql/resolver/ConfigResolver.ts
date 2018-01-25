@@ -6,6 +6,7 @@ import { AudioFormat } from '../../interface/config/AudioFormat';
 import { VideoFormat } from '../../interface/config/VideoFormat';
 import { Resolver, Query, Mutation } from '@nestjs/graphql';
 import { ConfigService } from '../../service/ConfigService';
+import { UploadFile } from '../../interface/file/UploadFile'
 import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KindUtil } from '../../util/KindUtil';
@@ -33,7 +34,7 @@ export class ConfigResolver {
     /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
     async bucket(req: any, body: BucketConfig): Promise<CommonData> {
-        let data:CommonData = {
+        let data: CommonData = {
             code: 200,
             message: '空间配置保存成功'
         }
@@ -62,12 +63,12 @@ export class ConfigResolver {
 
     /* 图片保存格式配置*/
     @Mutation('imageFormat')
-    async  imageFormat(req: any, body: ImageFormat): Promise<any> {
-        let data = {
+    async  imageFormat(req: any, body: ImageFormat): Promise<CommonData> {
+        let data: CommonData = {
             code: 200,
-            message: ""
+            message: "图片保存格式配置保存成功"
         }
-        let format = body.format
+        let format: string = body.format
         //验证参数
         if (format == undefined || format.length == 0) {
             data.code = 400
@@ -83,24 +84,28 @@ export class ConfigResolver {
         return data
     }
 
+    /* 图片水印启用配置 */
     @Mutation('enableImageWatermark')
-    async  enableImageWatermark(req: any, body: EnableImageWatermark): Promise<any> {
-        let data = {
+    async  enableImageWatermark(req: any, body: EnableImageWatermark): Promise<CommonData> {
+        let data: CommonData = {
             code: 200,
-            message: ''
+            message: '图片水印启用配置保存成功'
         }
         //验证参数
-        let { enable } = body
+        let enable: boolean = body.enable
+        //验证参数存在
         if (enable === null || enable === undefined) {
             data.code = 400
             data.message = '缺少参数'
             return data
         }
+        //验证参数正确
         if (enable !== true && enable !== false) {
             data.code = 400
             data.message = '参数错误'
             return data
         }
+        //保存配置
         await this.configService.saveEnableImageWatermark(data, body)
         //保存启用水印到数据库失败，无法模仿这个错误
         if (data.code === 401 || data.code === 402) {
@@ -109,14 +114,63 @@ export class ConfigResolver {
         return data
     }
 
+    /* 图片水印配置,其中水印图片以base64编码传输 */
     @Mutation('imageWatermark')
-    async  imageWatermark(req: any, body: ImageWatermark): Promise<any> {
-        let data = {
+    async  imageWatermark(req: any, body: ImageWatermark): Promise<CommonData> {
+        let data: CommonData = {
             code: 200,
             message: ''
         }
         let { name, base64, gravity, opacity, x, y, ws } = body
-        //保存图片的base64编码为文件
+        //验证参数存在，其中数字为0也可以
+        if (!name || !base64 || !gravity || (opacity !== 0 && !opacity) || (x !== 0 && !x) || (y !== 0 && !y) || (ws !== 0 && !ws)) {
+            data.code = 400
+            data.message = '缺少参数'
+            return data
+        }
+        //验证参数正确
+        if (!this.gravity.has(gravity)) {
+            data.code = 400
+            data.message = '不允许的水印图片位置'
+            return data
+        }
+        if (!Number.isInteger(x)) {
+            data.code = 400
+            data.message = 'x偏移不是整数'
+            return data
+        }
+        if (!Number.isInteger(y)) {
+            data.code = 400
+            data.message = 'y偏移不是整数'
+            return data
+        }
+        if (!Number.isInteger(opacity)) {
+            data.code = 400
+            data.message = '透明度不是整数'
+            return data
+        } else if (opacity <= 0) {
+            data.code = 400
+            data.message = '透明度不大于0'
+            return data
+        } else if (opacity > 100) {
+            data.code = 400
+            data.message = '透明度大于100'
+            return data
+        } else {
+
+        }
+        if (!Number.isInteger(ws)) {
+            data.code = 400
+            data.message = '短边自适应比例不是整数'
+            return data
+        } else if (ws <= 0) {
+            data.code = 400
+            data.message = '短边自适应比例不大于0'
+            return data
+        } else {
+            //暂定短边自适应比例可以大于100
+        }
+        //保存图片的base64编码为文件，保存目录为当前目录下
         await new Promise((resolve, reject) => {
             fs.writeFile(__dirname + '/' + name, Buffer.from(base64, 'base64'), (err) => {
                 if (err) {
@@ -126,67 +180,22 @@ export class ConfigResolver {
                 resolve()
             })
         })
+        //删除base64字符串，太大了
+        delete body.base64
         if (data.code !== 200) {
             return data
         }
-        let obj: any = {}
-        let file: any = {}
-        obj.x = x
-        obj.y = y
-        obj.opacity = opacity
-        obj.ws = ws
-        obj.gravity = gravity
+        //上传文件对象，存储了上传文件名、临时保存路径
+        let file: UploadFile
         file.name = name
         file.path = __dirname + '/' + name
-        if (!this.gravity.has(obj.gravity)) {
-            data.code = 400
-            data.message = '不允许的水印图片位置'
-            return data
-        }
-        if (!Number.isInteger(obj.x)) {
-            data.code = 400
-            data.message = 'x偏移不是整数'
-            return data
-        }
-        if (!Number.isInteger(obj.y)) {
-            data.code = 400
-            data.message = 'y偏移不是整数'
-            return data
-        }
-        if (!Number.isInteger(obj.opacity)) {
-            data.code = 400
-            data.message = '透明度不是整数'
-            return data
-        } else if (obj.opacity <= 0) {
-            data.code = 400
-            data.message = '透明度不大于0'
-            return data
-        } else if (obj.opacity > 100) {
-            data.code = 400
-            data.message = '透明度大于100'
-            return data
-        } else {
-
-        }
-        if (!Number.isInteger(obj.ws)) {
-            data.code = 400
-            data.message = '短边自适应比例不是整数'
-            return data
-        } else if (obj.ws <= 0) {
-            data.code = 400
-            data.message = '短边自适应比例不大于0'
-            return data
-        } else {
-            //暂定短边自适应比例可以大于100
-        }
         if (!this.kindUtil.isImage(file.name.substr(file.name.lastIndexOf('.') + 1))) {
             data.code = 400
             data.message = '不允许的水印图片类型'
             return data
         }
         //保存后台水印配置
-        await this.configService.saveImageWatermark(data, file, obj)
-
+        await this.configService.saveImageWatermark(data, file, body)
         if (data.code !== 200) {
             return data
         }
