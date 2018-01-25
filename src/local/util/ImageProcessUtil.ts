@@ -1,4 +1,4 @@
-import { Component, Inject } from '@nestjs/common';
+import { Component, Inject, HttpException } from '@nestjs/common';
 import { ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor, Blur } from '../interface/file/ImageProcessInfo'
 import { ImageMetadata } from '../interface/file/ImageMetadata'
 import { KindUtil } from './KindUtil';
@@ -30,16 +30,22 @@ export class ImageProcessUtil {
         let size, name
         //为路径时
         if ((typeof pathOrBuffer) === 'string') {
+            let ex:HttpException
             await new Promise((resolver, reject) => {
                 //获取图片大小
                 fs.stat(pathOrBuffer, (err, stats) => {
                     if (err) {
-                        resolver()
+                        reject(new HttpException('获取文件状态错误',410))
                     }
                     size = stats.size
                     resolver()
                 })
+            }).catch(err=>{
+                ex = err
             })
+            if(ex){
+                throw ex
+            }
             //计算sha256为图片名称
             name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
         } else {
@@ -58,13 +64,9 @@ export class ImageProcessUtil {
     }
 
     //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据，用于上传时保存图片
-    async processAndStore(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata> {
+    async processAndStore(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata> {
         //根据处理信息处理图片，获取处理后实例
-        let instance: SharpInstance = await this.process(data, imagePath, bucket, imageProcessInfo)
-        //处理参数有错误，直接返回null
-        if (data.code !== 200) {
-            return null
-        }
+        let instance: SharpInstance = await this.process(imagePath, bucket, imageProcessInfo)
         //获取处理后Buffer，这里必须先获取BUffer，再获取format、name，才能写入文件，因为文件名需要使用name、format
         //不能直接使用toFile
         let buffer: Buffer = await instance.toBuffer()
@@ -72,19 +74,20 @@ export class ImageProcessUtil {
         let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
+        let ex:HttpException
         //根据绝对路径保存图片
         await new Promise((resolver, reject) => {
             fs.writeFile(absolute_path, buffer, (err) => {
                 if (err) {
-                    data.code = 402
-                    data.message = '写入文件错误'
-                    resolver()
+                    reject(new HttpException('文件写入磁盘错误:'+err.toString(),407))
                 }
                 resolver()
             })
+        }).catch(err=>{
+            ex = err
         })
-        if (data.code !== 200) {
-            return null
+        if (ex) {
+           throw ex
         }
         //返回处理后元数据
         return metadata
@@ -92,17 +95,14 @@ export class ImageProcessUtil {
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
     async processAndOutput(data: any, bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
-        let instance: SharpInstance = await this.process(data, imagePath, bucket, imageProcessInfo)
-        if (data.code !== 200) {
-            return null
-        }
+        let instance: SharpInstance = await this.process(imagePath, bucket, imageProcessInfo)
         //返回Buffer对象
         return await instance.toBuffer()
     }
 
 
     //根据图片处理参数，获取指定路径图片的SharpInstance实例
-    async process(data: any, imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<SharpInstance> {
+    async process(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<SharpInstance> {
         let instance: SharpInstance = sharp(imagePath)
         if(!imageProcessInfo){
             return instance
@@ -169,10 +169,7 @@ export class ImageProcessUtil {
             } 
             return instance
         } catch (err) {
-            console.log(err)
-            data.code = 404
-            data.message = err.toString()
-            return null
+            throw new HttpException(err.toString(),408)
         }
     }
 

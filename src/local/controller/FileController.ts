@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards ,HttpException} from '@nestjs/common';
 import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
 import { DownloadParamGuard } from '../guard/DownloadParamGuard';
+import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { UploadParamGuard } from '../guard/UploadParamGuard';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { HeaderParam } from '../interface/file/HeaderParam';
@@ -26,7 +27,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import * as mime from 'mime';
 import * as fs from 'fs';
-import { ImageMetadata } from '../interface/file/ImageMetadata';
+
 
 /*文件控制器，包含了文件下载、上传、访问功能
   访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
@@ -50,19 +51,11 @@ export class FileController {
     @UseGuards(DownloadParamGuard)
     async download( @Headers() headers: HeaderParam, @Response() res): Promise<any> {
         let { bucket_name, fileName } = headers
-        //验证参数
-        if (!bucket_name || !fileName) {
-            res.json({ code: 400, message: '缺少文件路径' })
-            res.end()
-            return
-        }
         //文件绝对路径，这里并不查询数据库，直接从文件夹获取
         let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
         //文件不存在，返回404
         if (!fs.existsSync(realPath)) {
-            res.json({ code: 404, message: '请求文件不存在' })
-            res.end()
-            return
+            throw new HttpException('请求下载的文件不存在',404)
         }
         //下载文件的buffer，不进行处理，返回原始文件
         let buffer: Buffer = fs.readFileSync(realPath)
@@ -84,10 +77,6 @@ export class FileController {
     @Post('/upload')
     @UseGuards(UploadParamGuard)
     async upload(@Body() body): Promise<CommonData> {
-        let data: CommonData = {
-            code: 200,
-            message: ''
-        }
         let {uploadForm:obj,uploadFile:file} = body
         //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
@@ -97,27 +86,24 @@ export class FileController {
             .where("bucket.name = :name", { name: obj.bucket_name })
             .getOne()
         if (!bucket) {
-            data.code = 401
-            data.message = '指定空间不存在'
-            return data
+            throw new HttpException('指定空间'+obj.bucket_name+'不存在',401)
         }
         //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
         if (file.name !== obj.fileName) {
-            data.code = 403
-            data.message = '文件名不符'
-            return data
+            throw new HttpException('上传文件名'+file.name+'与请求头中文件名'+obj.fileName+'不符',403)
         }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
         //对上传文件进行md5校验
         let pass: boolean = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5
         if (!pass) {
-            data.code = 404
-            data.message = '文件md5校验失败'
-            return data
+            throw new HttpException('文件md5校验失败',409)
         }
         //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
-        await this.fileService.saveUploadFile(data, bucket, file, obj)
-        return data
+        await this.fileService.saveUploadFile(bucket, file, obj)
+        return {
+            code: 200,
+            message: '上传文件成功'
+        }
     }
 
     /* 访问文件接口，文件路径在url中
