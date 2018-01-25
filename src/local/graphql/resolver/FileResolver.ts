@@ -5,6 +5,8 @@ import { UploadProcessData } from '../../interface/file/UploadProcessData';
 import { FileLocationBody } from '../../interface/file/FileLocationBody';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { FileService } from '../../service/FileService';
+import { AllBody } from '../../interface/file/AllBody';
+import { AllData } from '../../interface/file/AllData';
 import { OneBody } from '../../interface/file/OneBody';
 import { OneData } from '../../interface/file/OneData';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -209,8 +211,8 @@ export class FileResolver {
             data.documents: 文档信息数组
   */
   @Query('all')
-  async  files(req, body): Promise<any> {
-    let data = {
+  async  files(req:any, body:AllBody): Promise<AllData> {
+    let data:AllData = {
       code: 200,
       message: '获取空间下所有文件成功',
       baseUrl: req.protocol + '://' + req.get('host') + '/local/file/visit',
