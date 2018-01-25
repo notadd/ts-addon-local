@@ -1,22 +1,25 @@
-import { InjectRepository } from '@nestjs/typeorm'
-import { Component } from '@nestjs/common'
-import { Repository } from 'typeorm'
-import { Resolver, Query, Mutation } from '@nestjs/graphql'
-import { ConfigService } from '../../service/ConfigService'
-import { Bucket } from '../../model/Bucket'
-import { BucketConfig } from '../../interface/config/BucketConfig'
-import { ImageFormat } from '../../interface/config/ImageFormat'
-import { AudioFormat } from '../../interface/config/AudioFormat'
-import { VideoFormat } from '../../interface/config/VideoFormat'
-import { ImageWatermark } from '../../interface/config/ImageWatermark'
-import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark'
-import * as fs from 'fs'
+import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark';
+import { ImageWatermark } from '../../interface/config/ImageWatermark';
+import { BucketConfig } from '../../interface/config/BucketConfig';
+import { ImageFormat } from '../../interface/config/ImageFormat';
+import { AudioFormat } from '../../interface/config/AudioFormat';
+import { VideoFormat } from '../../interface/config/VideoFormat';
+import { Resolver, Query, Mutation } from '@nestjs/graphql';
+import { ConfigService } from '../../service/ConfigService';
+import { CommonData } from '../../interface/Common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { KindUtil } from '../../util/KindUtil';
+import { Bucket } from '../../model/Bucket';
+import { Component } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import * as fs from 'fs';
+
 
 /* 本地存储配置的resolver */
 @Resolver('Config')
 export class ConfigResolver {
 
+    //图片水印方位的集合，九宫格
     private readonly gravity: Set<string>
 
     constructor(
@@ -27,20 +30,21 @@ export class ConfigResolver {
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
     }
 
-    /* 空间配置的resolver，与云存储不同，只配置空间目录即可，私有空间要配置token超时与密钥 */
+    /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
-    async bucket(req: any, body: BucketConfig): Promise<any> {
-        let data = {
+    async bucket(req: any, body: BucketConfig): Promise<CommonData> {
+        let data:CommonData = {
             code: 200,
-            message: ''
+            message: '空间配置保存成功'
         }
         let { isPublic, name, token_expire, token_secret_key } = body
-        //验证参数
+        //验证参数存在
         if (isPublic === undefined || !name) {
             data.code = 400
             data.message = '缺少参数'
             return data
         }
+        //验证参数正确与否
         if (isPublic !== true && isPublic !== false) {
             data.code = 400
             data.message = 'isPublic参数不正确'
@@ -213,7 +217,7 @@ export class ConfigResolver {
 
     /* 视频保存配置，目前公有空间、私有空间采用一个保存格式，会在两个配置信息中各保存一次 */
     @Mutation('videoFormat')
-    async videoFormat(req:any, body:VideoFormat): Promise<any> {
+    async videoFormat(req: any, body: VideoFormat): Promise<any> {
         let data = {
             code: 200,
             message: ""
@@ -235,23 +239,23 @@ export class ConfigResolver {
 
     /* 获取所有空间信息字段 */
     @Query('buckets')
-    async buckets(){
-      let data = {
-        code:200,
-        message:'',
-        buckets:[]
-      }
-      let buckets:Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
-                                                         .select(['bucket.id','bucket.public_or_private','bucket.name'])
-                                                         .getMany()
-      if(buckets.length!==2){
-        data.code = 401
-        data.message = '空间配置不存在'
+    async buckets() {
+        let data = {
+            code: 200,
+            message: '',
+            buckets: []
+        }
+        let buckets: Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
+            .select(['bucket.id', 'bucket.public_or_private', 'bucket.name'])
+            .getMany()
+        if (buckets.length !== 2) {
+            data.code = 401
+            data.message = '空间配置不存在'
+            return data
+        }
+        data.code = 200
+        data.message = '获取空间配置成功'
+        data.buckets = buckets
         return data
-      }
-      data.code = 200
-      data.message = '获取空间配置成功'
-      data.buckets = buckets
-      return data
     }
 }

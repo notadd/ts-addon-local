@@ -42,7 +42,7 @@ export class FileController {
 
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */
     @Get('/download/:bucket_name/:fileName')
-    async download( @Param() param: PathParam, @Response() res): Promise<CommonData> {
+    async download( @Param() param: PathParam, @Response() res): Promise<any> {
         let { bucket_name, fileName } = param
         //验证参数
         if (!bucket_name || !fileName) {
@@ -151,7 +151,7 @@ export class FileController {
        私有空间文件需要token，token与图片处理字符串都在查询字符串中
        文件存在且token正确，处理后返回，不存在返回错误 */
     @Get('/visit/:bucket_name/:fileName')
-    async visit( @Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<CommonData> {
+    async visit( @Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
         //只有错误情况下会返回错误码，正常情况下返回文件Buffer
         let data: CommonData = {
             code: 200,
