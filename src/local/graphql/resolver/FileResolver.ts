@@ -5,6 +5,7 @@ import { UploadProcessData } from '../../interface/file/UploadProcessData';
 import { FileLocationBody } from '../../interface/file/FileLocationBody';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { FileService } from '../../service/FileService';
+import { OneBody } from '../../interface/file/OneBody';
 import { OneData } from '../../interface/file/OneData';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
@@ -141,13 +142,13 @@ export class FileResolver {
              data.url：访问文件的全部url，包括域名、目录、文件名、扩展名、token、处理字符串,访问图片方法必须是get，不说明
   */
   @Query('one')
-  async  getFile(req, body): Promise<any> {
+  async  getFile(req:any, body:OneBody): Promise<OneData> {
     let data: OneData = {
       code: 200,
       message: "获取文件url成功",
       url: req.protocol + '://' + req.get('host') + '/local/file/visit'
     }
-    //空间名、目录数组、文件名
+    //验证参数存在，图片后处理信息可选
     let { bucket_name, name, type, imagePostProcessInfo } = body
     if (!bucket_name || !name || !type) {
       data.code = 400
@@ -165,8 +166,8 @@ export class FileResolver {
       data.message = '空间不存在'
       return data
     }
+    //根据文件种类处理
     let kind = this.kindUtil.getKind(type)
-    //处理图片类型
     if (kind === 'image') {
       let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
       if (!image) {
