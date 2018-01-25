@@ -80,30 +80,11 @@ export class FileController {
     /* 上传文件接口，空间名、文件原名在路径中，其他上传信息：md5、图片处理字符串、标签字符串、文件密钥都与文件一起使用表单上传
        小bug，如果参数中出现了@Response装饰器，那么直接使用return返回不成功，需要使用res.end
     */
-    @Post('/upload/:bucket_name/:fileName')
+    @Post('/upload')
     async upload( @Param() param: PathParam, @Request() req): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: ''
-        }
-        let { bucket_name, fileName } = param
-        //验证路径中参数
-        if (!bucket_name || !fileName) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
-        let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
-            .leftJoinAndSelect("bucket.image_config", "image_config")
-            .leftJoinAndSelect("bucket.audio_config", "audio_config")
-            .leftJoinAndSelect("bucket.video_config", "video_config")
-            .where("bucket.name = :name", { name: bucket_name })
-            .getOne()
-        if (!bucket) {
-            data.code = 401
-            data.message = '指定空间不存在'
-            return data
         }
         //解析from-data请求，获取上传表单中文件、其他字段
         let file: UploadFile, obj: UploadForm
@@ -117,7 +98,7 @@ export class FileController {
                     return
                 }
                 //只有文件字段、md5是必须的
-                if (!fields || !files || !files.file || !fields.md5) {
+                if (!fields || !files || !files.file || !fields.md5 || !fields.bucket_name || !fields.fileName) {
                     data.code = 400
                     data.message = '缺少参数'
                     resolve()
@@ -133,8 +114,20 @@ export class FileController {
         if (data.code === 400 || data.code === 402) {
             return data
         }
+        //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
+        let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+            .leftJoinAndSelect("bucket.image_config", "image_config")
+            .leftJoinAndSelect("bucket.audio_config", "audio_config")
+            .leftJoinAndSelect("bucket.video_config", "video_config")
+            .where("bucket.name = :name", { name: obj.bucket_name })
+            .getOne()
+        if (!bucket) {
+            data.code = 401
+            data.message = '指定空间不存在'
+            return data
+        }
         //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
-        if (file.name !== fileName) {
+        if (file.name !== obj.fileName) {
             data.code = 403
             data.message = '文件名不符'
             return data

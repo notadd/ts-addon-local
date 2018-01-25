@@ -4,9 +4,11 @@ export interface UploadProcessData{
     method: string
     url:string
     form: {
-      imagePreProcessString:string
-      contentSecret: string
-      tagsString: string
+      imagePreProcessString?:string
+      contentSecret?: string
+      tagsString?: string
+      bucket_name:string
+      fileName:string
       md5:string
     }
 }

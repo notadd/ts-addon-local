@@ -112,10 +112,12 @@ export class FileResolver {
       method: 'post',
       url: req.protocol + '://' + req.get('host') + '/local/file/upload',
       form: {
-        imagePreProcessString: '',
-        contentSecret: '',
-        tagsString: '',
-        md5: ''
+        md5: '',
+        fileName:'',
+        bucket_name:'',
+        tagsString:null,
+        contentSecret:null,
+        imagePreProcessString:null,
       }
     }
     //可以根据md5对文件内容进行校验
@@ -131,8 +133,9 @@ export class FileResolver {
       data.message = '指定空间' + bucket_name + '不存在'
       return data
     }
-    data.url += '/' + bucket.name + '/' + contentName
     data.form.md5 = md5
+    data.form.fileName = contentName
+    data.form.bucket_name = bucket.name
     data.form.contentSecret = contentSecret
     data.form.tagsString = JSON.stringify(tags)
     data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
