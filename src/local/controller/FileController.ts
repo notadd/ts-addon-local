@@ -24,6 +24,7 @@ import * as mime from 'mime';
 import * as fs from 'fs';
 
 /*文件控制器，包含了文件下载、上传、访问功能
+  访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
 */
 @Controller('local/file')
 export class FileController {
@@ -42,21 +43,29 @@ export class FileController {
     @Get('/download/:bucket_name/:fileName')
     async download( @Param() param: PathParam, @Response() res): Promise<CommonData> {
         let { bucket_name, fileName } = param
+        //验证参数
         if (!bucket_name || !fileName) {
             res.json({ code: 400, message: '缺少文件路径' })
             res.end()
             return
         }
+        //文件绝对路径，这里并不查询数据库，直接从文件夹获取
         let realPath:string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        //文件不存在，返回404
         if (!fs.existsSync(realPath)) {
             res.json({ code: 404, message: '请求文件不存在' })
             res.end()
             return
         }
+        //下载文件的buffer，不进行处理，返回原始文件
         let buffer:Buffer = fs.readFileSync(realPath)
+        //文件类型响应头
         res.setHeader('Content-Type', mime.getType(fileName))
+        //文件大小响应头
         res.setHeader('Content-Length', Buffer.byteLength(buffer))
+        //下载响应头，不管浏览器支持不支持显示文件mime，都会直接弹出下载
         res.setHeader('Content-Disposition','attachment; filename='+fileName)
+        //发送文件buffer
         res.end(buffer)
         return
     }
