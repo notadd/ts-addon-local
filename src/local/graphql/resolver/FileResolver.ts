@@ -1,11 +1,12 @@
+import { DownloadProcessData } from '../../interface/file/DownloadProcessData';
 import { Query, Resolver, ResolveProperty, Mutation } from '@nestjs/graphql';
-import { DownloadProcess } from '../../interface/file/DownloadProcess';
+import { FileLocationBody } from '../../interface/file/FileLocationBody';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { FileService } from '../../service/FileService';
 import { OneData } from '../../interface/file/OneData';
-import { FileService } from '../../service/FileService'
 import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
-import { Document } from '../../model/Document'
+import { Document } from '../../model/Document';
 import { KindUtil } from '../../util/KindUtil';
 import { Bucket } from '../../model/Bucket';
 import { Audio } from '../../model/Audio';
@@ -13,9 +14,9 @@ import { Video } from '../../model/Video';
 import { Image } from '../../model/Image';
 import { File } from '../../model/File';
 import * as path from 'path';
-import * as fs from 'fs'
-/*文件Resolver，包含了文件下载预处理、上传预处理、下载、上传、
-  获取单个文件url、获取多个文件信息以及url、根据url访问文件、删除文件等接口
+import * as fs from 'fs';
+/*文件Resolver，包含了文件下载预处理、上传预处理
+  获取单个文件url、获取多个文件信息以及url、删除文件等接口
 */
 @Resolver('File')
 export class FileResolver {
@@ -31,7 +32,7 @@ export class FileResolver {
 
   /* 文件下载预处理接口
    当客户端需要下载某个文件时使用
-   返回下载文件的方法、url
+   返回下载文件的方法、url、头信息
    @Param bucket_name：文件所属空间名
    @Param type：       上传文件扩展名，即文件类型
    @Param name：       文件名
@@ -39,12 +40,13 @@ export class FileResolver {
            data.message：响应信息
            data.url：下载时的url
            data.method： 下载方法
+           data.headers:下载文件头信息，这里其实不需要，但是为了与又拍云统一，返回null
 */
   @Query('downloadProcess')
-  async downloadProcess(req, body: DownloadProcess): Promise<any> {
-    let data = {
+  async downloadProcess(req: any, body: FileLocationBody): Promise<DownloadProcessData> {
+    let data: DownloadProcessData = {
       code: 200,
-      message: '',
+      message: '下载预处理成功',
       method: 'get',
       headers: null,
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
@@ -61,7 +63,7 @@ export class FileResolver {
       data.message = '指定空间' + bucket_name + '不存在'
       return data
     }
-    let kind
+    let kind:string
     let file: File | Audio | Video | Image | Document
     if (this.kindUtil.isImage(type)) {
       file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id })
@@ -74,7 +76,6 @@ export class FileResolver {
       return data
     }
     data.url += '/' + bucket.name + '/' + file.name + '.' + file.type
-    data.message = '获取下载预处理信息成功'
     return data
   }
 
