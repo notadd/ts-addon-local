@@ -1,6 +1,7 @@
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark';
 import { ImageWatermark } from '../../interface/config/ImageWatermark';
 import { BucketConfig } from '../../interface/config/BucketConfig';
+import { BucketsData } from '../../interface/config/BucketsData';
 import { ImageFormat } from '../../interface/config/ImageFormat';
 import { AudioFormat } from '../../interface/config/AudioFormat';
 import { VideoFormat } from '../../interface/config/VideoFormat';
@@ -202,20 +203,20 @@ export class ConfigResolver {
         return data
     }
 
-    /* 音频保存格式配置，目前公有空间、私有空间采用一个保存格式，会在两个配置信息中各保存一次 */
+    /* 音频保存格式配置*/
     @Mutation('audioFormat')
-    async  audioFormat(req, body: AudioFormat): Promise<any> {
-        let data = {
+    async  audioFormat(req, body: AudioFormat): Promise<CommonData> {
+        let data: CommonData = {
             code: 200,
-            message: ""
+            message: "音频保存格式配置保存成功"
         }
-        let format = body.format
+        let format: string = body.format
         if (!format) {
             data.code = 400
             data.message = '缺少参数'
             return data
         }
-        //保存公有空间格式
+        //保存格式到数据库
         await this.configService.saveAudioFormat(data, body)
         //格式参数不正确、配置不存在、保存失败
         if (data.code == 401 || data.code == 402 || data.code == 403) {
@@ -224,20 +225,21 @@ export class ConfigResolver {
         return data
     }
 
-    /* 视频保存配置，目前公有空间、私有空间采用一个保存格式，会在两个配置信息中各保存一次 */
+    /* 视频保存配置*/
     @Mutation('videoFormat')
-    async videoFormat(req: any, body: VideoFormat): Promise<any> {
-        let data = {
+    async videoFormat(req: any, body: VideoFormat): Promise<CommonData> {
+        let data: CommonData = {
             code: 200,
-            message: ""
+            message: "视频保存格式配置保存成功"
         }
+        //视频编码、分辨率
         let { format, resolution } = body
         if (!format || !resolution) {
             data.code = 400
             data.message = '缺少参数'
             return data
         }
-        //保存公有空间格式
+        //保存格式到数据库
         await this.configService.saveVideoFormat(data, body)
         //格式参数不正确、配置不存在、保存失败
         if (data.code == 401 || data.code == 402 || data.code == 403) {
@@ -248,12 +250,13 @@ export class ConfigResolver {
 
     /* 获取所有空间信息字段 */
     @Query('buckets')
-    async buckets() {
-        let data = {
+    async buckets():Promise<BucketsData>{
+        let data:BucketsData = {
             code: 200,
             message: '',
             buckets: []
         }
+        //查询出所有空间的三个字段，其他字段保密
         let buckets: Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
             .select(['bucket.id', 'bucket.public_or_private', 'bucket.name'])
             .getMany()
