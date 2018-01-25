@@ -71,7 +71,7 @@ export class FileController {
     }
 
 
-    /* 上传文件接口，空间名、文件原名在路径中
+    /* 上传文件接口，空间名、文件原名在路径中，其他上传信息：md5、图片处理字符串、标签字符串、文件密钥都与文件一起使用表单上传
        小bug，如果参数中出现了@Response装饰器，那么直接使用return返回不成功，需要使用res.end
     */
     @Post('/upload/:bucket_name/:fileName')
@@ -81,6 +81,7 @@ export class FileController {
             message: ''
         }
         let { bucket_name, fileName } = param
+        //验证路径中参数
         if (!bucket_name || !fileName) {
             data.code = 400
             data.message = '缺少参数'
@@ -98,6 +99,7 @@ export class FileController {
             data.message = '指定空间不存在'
             return data
         }
+        //解析from-data请求，获取上传表单中文件、其他字段
         let file: UploadFile, obj: UploadForm
         await new Promise((resolve, reject) => {
             let form = new formidable.IncomingForm();
@@ -108,6 +110,7 @@ export class FileController {
                     resolve()
                     return
                 }
+                //只有文件字段、md5是必须的
                 if (!fields || !files || !files.file || !fields.md5) {
                     data.code = 400
                     data.message = '缺少参数'
@@ -120,9 +123,11 @@ export class FileController {
                 return
             });
         })
+        //缺少参数、请求解析错误
         if (data.code === 400 || data.code === 402) {
             return data
         }
+        //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
         if (file.name !== fileName) {
             data.code = 403
             data.message = '文件名不符'
@@ -136,6 +141,7 @@ export class FileController {
             data.message = '文件md5校验失败'
             return data
         }
+        //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
         await this.fileService.saveUploadFile(data, bucket, file, param, obj)
         return data
     }
