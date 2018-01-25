@@ -94,7 +94,7 @@ export class ImageProcessUtil {
     }
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
-    async processAndOutput(data: any, bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
+    async processAndOutput(bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
         let instance: SharpInstance = await this.process(imagePath, bucket, imageProcessInfo)
         //返回Buffer对象
         return await instance.toBuffer()

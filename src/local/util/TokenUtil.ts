@@ -1,4 +1,4 @@
-import { Component } from '@nestjs/common';
+import { Component, HttpException } from '@nestjs/common';
 import * as crypto from 'crypto'
 import { Bucket } from '../model/Bucket'
 
@@ -19,24 +19,18 @@ export class TokenUtil {
         return md5 + expire
     }
 
-    verify(url: string, bucket: Bucket, token: string): boolean {
-        if (bucket.public_or_private === 'public') {
-            throw new Error('公有空间不需要token')
-        }
+    verify(url: string, bucket: Bucket, token: string):void{
         let expire: number = parseInt(token.substring(32))
         let md5: string = token.substring(0, 32)
         let str = url + expire + bucket.token_secret_key
         let generateMd5 = crypto.createHash('md5').update(str).digest('hex')
         if (md5 !== generateMd5) {
-            console.log('token验证错误')
-            return false
+            throw new HttpException('token验证错误',412)
         }
         //当前时间
         let now = Math.floor(+new Date() / 1000)
         if (now > expire) {
-            console.log('token超时')
-            return false
+            throw new HttpException('token超时',413)
         }
-        return true
     }
 }

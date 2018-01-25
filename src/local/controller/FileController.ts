@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards ,HttpException} from '@nestjs/common';
+import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards, HttpException } from '@nestjs/common';
 import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
 import { DownloadParamGuard } from '../guard/DownloadParamGuard';
@@ -55,7 +55,7 @@ export class FileController {
         let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
         //文件不存在，返回404
         if (!fs.existsSync(realPath)) {
-            throw new HttpException('请求下载的文件不存在',404)
+            throw new HttpException('请求下载的文件不存在', 404)
         }
         //下载文件的buffer，不进行处理，返回原始文件
         let buffer: Buffer = fs.readFileSync(realPath)
@@ -76,8 +76,8 @@ export class FileController {
     */
     @Post('/upload')
     @UseGuards(UploadParamGuard)
-    async upload(@Body() body): Promise<CommonData> {
-        let {uploadForm:obj,uploadFile:file} = body
+    async upload( @Body() body): Promise<CommonData> {
+        let { uploadForm: obj, uploadFile: file } = body
         //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.image_config", "image_config")
@@ -86,17 +86,16 @@ export class FileController {
             .where("bucket.name = :name", { name: obj.bucket_name })
             .getOne()
         if (!bucket) {
-            throw new HttpException('指定空间'+obj.bucket_name+'不存在',401)
+            throw new HttpException('指定空间' + obj.bucket_name + '不存在', 401)
         }
         //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
         if (file.name !== obj.fileName) {
-            throw new HttpException('上传文件名'+file.name+'与请求头中文件名'+obj.fileName+'不符',403)
+            throw new HttpException('上传文件名' + file.name + '与请求头中文件名' + obj.fileName + '不符', 403)
         }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
         //对上传文件进行md5校验
-        let pass: boolean = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5
-        if (!pass) {
-            throw new HttpException('文件md5校验失败',409)
+        if (!(crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5)) {
+            throw new HttpException('文件md5校验失败', 409)
         }
         //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
         await this.fileService.saveUploadFile(bucket, file, obj)
@@ -111,30 +110,12 @@ export class FileController {
        文件存在且token正确，处理后返回，不存在返回错误 */
     @Get('/visit/:bucket_name/:fileName')
     async visit( @Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
-        //只有错误情况下会返回错误码，正常情况下返回文件Buffer
-        let data: CommonData = {
-            code: 200,
-            message: ''
-        }
         let { bucket_name, fileName } = param
         let { imagePostProcessString, token } = query
-        //验证路径参数
-        if (!bucket_name || !fileName) {
-            data.code = 400
-            data.message = '缺少文件路径'
-            //测试中遇到：参数中出现@Response，貌似只能使用res来发送响应，直接return data无效
-            res.json(data)
-            res.end()
-            return
-        }
         //判断文件是否存在
         let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
         if (!fs.existsSync(realPath)) {
-            data.code = 404
-            data.message = '请求文件不存在'
-            res.json(data)
-            res.end()
-            return
+            throw new HttpException('指定文件不存在',404)
         }
         //判断空间是否存在，由于要判断公有、私有空间，这里需要查询出空间
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
@@ -144,21 +125,13 @@ export class FileController {
             .where("bucket.name = :name", { name: bucket_name })
             .getOne()
         if (!bucket) {
-            data.code = 401
-            data.message = '指定空间不存在'
-            res.json(data)
-            res.end()
-            return
+            throw new HttpException('指定空间'+bucket_name+'不存在',401)
         }
         //私有空间需要验证token
         if (bucket.public_or_private === 'private') {
             //token不存在
             if (!token) {
-                data.code = 402
-                data.message = '需要token'
-                res.json(data)
-                res.end()
-                return
+                throw new HttpException('访问私有空间文件需要token',411)
             }
             //请求的全路径，包含协议、域名、端口、查询字符串，需要URL解码
             let fullUrl: string = decodeURI(req.protocol + '://' + req.get('host') + req.originalUrl)
@@ -171,15 +144,7 @@ export class FileController {
                 fullUrl = fullUrl.substring(0, fullUrl.lastIndexOf('?token='))
             }
             //根据空间配置、url验证token
-            let pass: boolean = this.tokenUtil.verify(fullUrl, bucket, token)
-            //验证未通过，可能是生成md5不同。也可能是token过期
-            if (!pass) {
-                data.code = 403
-                data.message = 'token不正确'
-                res.json(data)
-                res.end()
-                return
-            }
+            this.tokenUtil.verify(fullUrl, bucket, token)
         }
         //解析图片处理字符串为对象
         let imagePostProcessInfo: ImagePostProcessInfo
@@ -187,11 +152,7 @@ export class FileController {
             try {
                 imagePostProcessInfo = JSON.parse(imagePostProcessString)
             } catch (err) {
-                data.code = 405
-                data.message = '图片处理字符串解析错误'
-                res.json(data)
-                res.end()
-                return
+                throw new HttpException('JSON解析错误:'+err.toString(),405)
             }
 
         }
@@ -200,7 +161,7 @@ export class FileController {
         let kind: string = this.kindUtil.getKind(type)
         if (kind === 'image') {
             //图片需要使用处理工具进行处理之后返回，得到处理之后的buffer
-            let buffer: Buffer = await this.imageProcessUtil.processAndOutput(data, bucket, realPath, imagePostProcessInfo)
+            let buffer: Buffer = await this.imageProcessUtil.processAndOutput(bucket, realPath, imagePostProcessInfo)
             //获取处理后图片元数据，主要为获取其类型，因为经过处理图片类型可能已经改变
             let metadata: ImageMetadata = await this.imageProcessUtil.getMetadata(buffer)
             //设置文件类型头信息

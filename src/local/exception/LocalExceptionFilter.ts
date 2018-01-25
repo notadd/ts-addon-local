@@ -14,6 +14,9 @@ import { HttpException } from '@nestjs/common';
   408：图片处理信息错误
   409：上传文件md5校验失败 
   410：获取文件状态错误
+  411: 访问私有空间文件需要token
+  412：token验证错误
+  413：token超时
 */
 @Catch(HttpException)
 export class LocalExceptionFilter implements ExceptionFilter {
