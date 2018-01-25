@@ -1,9 +1,8 @@
 
 import { ExceptionFilter, Catch } from '@nestjs/common';
 import { HttpException } from '@nestjs/common';
-import { MissingParameterException } from './MissingParameterException'
 
-@Catch(HttpException,MissingParameterException)
+@Catch(HttpException)
 export class LocalExceptionFilter implements ExceptionFilter {
 
   catch(exception: HttpException, response) {

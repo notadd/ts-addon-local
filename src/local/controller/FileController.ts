@@ -2,6 +2,7 @@ import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, 
 import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
 import { DownloadParamGuard } from '../guard/DownloadParamGuard';
+import { UploadParamGuard } from '../guard/UploadParamGuard';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { HeaderParam } from '../interface/file/HeaderParam';
 import { UploadFile } from '../interface/file/UploadFile';
@@ -81,39 +82,13 @@ export class FileController {
        小bug，如果参数中出现了@Response装饰器，那么直接使用return返回不成功，需要使用res.end
     */
     @Post('/upload')
-    async upload( @Param() param: PathParam, @Request() req): Promise<CommonData> {
+    @UseGuards(UploadParamGuard)
+    async upload(@Body() body): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: ''
         }
-        //解析from-data请求，获取上传表单中文件、其他字段
-        let file: UploadFile, obj: UploadForm
-        await new Promise((resolve, reject) => {
-            let form = new formidable.IncomingForm();
-            form.parse(req, function (err, fields, files) {
-                if (err) {
-                    data.code = 402
-                    data.message = '请求解析错误'
-                    resolve()
-                    return
-                }
-                //只有文件字段、md5是必须的
-                if (!fields || !files || !files.file || !fields.md5 || !fields.bucket_name || !fields.fileName) {
-                    data.code = 400
-                    data.message = '缺少参数'
-                    resolve()
-                    return
-                }
-                file = files.file
-                obj = fields
-                resolve()
-                return
-            });
-        })
-        //缺少参数、请求解析错误
-        if (data.code === 400 || data.code === 402) {
-            return data
-        }
+        let {uploadForm:obj,uploadFile:file} = body
         //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.image_config", "image_config")
@@ -141,7 +116,7 @@ export class FileController {
             return data
         }
         //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
-        await this.fileService.saveUploadFile(data, bucket, file, param, obj)
+        await this.fileService.saveUploadFile(data, bucket, file, obj)
         return data
     }
 

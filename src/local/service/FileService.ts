@@ -37,9 +37,8 @@ export class FileService {
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) { }
 
 
-    async saveUploadFile(data: CommonData, bucket: Bucket, file: UploadFile, param: PathParam, obj: UploadForm): Promise<void> {
-        let { bucket_name, fileName } = param
-        let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
+    async saveUploadFile(data: CommonData, bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<void> {
+        let { imagePreProcessString, contentSecret, tagsString, md5 ,bucket_name, fileName} = obj
         let imageProcessInfo: ImagePreProcessInfo, tags: string[]
         try {
             if (tagsString) {
