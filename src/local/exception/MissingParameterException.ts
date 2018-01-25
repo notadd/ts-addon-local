@@ -1,7 +1,7 @@
 import { HttpException } from '@nestjs/common'
 
 export class MissingParameterException extends HttpException{
-    constructor(){
-        super('缺少参数',400)
+    constructor(name?:string){
+        super('缺少参数'+(name?name:''),400)
     }
 }

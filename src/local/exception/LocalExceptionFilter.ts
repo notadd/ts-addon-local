@@ -9,7 +9,6 @@ export class LocalExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, response) {
     let status = exception.getStatus()
     let message = exception.getResponse()
-    console.log(exception)
     response
       .status(status)
       .json({

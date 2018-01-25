@@ -6,9 +6,12 @@ import { Observable } from 'rxjs/Observable';
 @Guard()
 export class DownloadParamGuard implements CanActivate {
     canActivate(req, context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        let { bucket_name , fileName } = req.params 
-        if(!bucket_name||!fileName){
-            throw new MissingParameterException()
+        let { bucket_name , fileName } = req.headers 
+        if(!bucket_name){
+            throw new MissingParameterException('bucket_name')
+        }
+        if(!fileName){
+            throw new MissingParameterException('fileName')
         }
         return true
     }

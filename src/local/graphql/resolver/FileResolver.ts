@@ -54,7 +54,10 @@ export class FileResolver {
       code: 200,
       message: '下载预处理成功',
       method: 'get',
-      headers: null,
+      headers:{
+        bucket_name:'',
+        fileName:''
+      },
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
     //验证参数存在
@@ -83,7 +86,8 @@ export class FileResolver {
       data.message = '指定文件' + name + '不存在'
       return data
     }
-    data.url += '/' + bucket.name + '/' + file.name + '.' + file.type
+    data.headers.bucket_name = bucket.name
+    data.headers.fileName = file.name + '.' + file.type
     return data
   }
 

@@ -3,10 +3,10 @@ import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
 import { DownloadParamGuard } from '../guard/DownloadParamGuard';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
+import { HeaderParam } from '../interface/file/HeaderParam';
 import { UploadFile } from '../interface/file/UploadFile';
 import { UploadForm } from '../interface/file/UploadForm';
 import { QueryParam } from '../interface/file/QueryParam';
-import { ParameterGuard } from '../guard/ParameterGuard';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
@@ -31,7 +31,6 @@ import { ImageMetadata } from '../interface/file/ImageMetadata';
   访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
 */
 @Controller('local/file')
-
 @UseFilters(new LocalExceptionFilter())
 export class FileController {
 
@@ -46,10 +45,10 @@ export class FileController {
     }
 
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */
+    @Get('/download')
     @UseGuards(DownloadParamGuard)
-    @Get('/download/:bucket_name/:fileName')
-    async download( @Param() param: PathParam, @Response() res): Promise<any> {
-        let { bucket_name, fileName } = param
+    async download( @Headers() headers: HeaderParam, @Response() res): Promise<any> {
+        let { bucket_name, fileName } = headers
         //验证参数
         if (!bucket_name || !fileName) {
             res.json({ code: 400, message: '缺少文件路径' })
