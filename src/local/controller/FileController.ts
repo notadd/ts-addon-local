@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query } from '@nestjs/common';
+import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
+import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
+import { DownloadParamGuard } from '../guard/DownloadParamGuard';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { UploadFile } from '../interface/file/UploadFile';
 import { UploadForm } from '../interface/file/UploadForm';
 import { QueryParam } from '../interface/file/QueryParam';
+import { ParameterGuard } from '../guard/ParameterGuard';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
@@ -28,6 +31,8 @@ import { ImageMetadata } from '../interface/file/ImageMetadata';
   访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
 */
 @Controller('local/file')
+
+@UseFilters(new LocalExceptionFilter())
 export class FileController {
 
     constructor(
@@ -41,6 +46,7 @@ export class FileController {
     }
 
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */
+    @UseGuards(DownloadParamGuard)
     @Get('/download/:bucket_name/:fileName')
     async download( @Param() param: PathParam, @Response() res): Promise<any> {
         let { bucket_name, fileName } = param

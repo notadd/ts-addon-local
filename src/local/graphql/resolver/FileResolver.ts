@@ -20,6 +20,7 @@ import { Image } from '../../model/Image';
 import { File } from '../../model/File';
 import * as path from 'path';
 import * as fs from 'fs';
+import { CommonData } from '../../interface/Common';
 /*文件Resolver，包含了文件下载预处理、上传预处理
   获取单个文件url、获取多个文件信息以及url、删除文件等接口
 */
@@ -144,7 +145,7 @@ export class FileResolver {
              data.url：访问文件的全部url，包括域名、目录、文件名、扩展名、token、处理字符串,访问图片方法必须是get，不说明
   */
   @Query('one')
-  async  getFile(req:any, body:OneBody): Promise<OneData> {
+  async  getFile(req: any, body: OneBody): Promise<OneData> {
     let data: OneData = {
       code: 200,
       message: "获取文件url成功",
@@ -211,8 +212,8 @@ export class FileResolver {
             data.documents: 文档信息数组
   */
   @Query('all')
-  async  files(req:any, body:AllBody): Promise<AllData> {
-    let data:AllData = {
+  async  files(req: any, body: AllBody): Promise<AllData> {
+    let data: AllData = {
       code: 200,
       message: '获取空间下所有文件成功',
       baseUrl: req.protocol + '://' + req.get('host') + '/local/file/visit',
@@ -247,11 +248,12 @@ export class FileResolver {
              data.message：响应信息
   */
   @Mutation('deleteFile')
-  async deleteFile(req, body): Promise<any> {
-    let data = {
+  async deleteFile(req:any, body:FileLocationBody): Promise<CommonData> {
+    let data:CommonData = {
       code: 200,
       message: '删除成功'
     }
+    //验证参数
     let { bucket_name, type, name } = body
     if (!bucket_name || !name || !type) {
       data.code = 400
@@ -264,6 +266,7 @@ export class FileResolver {
       data.message = '空间' + bucket_name + '不存在'
       return data
     }
+    //根据文件种类，查找、删除数据库
     let kind = this.kindUtil.getKind(type)
     if (kind === 'image') {
       let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
@@ -276,6 +279,7 @@ export class FileResolver {
     } else {
       //其他类型暂不支持
     }
+    //删除目录下存储文件
     let realPath = path.resolve(__dirname, '../../', 'store', bucket_name, name + '.' + type)
     if (!fs.existsSync(realPath)) {
       data.code = 404
