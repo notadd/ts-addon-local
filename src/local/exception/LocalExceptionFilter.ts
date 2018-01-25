@@ -27,15 +27,15 @@ export class LocalExceptionFilter implements ExceptionFilter {
     let status = exception.getStatus()
     let message = exception.getResponse()
 
-    /* response
+    response
       .status(status)
       .json({
         code: status,
         message: message
-      }); */
-    return {
+      }); 
+   /*  return {
       code : exception.getStatus(),
       message: exception.getResponse()
-    }
+    } */
   }
 }
