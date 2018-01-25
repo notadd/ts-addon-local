@@ -3,6 +3,7 @@ import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { UploadFile } from '../interface/file/UploadFile';
 import { UploadForm } from '../interface/file/UploadForm';
+import { QueryParam } from '../interface/file/QueryParam';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
@@ -46,7 +47,7 @@ export class FileController {
             res.end()
             return
         }
-        let realPath = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        let realPath:string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
         if (!fs.existsSync(realPath)) {
             res.json({ code: 404, message: '请求文件不存在' })
             res.end()
@@ -120,7 +121,7 @@ export class FileController {
         }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
         //对上传文件进行md5校验
-        let pass = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5
+        let pass:boolean = crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5
         if (!pass) {
             data.code = 404
             data.message = '文件md5校验失败'
@@ -132,8 +133,8 @@ export class FileController {
 
     /* 访问文件接口，文件路径在url中，文件存在且token正确，处理后返回，不存在返回错误 */
     @Get('/visit/:bucket_name/:fileName')
-    async visit( @Param() param: PathParam, @Query() query, @Response() res, @Request() req): Promise<CommonData> {
-        let data = {
+    async visit( @Param() param: PathParam, @Query() query:QueryParam, @Response() res, @Request() req): Promise<CommonData> {
+        let data:CommonData = {
             code: 200,
             message: ''
         }
@@ -148,7 +149,7 @@ export class FileController {
             return
         }
         //判断文件是否存在
-        let realPath = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        let realPath:string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
         if (!fs.existsSync(realPath)) {
             data.code = 404
             data.message = '请求文件不存在'
@@ -179,13 +180,13 @@ export class FileController {
                 res.end()
                 return
             }
-            let fullUrl =  decodeURI(req.protocol + '://' + req.get('host') + req.originalUrl)
+            let fullUrl:string =  decodeURI(req.protocol + '://' + req.get('host') + req.originalUrl)
             if (imagePostProcessString) {
                 fullUrl= fullUrl.substring(0,fullUrl.lastIndexOf('&token='))
             }else{
                 fullUrl= fullUrl.substring(0,fullUrl.lastIndexOf('?token='))
             }
-            let pass = this.tokenUtil.verify(fullUrl, bucket, token)
+            let pass:boolean = this.tokenUtil.verify(fullUrl, bucket, token)
             if (!pass) {
                 data.code = 403
                 data.message = 'token不正确'
