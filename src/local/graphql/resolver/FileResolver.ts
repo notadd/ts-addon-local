@@ -1,5 +1,7 @@
 import { DownloadProcessData } from '../../interface/file/DownloadProcessData';
 import { Query, Resolver, ResolveProperty, Mutation } from '@nestjs/graphql';
+import { UploadProcessBody } from '../../interface/file/UploadProcessBody';
+import { UploadProcessData } from '../../interface/file/UploadProcessData';
 import { FileLocationBody } from '../../interface/file/FileLocationBody';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { FileService } from '../../service/FileService';
@@ -51,6 +53,7 @@ export class FileResolver {
       headers: null,
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
+    //验证参数存在
     let { bucket_name, name, type } = body
     if (!bucket_name || !name || !type) {
       data.message = '缺少参数'
@@ -63,7 +66,8 @@ export class FileResolver {
       data.message = '指定空间' + bucket_name + '不存在'
       return data
     }
-    let kind:string
+    //根据文件种类获取文件实例
+    let kind: string
     let file: File | Audio | Video | Image | Document
     if (this.kindUtil.isImage(type)) {
       file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id })
@@ -80,21 +84,21 @@ export class FileResolver {
   }
 
   /*文件表单上传预处理接口
-  @Param bucket_name：上传空间名
-  @Param md5：文件md5,在本地存储中没有用
-  @Param contentName：文件名
   @Param tags:文件标签数组
+  @Param contentName：文件名
+  @Param bucket_name：上传空间名
+  @Param md5：文件md5,在本地存储中可以用于校验文件
   @Param contentSecret：文件密钥，暂时不支持这个功能
   @Param imagePreProcessInfo：图片预处理信息
   @Return data.code：状态码，200为成功，其他为错误
           data.message：响应信息
-          data.u：上传时的url
+          data.url：上传时的url
           data.method： 上传方法
-          data.form：   表单上传的字段对象，包含了imagePreProcessInfo字段，上传时需要加上file字段
+          data.form：   表单上传的字段对象，包含了imagePreProcessInfo、md5、contentSecret、tags字段，上传时需要加上file字段
 */
   @Mutation('uploadProcess')
-  async uploadProcess(req, body): Promise<any> {
-    let data = {
+  async uploadProcess(req: any, body: UploadProcessBody): Promise<UploadProcessData> {
+    let data: UploadProcessData = {
       code: 200,
       message: '',
       method: 'post',
