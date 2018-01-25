@@ -107,7 +107,9 @@ export class FileController {
 
     /* 访问文件接口，文件路径在url中
        私有空间文件需要token，token与图片处理字符串都在查询字符串中
-       文件存在且token正确，处理后返回，不存在返回错误 */
+       文件存在且token正确，处理后返回，不存在返回错误 
+       这个接口不需要Guard，因为如果缺少参数就找不到路由   
+    */
     @Get('/visit/:bucket_name/:fileName')
     async visit( @Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
         let { bucket_name, fileName } = param
@@ -115,7 +117,7 @@ export class FileController {
         //判断文件是否存在
         let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
         if (!fs.existsSync(realPath)) {
-            throw new HttpException('指定文件不存在',404)
+            throw new HttpException('指定文件不存在', 404)
         }
         //判断空间是否存在，由于要判断公有、私有空间，这里需要查询出空间
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
@@ -125,13 +127,13 @@ export class FileController {
             .where("bucket.name = :name", { name: bucket_name })
             .getOne()
         if (!bucket) {
-            throw new HttpException('指定空间'+bucket_name+'不存在',401)
+            throw new HttpException('指定空间' + bucket_name + '不存在', 401)
         }
         //私有空间需要验证token
         if (bucket.public_or_private === 'private') {
             //token不存在
             if (!token) {
-                throw new HttpException('访问私有空间文件需要token',411)
+                throw new HttpException('访问私有空间文件需要token', 411)
             }
             //请求的全路径，包含协议、域名、端口、查询字符串，需要URL解码
             let fullUrl: string = decodeURI(req.protocol + '://' + req.get('host') + req.originalUrl)
@@ -152,7 +154,7 @@ export class FileController {
             try {
                 imagePostProcessInfo = JSON.parse(imagePostProcessString)
             } catch (err) {
-                throw new HttpException('JSON解析错误:'+err.toString(),405)
+                throw new HttpException('JSON解析错误:' + err.toString(), 405)
             }
 
         }

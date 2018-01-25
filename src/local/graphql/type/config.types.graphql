@@ -7,8 +7,8 @@ type Query{
 type Mutation{
     #空间配置字段
     bucket(
-        isPublic:Boolean!,
-        name:String!,
+        isPublic:Boolean,
+        name:String,
         token_expire:Int,
         token_secret_key:String):ConfigData
 

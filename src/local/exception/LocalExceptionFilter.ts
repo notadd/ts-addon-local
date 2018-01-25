@@ -1,6 +1,7 @@
 
 import { ExceptionFilter, Catch } from '@nestjs/common';
 import { HttpException } from '@nestjs/common';
+const graphql= require('graphql')
 
 /*错误码表
   400：缺少参数、参数不正确
@@ -18,17 +19,23 @@ import { HttpException } from '@nestjs/common';
   412：token验证错误
   413：token超时
 */
-@Catch(HttpException)
+@Catch(HttpException,graphql.GraphQLError)
 export class LocalExceptionFilter implements ExceptionFilter {
 
   catch(exception: HttpException, response) {
+    console.log(exception)
     let status = exception.getStatus()
     let message = exception.getResponse()
-    response
+
+    /* response
       .status(status)
       .json({
-        statusCode: status,
+        code: status,
         message: message
-      });
+      }); */
+    return {
+      code : exception.getStatus(),
+      message: exception.getResponse()
+    }
   }
 }

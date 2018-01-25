@@ -1,24 +1,28 @@
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark';
+import { LocalExceptionFilter } from '../../exception/LocalExceptionFilter';
 import { ImageWatermark } from '../../interface/config/ImageWatermark';
+import { Component, UseGuards, UseFilters, HttpException } from '@nestjs/common';
 import { BucketConfig } from '../../interface/config/BucketConfig';
 import { BucketsData } from '../../interface/config/BucketsData';
 import { ImageFormat } from '../../interface/config/ImageFormat';
 import { AudioFormat } from '../../interface/config/AudioFormat';
 import { VideoFormat } from '../../interface/config/VideoFormat';
+import { UploadFile } from '../../interface/file/UploadFile';
 import { Resolver, Query, Mutation } from '@nestjs/graphql';
 import { ConfigService } from '../../service/ConfigService';
-import { UploadFile } from '../../interface/file/UploadFile'
+import { BucketGuard } from '../../guard/BucketGuard';
 import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KindUtil } from '../../util/KindUtil';
 import { Bucket } from '../../model/Bucket';
-import { Component } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 
 
 /* 本地存储配置的resolver */
 @Resolver('Config')
+//这个异常过滤器目前神码异常都接收不到，所有异常都会被转化为GraphqlError，然后发送给前端
+@UseFilters(new LocalExceptionFilter())
 export class ConfigResolver {
 
     //图片水印方位的集合，九宫格
@@ -34,6 +38,8 @@ export class ConfigResolver {
 
     /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
+    //这个guard也接收不到resolver中的参数，只能接收到req，很难获取参数来验证参数
+    @UseGuards(BucketGuard)
     async bucket(req: any, body: BucketConfig): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
@@ -41,7 +47,7 @@ export class ConfigResolver {
         }
         let { isPublic, name, token_expire, token_secret_key } = body
         //验证参数存在
-        if (isPublic === undefined || !name) {
+        if (isPublic === undefined || isPublic === null || !name) {
             data.code = 400
             data.message = '缺少参数'
             return data
@@ -64,7 +70,7 @@ export class ConfigResolver {
 
     /* 图片保存格式配置*/
     @Mutation('imageFormat')
-    async  imageFormat(req: any, body: ImageFormat): Promise<CommonData> {
+    async imageFormat(req: any, body: ImageFormat): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: "图片保存格式配置保存成功"
@@ -250,8 +256,8 @@ export class ConfigResolver {
 
     /* 获取所有空间信息字段 */
     @Query('buckets')
-    async buckets():Promise<BucketsData>{
-        let data:BucketsData = {
+    async buckets(): Promise<BucketsData> {
+        let data: BucketsData = {
             code: 200,
             message: '',
             buckets: []

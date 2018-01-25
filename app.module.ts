@@ -2,6 +2,7 @@ import { Module,MiddlewaresConsumer,NestModule,RequestMethod, } from '@nestjs/co
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import { GraphQLModule , GraphQLFactory} from '@nestjs/graphql';
 import { LocalModule } from './src/local/LocalModule'
+
 @Module({
   modules: [GraphQLModule,LocalModule]
 })
