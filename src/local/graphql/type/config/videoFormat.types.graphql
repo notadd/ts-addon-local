@@ -1,11 +1,9 @@
 type Mutation{
-    #视频保存格式配置
-    #format   视频保存编码格式，只能为枚举之一
-    #resolution 视频保存分辨率
+    #config format of uploaded video
     videoFormat(format:VideoFormat,resolution:VideoResolution):ConfigData
 }
 
-#视频保存编码格式枚举
+#the enum of video coded format
 enum VideoFormat {
   raw
   vp9
@@ -13,7 +11,7 @@ enum VideoFormat {
   h265
 }
 
-#视频保存分辨率枚举
+#the enum of video  resolution ratio
 enum VideoResolution {
   raw
   p1080

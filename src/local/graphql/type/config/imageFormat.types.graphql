@@ -1,14 +1,14 @@
 type Mutation{
-    #图片保存格式配置字段
+    #config format of uploaded image
     imageFormat(format:ImageFormat!):ConfigData
 }
 
-#图片保存格式枚举
+#the enum of image format
 enum ImageFormat {
-  #原图
+  #original format 
   raw
-  #webp有损
+  #webp 
   webp_damage
-  #webp无损
+  #webp and lossless
   webp_undamage
 }

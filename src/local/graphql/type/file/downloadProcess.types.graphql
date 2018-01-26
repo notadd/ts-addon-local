@@ -1,24 +1,27 @@
-#查询字段
+
 type Query{
-  #下载预处理字段
+  #download pretreatment 
   downloadProcess(bucket_name:String,name:String,type:String):DownloadProcessData
 }
 
-#文件下载预处理返回数据类型
+#return data 
 type DownloadProcessData{
-   #错误码
+   #error code 
    code:Int
-   #信息
+   #error message
    message:String
-   #发起下载请求的方法
+   #request method
    method:String
-   #发起下载请求的url
+   #request url
    url:String
-   #发起下载请求的头信息
+   #request headers
    headers:DownloadHeader
 }
 
+#download header type
 type DownloadHeader{
+    #bucket name 
     bucket_name:String
+    #file name
     file_name:String
 }

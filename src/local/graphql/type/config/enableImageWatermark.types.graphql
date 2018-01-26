@@ -1,4 +1,4 @@
 type Mutation{
-    #图片水印启用字段
+    #start using watermark on image
     enableImageWatermark(enable:Boolean!):ConfigData
 }
