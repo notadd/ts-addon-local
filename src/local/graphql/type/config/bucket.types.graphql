@@ -1,5 +1,5 @@
 type Mutation{
-    #空间配置字段
+    #bucket configuration
     bucket(
         isPublic:Boolean,
         name:String,
@@ -7,10 +7,10 @@ type Mutation{
         token_secret_key:String):ConfigData
 }
 
-#配置字段返回数据
+#config return data
 type ConfigData{
-    #错误码
+    #error code
     code:Int
-    #错误信息
+    #code message
     message:String
 }
