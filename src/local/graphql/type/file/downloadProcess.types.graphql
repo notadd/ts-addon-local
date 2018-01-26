@@ -15,11 +15,11 @@ type DownloadProcessData{
    #download request url
    url:String
    #download request headers
-   headers:DownloadHeader
+   headers:DownloadHeaders
 }
 
 #download header type
-type DownloadHeader{
+type DownloadHeaders{
     #bucket name 
     bucket_name:String
     #file name
