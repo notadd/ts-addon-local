@@ -201,15 +201,9 @@ function metadata() {
 async function overlayWith() {
   /* 添加水印*/
   sharp('../../test.jpeg')
-    .overlayWith(await sharp('../../tu/shuiyin.jpeg').resize(400,600).ignoreAspectRatio().toBuffer(), {
+    .overlayWith(await sharp('../../tu/shuiyin.jpeg').toBuffer(), {
       left: 100,
-      top: 0,
-      //gravity: sharp.gravity.centre,
-      //raw: {
-        //width: 100,
-        //height: 100,
-        //channels: 3
-      //}
+      top: 0
     })
     .toFile('../../overlay.jpeg', (err) => {
       console.log(err)
@@ -240,4 +234,4 @@ function extractChannel(){
    });
 }
 
-extractChannel()
+overlayWith() 
