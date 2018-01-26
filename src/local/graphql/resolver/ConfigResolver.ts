@@ -63,6 +63,11 @@ export class ConfigResolver {
             data.message = '缺少参数'
             return data
         }
+        if(!isPublic&&(token_expire<0||token_expire>1800)){
+            data.code = 400
+            data.message = 'token超时不正确'
+            return data
+        }
         //进行保存,如果存在就更新
         await this.configService.saveBucketConfig(data, body)
         return data
@@ -128,9 +133,9 @@ export class ConfigResolver {
             code: 200,
             message: ''
         }
-        let { name, base64, gravity, opacity, x, y, ws } = body
+        let { name, gravity, opacity, x, y, ws } = body
         //验证参数存在，其中数字为0也可以
-        if (!name || !base64 || !gravity || (opacity !== 0 && !opacity) || (x !== 0 && !x) || (y !== 0 && !y) || (ws !== 0 && !ws)) {
+        if (!name || !body.base64 || !gravity || (opacity !== 0 && !opacity) || (x !== 0 && !x) || (y !== 0 && !y) || (ws !== 0 && !ws)) {
             data.code = 400
             data.message = '缺少参数'
             return data
@@ -179,7 +184,7 @@ export class ConfigResolver {
         }
         //保存图片的base64编码为文件，保存目录为当前目录下
         await new Promise((resolve, reject) => {
-            fs.writeFile(__dirname + '/' + name, Buffer.from(base64, 'base64'), (err) => {
+            fs.writeFile(__dirname + '/' + name, Buffer.from(body.base64, 'base64'), (err) => {
                 if (err) {
                     data.code = 402
                     data.message = '文件写入错误'
@@ -193,9 +198,10 @@ export class ConfigResolver {
             return data
         }
         //上传文件对象，存储了上传文件名、临时保存路径
-        let file: UploadFile
-        file.name = name
-        file.path = __dirname + '/' + name
+        let file: UploadFile = {
+            name : name,
+            path : __dirname + '/' + name
+        }
         if (!this.kindUtil.isImage(file.name.substr(file.name.lastIndexOf('.') + 1))) {
             data.code = 400
             data.message = '不允许的水印图片类型'

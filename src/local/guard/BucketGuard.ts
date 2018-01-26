@@ -5,7 +5,7 @@ import { parse } from 'graphql'
 export class BucketGuard implements CanActivate {
     canActivate(req,context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         //解析字符串获取一颗节点树，很难获取请求参数
-       console.log(parse(req.body.query))
+       //console.log(parse(req.body.query))
         return true
     }
 }

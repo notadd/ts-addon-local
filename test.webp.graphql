@@ -197,3 +197,4 @@ mutation deleteFile{
     code
     message
   }
+}
