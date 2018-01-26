@@ -1,24 +1,24 @@
 type Query{
-    #获取所有空间信息的字段
+    #get information of bucket,return id、public_or_private、name
     buckets:BucketsData
 }
 
-#返回的空间配置
+#information of bucket
 type Bucket{
-    #空间id
+    #id
     id:Int
-    #公有或者私有空间
+    #public bucket or private bucket
     public_or_private:String
-    #空间名
+    #bucket name
     name:String
 }
 
-#获取空间的字段返回对象
+#return data
 type BucketsData{
-    #错误码
+    #error code
     code:Int
-    #信息
+    #error message
     message:String
-    #空间配置数组
+    #array of bucket information
     buckets:[Bucket]
 }
