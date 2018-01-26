@@ -1,0 +1,16 @@
+type Mutation{
+    #空间配置字段
+    bucket(
+        isPublic:Boolean,
+        name:String,
+        token_expire:Int,
+        token_secret_key:String):ConfigData
+}
+
+#配置字段返回数据
+type ConfigData{
+    #错误码
+    code:Int
+    #错误信息
+    message:String
+}

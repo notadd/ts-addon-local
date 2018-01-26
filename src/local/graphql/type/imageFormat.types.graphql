@@ -1,0 +1,14 @@
+type Mutation{
+    #图片保存格式配置字段
+    imageFormat(format:ImageFormat!):ConfigData
+}
+
+#图片保存格式枚举
+enum ImageFormat {
+  #原图
+  raw
+  #webp有损
+  webp_damage
+  #webp无损
+  webp_undamage
+}
