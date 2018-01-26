@@ -58,9 +58,23 @@ query buckets{
 }
 
 query downprocess{
-  downloadProcess(
+  public:downloadProcess(
     type:"jpeg",
     bucket_name:"public",
+    name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
+  ){
+    code
+    message
+    url
+    method
+    headers{
+			bucket_name
+      file_name
+    }
+  }
+  private:downloadProcess(
+    type:"jpeg",
+    bucket_name:"private",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code
@@ -102,10 +116,13 @@ mutation uploadprocess{
     url
     method
     form{
-      imagePreProcessString
-      contentSecret
-      tagsString
       md5
+      fileName
+      bucket_name
+      tagsString
+      contentSecret
+      imagePreProcessString
+      
     }
   }
   private:uploadProcess(
@@ -127,10 +144,12 @@ mutation uploadprocess{
     url
     method
     form{
-      imagePreProcessString
-      contentSecret
-      tagsString
       md5
+      fileName
+      bucket_name
+      tagsString
+      contentSecret
+      imagePreProcessString
     }
   }
 }
@@ -220,17 +239,17 @@ query allFile{
 
 mutation deleteFile{
   private:deleteFile(
-    type:"webp",
+    type:"jpeg",
     bucket_name:"private",
-    name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25"
+    name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code
     message
   }
   public:deleteFile(
-    type:"webp",
+    type:"jpeg",
     bucket_name:"public",
-    name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25"
+    name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code
     message
