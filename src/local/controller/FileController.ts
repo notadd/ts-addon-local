@@ -50,9 +50,9 @@ export class FileController {
     @Get('/download')
     @UseGuards(DownloadParamGuard)
     async download( @Headers() headers: HeaderParam, @Response() res): Promise<any> {
-        let { bucket_name, fileName } = headers
+        let { bucket_name, file_name} = headers
         //文件绝对路径，这里并不查询数据库，直接从文件夹获取
-        let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, file_name)
         //文件不存在，返回404
         if (!fs.existsSync(realPath)) {
             throw new HttpException('请求下载的文件不存在', 404)
@@ -60,11 +60,11 @@ export class FileController {
         //下载文件的buffer，不进行处理，返回原始文件
         let buffer: Buffer = fs.readFileSync(realPath)
         //文件类型响应头
-        res.setHeader('Content-Type', mime.getType(fileName))
+        res.setHeader('Content-Type', mime.getType(file_name))
         //文件大小响应头
         res.setHeader('Content-Length', Buffer.byteLength(buffer))
         //下载响应头，不管浏览器支持不支持显示文件mime，都会直接弹出下载
-        res.setHeader('Content-Disposition', 'attachment; filename=' + fileName)
+        res.setHeader('Content-Disposition', 'attachment; filename=' + file_name)
         //发送文件buffer
         res.end(buffer)
         return

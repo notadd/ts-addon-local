@@ -4,7 +4,7 @@ export interface DownloadProcessData{
     method:string
     headers: {
         bucket_name:string
-        fileName:string
+        file_name:string
     }
     url:string
 }

@@ -56,7 +56,7 @@ export class FileResolver {
       method: 'get',
       headers:{
         bucket_name:'',
-        fileName:''
+        file_name:''
       },
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
@@ -87,7 +87,7 @@ export class FileResolver {
       return data
     }
     data.headers.bucket_name = bucket.name
-    data.headers.fileName = file.name + '.' + file.type
+    data.headers.file_name = file.name + '.' + file.type
     return data
   }
 

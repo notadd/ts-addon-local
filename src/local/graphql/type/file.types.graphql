@@ -25,6 +25,13 @@ type DownloadProcessData{
    method:String
    #发起下载请求的url
    url:String
+   #发起下载请求的头信息
+   headers:DownloadHeader
+}
+
+type DownloadHeader{
+    bucket_name:String
+    file_name:String
 }
  
 #上传预处理表单信息类型
