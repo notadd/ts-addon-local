@@ -1,0 +1,80 @@
+type Query{
+    #获取空间下所有文件信息以及访问url的字段
+    all(bucket_name:String):AllData
+}
+
+type File{
+    id:Int
+    raw_name:String
+    name:String
+    tags:[String]
+    type:String
+    size:Int
+    content_secret:String
+    create_date:String
+    update_date:String
+    url:String
+}
+
+type Image{
+    id:Int
+    raw_name:String
+    name:String
+    tags:[String]
+    type:String
+    size:Int
+    create_date:String
+    update_date:String
+    width:Int
+    height:Int
+    url:String
+}
+
+type Audio{
+    id:Int
+    raw_name:String
+    name:String
+    tags:[String]
+    md5:String
+    type:String
+    size:Int
+    create_date:String
+    update_date:String
+    url:String
+}
+
+type Video{
+    id:Int
+    raw_name:String
+    name:String
+    tags:[String]
+    type:String
+    size:Int
+    create_date:String
+    update_date:String
+    url:String
+}
+
+type Document{
+    id:Int
+    raw_name:String
+    name:String
+    tags:[String]
+    type:String
+    size:Int
+    create_date:String
+    update_date:String
+    url:String
+}
+
+
+type AllData{
+    code:Int
+    message:String
+    baseUrl:String
+    files:[File]
+    images:[Image]
+    audios:[Audio]
+    videos:[Video]
+    documents:[Document]
+}

@@ -1,0 +1,29 @@
+type Mutation{
+   #上传预处理字段
+   uploadProcess(bucket_name:String,md5:String,contentName:String,contentSecret:String,tags:[String],imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
+}
+
+#上传预处理表单信息类型
+type UploadProcessForm{
+    #文件md5
+    md5:String
+    #上传空间名
+    bucket_name:String
+    #上传文件名
+    fileName:String
+    #文件密钥
+    contentSecret:String
+    #标签数组
+    tagsString:String
+    #图片预处理信息
+    imagePreProcessString:String  
+}
+
+#上传预处理字段返回类型
+type  UploadProcessData{
+    code:Int,
+    message:String,
+    url:String,
+    method:String,
+    form:UploadProcessForm
+}

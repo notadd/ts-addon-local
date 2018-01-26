@@ -1,0 +1,9 @@
+type Mutation{
+    #删除文件字段
+    deleteFile(bucket_name:String,name:String,type:String):DeleteFileData
+}
+
+type DeleteFileData{
+    code:Int
+    message:String
+}

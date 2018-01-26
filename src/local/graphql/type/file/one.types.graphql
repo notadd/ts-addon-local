@@ -1,0 +1,11 @@
+#查询字段
+type Query{
+    #获取单个图片访问url的字段
+    one(bucket_name:String,name:String,type:String,imagePostProcessInfo:ImagePostProcessInfo):OneData
+}
+
+type OneData{
+    code:Int
+    message:String
+    url:String
+}
