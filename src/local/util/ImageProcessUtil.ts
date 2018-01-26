@@ -66,7 +66,7 @@ export class ImageProcessUtil {
     //根据图片处理信息处理指定路径图片，并且按照配置保存它，返回处理后图片元数据，用于上传时保存图片
     async processAndStore(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata> {
         //根据处理信息处理图片，获取处理后实例
-        let instance: SharpInstance = await this.process(imagePath, bucket, imageProcessInfo)
+        let instance: SharpInstance = await this.preProcess(imagePath, bucket, imageProcessInfo)
         //获取处理后Buffer，这里必须先获取BUffer，再获取format、name，才能写入文件，因为文件名需要使用name、format
         //不能直接使用toFile
         let buffer: Buffer = await instance.toBuffer()
@@ -95,19 +95,86 @@ export class ImageProcessUtil {
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
     async processAndOutput(bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
-        let instance: SharpInstance = await this.process(imagePath, bucket, imageProcessInfo)
+        let instance: SharpInstance = await this.postProcess(imagePath, bucket, imageProcessInfo)
         //返回Buffer对象
         return await instance.toBuffer()
     }
 
 
-    //根据图片处理参数，获取指定路径图片的SharpInstance实例
-    async process(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<SharpInstance> {
+    //sharp实例预处理函数，用于上传预处理使用，只支持缩放、裁剪、水印、旋转四个参数
+    async preProcess(imagePath: string, bucket: Bucket, imageProcessInfo:ImagePreProcessInfo): Promise<SharpInstance> {
         let instance: SharpInstance = sharp(imagePath)
         if(!imageProcessInfo){
             return instance
         }
-        let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo as ImagePostProcessInfo
+        let { resize, tailor, watermark, rotate, format , lossless} = imageProcessInfo as ImagePostProcessInfo
+        //获取处理之前元数据
+        let metadata: ImageMetadata = await this.getMetadata(imagePath)
+        try {
+            let width2, height2
+            //缩放与裁剪都需要之前一步得到的图片宽高
+            //如果存在裁剪，且为缩放之前裁剪
+            if (tailor && tailor.isBefore) {
+                //裁剪，获取裁剪之后宽高
+                let result1 = this.tailor(instance, tailor, metadata.width, metadata.height)
+                //如果缩放存在，使用裁剪之后宽高，进行缩放
+                if (resize) {
+                    let result2 = this.resize(instance, resize, result1.width, result1.height)
+                    width2 = result2.width
+                    height2 = result2.height
+                }
+                width2 = result1.width
+                height2 = result1.height
+            }
+            //如果裁剪存在，且为缩放之后裁剪
+            else if (tailor && !tailor.isBefore) {
+                //如果缩放存在
+                if (resize) {
+                    //先缩放，获取缩放后宽高
+                    let result1 = this.resize(instance, resize, metadata.width, metadata.height)
+                    //使用缩放后宽高进行裁剪
+                    let result2 = this.tailor(instance, tailor, result1.width, result1.height)
+                    width2 = result2.width
+                    height2 = result2.height
+                } else {
+                    //缩放不存在，直接使用原图大小进行裁剪
+                    let result1 = this.tailor(instance, tailor, metadata.width, metadata.height)
+                    width2 = result1.width
+                    height2 = result1.height
+                }
+            }
+            //如果裁剪不存在
+            else {
+                //如果缩放存在
+                if (resize) {
+                    //直接使用原图大小缩放
+                    let result1 = this.resize(instance, resize, metadata.width, metadata.height)
+                    width2 = result1.width
+                    height2 = result1.height
+                }else{
+                    width2 = metadata.width
+                    height2 = metadata.height
+                } 
+            }
+            await this.watermark(bucket, instance, watermark, width2, height2)
+            if (rotate) this.rotate(instance, rotate, width2, height2)
+            if (format) this.format(instance, format)
+            if (lossless){
+                this.output(instance,format?format:metadata.format,lossless,null,null)
+            } 
+            return instance
+        } catch (err) {
+            throw new HttpException(err.toString(),408)
+        }
+    }
+
+    //sharp实例后处理函数、用于输出访问图片时使用
+    async postProcess(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo): Promise<SharpInstance> {
+        let instance: SharpInstance = sharp(imagePath)
+        if(!imageProcessInfo){
+            return instance
+        }
+        let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
         try {
@@ -610,21 +677,21 @@ export class ImageProcessUtil {
 
     */
     output(instance:SharpInstance,format:string,lossless:boolean,quality:number,progressive:boolean){
-        if(lossless!==undefined&&lossless!==true&&lossless!==false){
+        if(lossless!==undefined&&lossless!==null&&lossless!==true&&lossless!==false){
             throw new Error('无损参数错误')
         }
-        if(quality!==undefined&&!Number.isInteger(quality)){
+        if(quality!==undefined&&quality!==null&&!Number.isInteger(quality)){
             throw new Error('质量参数错误')
         }
-        if(progressive!==undefined&&progressive!==true&&progressive!==false){
+        if(progressive!==undefined&&progressive!==null&&progressive!==true&&progressive!==false){
             throw new Error('渐进参数错误')
         }
         let options:any =  {
             force:true
         }
-        if(lossless!==undefined) options.lossless = lossless
-        if(quality!==undefined) options.quality = quality
-        if(progressive!==undefined) options.progressive = progressive
+        if(lossless!==undefined&&lossless!==null) options.lossless = lossless
+        if(quality!==undefined&&quality!==null) options.quality = quality
+        if(progressive!==undefined&&progressive!==null) options.progressive = progressive
         //jpeg不支持无损，加上了也无所谓
         if(format==='jpeg'){
             instance.jpeg(options)
