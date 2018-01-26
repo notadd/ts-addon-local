@@ -1,0 +1,17 @@
+type Mutation{
+    #图片水印配置字段
+    imageWatermark(name:String,base64:String,gravity:Gravity,opacity:Int,x:Int,y:Int,ws:Int):ConfigData
+}
+
+#方位枚举
+enum Gravity {
+  northwest
+  north
+  northeast
+  west
+  center
+  east
+  southwest
+  south
+  southeast
+}

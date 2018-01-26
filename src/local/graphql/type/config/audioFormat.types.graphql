@@ -1,0 +1,11 @@
+type Mutation{
+    #音频保存格式配置
+    #format   保存格式，只能为枚举之一
+    audioFormat(format:AudioFormat):ConfigData
+}
+#音频保存格式枚举
+enum AudioFormat {
+  raw
+  mp3
+  aac
+}

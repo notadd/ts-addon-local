@@ -1,0 +1,24 @@
+type Query{
+    #获取所有空间信息的字段
+    buckets:BucketsData
+}
+
+#返回的空间配置
+type Bucket{
+    #空间id
+    id:Int
+    #公有或者私有空间
+    public_or_private:String
+    #空间名
+    name:String
+}
+
+#获取空间的字段返回对象
+type BucketsData{
+    #错误码
+    code:Int
+    #信息
+    message:String
+    #空间配置数组
+    buckets:[Bucket]
+}

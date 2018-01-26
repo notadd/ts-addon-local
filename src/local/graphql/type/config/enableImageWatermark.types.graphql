@@ -1,0 +1,4 @@
+type Mutation{
+    #图片水印启用字段
+    enableImageWatermark(enable:Boolean!):ConfigData
+}
