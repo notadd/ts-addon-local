@@ -47,13 +47,16 @@ export class FileService {
             if (imagePreProcessString) {
                 imageProcessInfo = JSON.parse(imagePreProcessString)
                 if (bucket.image_config.format === 'webp_damage') {
-                    (imageProcessInfo as ImagePostProcessInfo).format = 'webp'
+                    (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
+                    (imageProcessInfo as ImagePostProcessInfo).lossless = false
                 } else if (bucket.image_config.format === 'webp_undamage') {
                     //这样写。后面需要分号
                     (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
                     (imageProcessInfo as ImagePostProcessInfo).lossless = true
                 } else {
-                    //原图情况下不管
+                    //这样写。后面需要分号
+                    (imageProcessInfo as ImagePostProcessInfo).format = undefined;
+                    (imageProcessInfo as ImagePostProcessInfo).lossless = undefined
                 }
             }
         } catch (err) {

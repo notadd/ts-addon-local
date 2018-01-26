@@ -10,11 +10,11 @@ type DownloadProcessData{
    code:Int
    #error message
    message:String
-   #request method
+   #download request method
    method:String
-   #request url
+   #download request url
    url:String
-   #request headers
+   #download request headers
    headers:DownloadHeader
 }
 

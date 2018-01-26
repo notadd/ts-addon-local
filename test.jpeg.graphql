@@ -67,6 +67,10 @@ query downprocess{
     message
     url
     method
+    headers{
+			bucket_name
+      file_name
+    }
   }
 }
 
@@ -78,7 +82,7 @@ mutation uploadprocess{
     tags:["微信","商城"],
     imagePreProcessInfo:{
       resize:{
-        mode:"scale",
+        mode:scale,
         data:{
           scale:50
         }
@@ -111,7 +115,7 @@ mutation uploadprocess{
     tags:["微信","商城"],
     imagePreProcessInfo:{
       resize:{
-        mode:"scale",
+        mode:scale,
         data:{
           scale:50
         }
@@ -138,7 +142,7 @@ query one{
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d",
     imagePostProcessInfo:{
       resize:{
-        mode:"scale",
+        mode:scale,
         data:{
 					scale:50
         }
@@ -155,7 +159,7 @@ query one{
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d",
     imagePostProcessInfo:{
       resize:{
-        mode:"scale",
+        mode:scale,
         data:{
 					scale:50
         }

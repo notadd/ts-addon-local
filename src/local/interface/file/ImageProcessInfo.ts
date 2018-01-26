@@ -40,7 +40,6 @@ export interface ImagePreProcessInfo{
 export interface ImagePostProcessInfo{
     resize?:Resize
     tailor?:Tailor
-    roundrect?:number
     watermark?:boolean
     rotate?:number
     blur?:Blur

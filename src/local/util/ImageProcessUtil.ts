@@ -174,7 +174,7 @@ export class ImageProcessUtil {
         if(!imageProcessInfo){
             return instance
         }
-        let { resize, tailor, watermark, rotate, roundrect, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo
+        let { resize, tailor, watermark, rotate,  blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
         try {
@@ -225,8 +225,6 @@ export class ImageProcessUtil {
             }
             await this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate, width2, height2)
-            //没有圆角功能
-            //if (roundrect) this.roundrect(instance, roundrect)
             if (blur) this.blur(instance, blur)
             if (sharpen) this.sharpen(instance, sharpen)
             if (format) this.format(instance, format)
