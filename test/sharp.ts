@@ -203,7 +203,12 @@ async function overlayWith() {
   sharp('../../test.jpeg')
     .overlayWith(await sharp('../../tu/shuiyin.jpeg').toBuffer(), {
       left: 100,
-      top: 0
+      top: 0,
+      raw:{
+        width:200,
+        height:300,
+        channels:1
+      }
     })
     .toFile('../../overlay.jpeg', (err) => {
       console.log(err)
@@ -218,7 +223,6 @@ function buffer() {
       console.log(value.toString('hex'))
     })
 }
-sharp('../../tu/shuiyin.jpeg').resize(300,200).ignoreAspectRatio().toFile('../../shuiyin.jpeg')
 /* import * as fs from 'fs'
 fs.stat('../../test.jpeg',(err,stats)=>{
   console.log(err)
@@ -234,4 +238,34 @@ function extractChannel(){
    });
 }
 
-overlayWith() 
+function create(){
+  sharp({
+    create: {
+      width: 300,
+      height: 200,
+      channels: 4,
+      background: { r:0, g: 100, b: 0, alpha: 0 }
+    }
+  }).toFile('../../kb2.png',(err,info)=>{
+    console.log(info)
+  })
+}
+
+
+async function join(){
+  let buffer = await sharp({
+    create: {
+      width: 500,
+      height: 200,
+      channels: 4,
+      background:  { r:0, g: 100, b: 0, alpha: 0.5 }
+    }
+  }).toFormat('png').toBuffer()
+
+  sharp('../../1.png').joinChannel(buffer).toFile('../../ch.png',(err,info)=>{
+    console.log(err)
+    console.log(info)
+  })
+}
+
+join()

@@ -18,7 +18,31 @@ let g= gm(p).resize(100,200).write('../../resize.jpeg',err=>{
  let g= gm(p).composite('../../tu/shuiyin.jpeg').gravity('SouthEast').dissolve(30).write('../../composite.jpeg',err=>{
     console.log(err)
 }) */
+const sharp = require('sharp')
+async function create(){
+    //let buffer = await sharp('../../tu/shuiyin.jpeg').resize(300,200).toBuffer()
+    //fs.writeFileSync('../../shuiyin.jpeg',buffer)
+    let g= gm('../../test.jpeg').composite('../../shuiyin.jpeg')
+    .gravity('Center')
+    .geometry('+100+10')
+    //.page()
+    .dissolve(30)
+    //.geometry(1024,640)
+    //.watermark(10)
+    //.resize(100,100)
+    //.rotate(90)
+    //.size(100,err=>{})
+    .write('../../com.jpeg',function (err){
+        console.log(err)
+    })
+}
 
-let g= gm(p).dissolve(30).write('../../alpha.jpeg',err=>{
-    console.log(err)
-})
+function alpha(){
+    gm('../../test.jpeg').convert()
+    .channel('alpha')
+    .fx('0.5')
+    .write('../../alpha.jpeg',function (err){
+        console.log(err)
+    })
+}
+
