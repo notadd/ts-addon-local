@@ -25,7 +25,24 @@ export class FileUtil {
     }
 
     async deleteIfExist(path:string){
-        
+        if(fs.existsSync(path)){
+            let ex: HttpException
+            await new Promise((resolver, reject) => {
+                fs.unlink(path,(err) => {
+                    if (err) {
+                        reject(new HttpException('文件删除错误:' + err.toString(), 407))
+                    }
+                    resolver()
+                })
+            }).catch(err => {
+                ex = err
+            })
+            if (ex) {
+                throw ex
+            }
+        }
     }
+
+   
 
 } 
