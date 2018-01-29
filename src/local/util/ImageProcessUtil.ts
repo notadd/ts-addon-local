@@ -60,6 +60,7 @@ export class ImageProcessUtil {
         //获取处理后元数据
         let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
+        
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
         await this.fileUtil.write(absolute_path, buffer)
         //返回处理后元数据
@@ -156,6 +157,7 @@ export class ImageProcessUtil {
         } 
         //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
         //删除旋转临时图片
+        let result:Buffer = await instance.toBuffer()
         if (rotateImagePath) {
             await this.fileUtil.deleteIfExist(rotateImagePath)
         }
@@ -163,7 +165,7 @@ export class ImageProcessUtil {
         if (watermarkImagePath) {
             await this.fileUtil.deleteIfExist(watermarkImagePath)
         }
-        return await instance.toBuffer()
+        return result
     }
 
     //sharp实例后处理函数、用于输出访问图片时使用
@@ -248,6 +250,7 @@ export class ImageProcessUtil {
         }
         //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
         //删除旋转临时图片
+        let result:Buffer = await instance.toBuffer()
         if (rotateImagePath) {
             await this.fileUtil.deleteIfExist(rotateImagePath)
         }
@@ -255,7 +258,7 @@ export class ImageProcessUtil {
         if (watermarkImagePath) {
             await this.fileUtil.deleteIfExist(watermarkImagePath)
         }
-        return await instance.toBuffer()
+        return result
     }
 
 
@@ -554,6 +557,7 @@ export class ImageProcessUtil {
                 width = width * preHeight * ws / (100 * height)
                 height = preHeight * ws / 100
             }
+            //转化为gm参数
             //方位为西北
             if (gravity === 'northwest') {
                 gravity = 'NorthWest'
@@ -606,39 +610,14 @@ export class ImageProcessUtil {
             if (width > preWidth || height > preHeight) {
                 throw new Error('水印图片过大')
             }
+            //获取临时原图、缩放后水印图片Buffer，生成存储临时路径
             let buffer: Buffer = await instance.toBuffer()
             let shuiyinBuffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
             let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw' + (+new Date()) + '.' + metadata.format)
             let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin' + (+new Date()) + shuiyin_path.substring(shuiyin_path.lastIndexOf('.')))
-            let ex: HttpException
-            //根据绝对路径保存临时图片,这个是原图
-            await new Promise((resolver, reject) => {
-                fs.writeFile(temp_path, buffer, (err) => {
-                    if (err) {
-                        reject(new HttpException('文件写入磁盘错误:' + err.toString(), 407))
-                    }
-                    resolver()
-                })
-            }).catch(err => {
-                ex = err
-            })
-            if (ex) {
-                throw ex
-            }
-            //根据绝对路径保存临时图片,这个是水印图片
-            await new Promise((resolver, reject) => {
-                fs.writeFile(shuiyin_temp_path, shuiyinBuffer, (err) => {
-                    if (err) {
-                        reject(new HttpException('文件写入磁盘错误:' + err.toString(), 407))
-                    }
-                    resolver()
-                })
-            }).catch(err => {
-                ex = err
-            })
-            if (ex) {
-                throw ex
-            }
+            await this.fileUtil.write(temp_path,buffer)
+            await this.fileUtil.write(shuiyin_temp_path,shuiyinBuffer)
+            let ex : HttpException
             await new Promise((resolve, reject) => {
                 gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry('+' + x + '+' + y).dissolve(opacity).write(temp_path, err => {
                     if (err) reject(new HttpException('为图片添加水印出现错误:' + err.toString(), 407))
