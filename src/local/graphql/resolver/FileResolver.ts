@@ -39,7 +39,7 @@ export class FileResolver {
   /* 文件下载预处理接口
    当客户端需要下载某个文件时使用
    返回下载文件的方法、url、头信息
-   @Param bucket_name：文件所属空间名
+   @Param bucketName：文件所属空间名
    @Param type：       上传文件扩展名，即文件类型
    @Param name：       文件名
    @Return data.code：状态码，200为成功，其他为错误
@@ -55,22 +55,22 @@ export class FileResolver {
       message: '下载预处理成功',
       method: 'get',
       headers:{
-        bucket_name:'',
-        file_name:''
+        bucketName:'',
+        fileName:''
       },
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
     //验证参数存在
-    let { bucket_name, name, type } = body
-    if (!bucket_name || !name || !type) {
+    let { bucketName, name, type } = body
+    if (!bucketName || !name || !type) {
       data.message = '缺少参数'
       return data
     }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucket_name })
+    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
     //指定空间不存在
     if (!bucket) {
       data.code = 401
-      data.message = '指定空间' + bucket_name + '不存在'
+      data.message = '指定空间' + bucketName + '不存在'
       return data
     }
     //根据文件种类获取文件实例
@@ -86,15 +86,15 @@ export class FileResolver {
       data.message = '指定文件' + name + '不存在'
       return data
     }
-    data.headers.bucket_name = bucket.name
-    data.headers.file_name = file.name + '.' + file.type
+    data.headers.bucketName = bucket.name
+    data.headers.fileName = file.name + '.' + file.type
     return data
   }
 
   /*文件表单上传预处理接口
   @Param tags:文件标签数组
   @Param contentName：文件名
-  @Param bucket_name：上传空间名
+  @Param bucketName：上传空间名
   @Param md5：文件md5,在本地存储中可以用于校验文件
   @Param contentSecret：文件密钥，暂时不支持这个功能
   @Param imagePreProcessInfo：图片预处理信息
@@ -113,29 +113,29 @@ export class FileResolver {
       url: req.protocol + '://' + req.get('host') + '/local/file/upload',
       form: {
         md5: '',
-        fileName:'',
-        bucket_name:'',
+        rawName:'',
+        bucketName:'',
         tagsString:null,
         contentSecret:null,
         imagePreProcessString:null,
       }
     }
     //可以根据md5对文件内容进行校验
-    let { bucket_name, md5, contentName, contentSecret, tags, imagePreProcessInfo } = body
-    if (!bucket_name || !contentName) {
+    let { bucketName, md5, contentName, contentSecret, tags, imagePreProcessInfo } = body
+    if (!bucketName || !contentName) {
       data.code = 400
       data.message = '缺少参数'
       return data
     }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucket_name })
+    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
     if (!bucket) {
       data.code = 401
-      data.message = '指定空间' + bucket_name + '不存在'
+      data.message = '指定空间' + bucketName + '不存在'
       return data
     }
     data.form.md5 = md5
-    data.form.fileName = contentName
-    data.form.bucket_name = bucket.name
+    data.form.rawName = contentName
+    data.form.bucketName = bucket.name
     data.form.contentSecret = contentSecret
     data.form.tagsString = JSON.stringify(tags)
     data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
@@ -143,7 +143,7 @@ export class FileResolver {
   }
 
   /* 获取访问单个文件url方法 ，从后台获取
-     @Param bucket_name：空间名
+     @Param bucketName：空间名
      @Param name：       文件名，不包括扩展名
      @Param type:        文件类型
      @Param imagePostProcessInfo 图片后处理信息，转化为JSON字符串
@@ -159,8 +159,8 @@ export class FileResolver {
       url: req.protocol + '://' + req.get('host') + '/local/file/visit'
     }
     //验证参数存在，图片后处理信息可选
-    let { bucket_name, name, type, imagePostProcessInfo } = body
-    if (!bucket_name || !name || !type) {
+    let { bucketName, name, type, imagePostProcessInfo } = body
+    if (!bucketName || !name || !type) {
       data.code = 400
       data.message = '缺少参数'
       return data
@@ -169,7 +169,7 @@ export class FileResolver {
       .leftJoinAndSelect("bucket.image_config", "image_config")
       .leftJoinAndSelect("bucket.audio_config", "audio_config")
       .leftJoinAndSelect("bucket.video_config", "video_config")
-      .where("bucket.name = :name", { name: bucket_name })
+      .where("bucket.name = :name", { name: bucketName })
       .getOne()
     if (!bucket) {
       data.code = 401
@@ -186,7 +186,7 @@ export class FileResolver {
         return data
       }
       //所有文件调用统一的拼接Url方法 
-      data.url += '/' + bucket_name + '/' + name + '.' + type
+      data.url += '/' + bucketName + '/' + name + '.' + type
       //存储图片处理信息时
       if (imagePostProcessInfo) {
         //拼接图片处理的查询字符串
@@ -208,7 +208,7 @@ export class FileResolver {
   }
 
   /* 获取指定空间下文件信息以及相关访问url
-     @Param bucket_name：文件所属空间
+     @Param bucketName：文件所属空间
      @Return data.code： 状态码，200为成功，其他为错误
             data.message：响应信息
             data.baseUrl：访问文件的基本url
@@ -230,16 +230,16 @@ export class FileResolver {
       videos: [],
       documents: []
     }
-    let { bucket_name } = body
-    if (!bucket_name) {
+    let { bucketName } = body
+    if (!bucketName) {
       data.code = 400
       data.message = '缺少参数'
       return data
     }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucket_name })
+    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
     if (!bucket) {
       data.code = 401
-      data.message = '空间' + bucket_name + '不存在'
+      data.message = '空间' + bucketName + '不存在'
       return
     }
     await this.fileService.getAll(data, bucket)
@@ -248,7 +248,7 @@ export class FileResolver {
 
   /* 文件删除接口
      当客户端需要删除某个文件时使用，
-     @Param bucket_name：文件所属空间名
+     @Param bucketName：文件所属空间名
      @Param type：       文件扩展名，即文件类型
      @Param name：       文件名
      @Return data.code：状态码，200为成功，其他为错误
@@ -261,16 +261,16 @@ export class FileResolver {
       message: '删除成功'
     }
     //验证参数
-    let { bucket_name, type, name } = body
-    if (!bucket_name || !name || !type) {
+    let { bucketName, type, name } = body
+    if (!bucketName || !name || !type) {
       data.code = 400
       data.message = '缺少参数'
       return data
     }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucket_name })
+    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
     if (!bucket) {
       data.code = 401
-      data.message = '空间' + bucket_name + '不存在'
+      data.message = '空间' + bucketName + '不存在'
       return data
     }
     //根据文件种类，查找、删除数据库
@@ -287,7 +287,7 @@ export class FileResolver {
       //其他类型暂不支持
     }
     //删除目录下存储文件
-    let realPath = path.resolve(__dirname, '../../', 'store', bucket_name, name + '.' + type)
+    let realPath = path.resolve(__dirname, '../../', 'store', bucketName, name + '.' + type)
     if (!fs.existsSync(realPath)) {
       data.code = 404
       data.message = '要删除的文件不存在'

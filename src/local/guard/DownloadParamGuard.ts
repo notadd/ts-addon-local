@@ -4,12 +4,12 @@ import { Observable } from 'rxjs/Observable';
 @Guard()
 export class DownloadParamGuard implements CanActivate {
     canActivate(req, context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        let { bucket_name , file_name } = req.headers 
-        if(!bucket_name){
-            throw new HttpException('缺少参数bucket_name',400)
+        let { bucketName , fileName } = req.headers 
+        if(!bucketName){
+            throw new HttpException('缺少参数bucketName',400)
         }
-        if(!file_name){
-            throw new HttpException('缺少参数file_name',400)
+        if(!fileName){
+            throw new HttpException('缺少参数fileName',400)
         }
         return true
     }

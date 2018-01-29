@@ -1,7 +1,7 @@
 import { ImagePreProcessInfo } from './ImageProcessInfo'
 
 export interface UploadProcessBody {
-    bucket_name: string
+    bucketName: string
     md5: string
     contentName: string
     contentSecret?: string

@@ -1,7 +1,7 @@
 
 type Query{
   #download pretreatment 
-  downloadProcess(bucket_name:String,name:String,type:String):DownloadProcessData
+  downloadProcess(bucketName:String,name:String,type:String):DownloadProcessData
 }
 
 #return data 
@@ -21,7 +21,7 @@ type DownloadProcessData{
 #download header type
 type DownloadHeaders{
     #bucket name 
-    bucket_name:String
+    bucketName:String
     #file name
-    file_name:String
+    fileName:String
 }

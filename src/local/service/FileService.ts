@@ -38,7 +38,7 @@ export class FileService {
 
 
     async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<void> {
-        let { imagePreProcessString, contentSecret, tagsString, md5 ,bucket_name, fileName} = obj
+        let { imagePreProcessString, contentSecret, tagsString, md5 ,bucketName, rawName} = obj
         let imageProcessInfo: ImagePreProcessInfo, tags: string[]
         try {
             if (tagsString) {
@@ -64,7 +64,7 @@ export class FileService {
         }
         //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
         let metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo)
-        let type: string = fileName.substring(fileName.lastIndexOf('.') + 1)
+        let type: string = rawName.substring(rawName.lastIndexOf('.') + 1)
         let kind: string = this.kindUtil.getKind(type)
         if (kind === 'image') {
             let exist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id })

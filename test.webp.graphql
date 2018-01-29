@@ -98,6 +98,8 @@ mutation uploadprocess{
       contentSecret
       tagsString
       md5
+      bucket_name
+      fileName
     }
   }
 }

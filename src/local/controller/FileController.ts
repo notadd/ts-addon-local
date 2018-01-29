@@ -50,9 +50,9 @@ export class FileController {
     @Get('/download')
     @UseGuards(DownloadParamGuard)
     async download( @Headers() headers: HeaderParam, @Response() res): Promise<any> {
-        let { bucket_name, file_name} = headers
+        let { bucketName, fileName} = headers
         //文件绝对路径，这里并不查询数据库，直接从文件夹获取
-        let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, file_name)
+        let realPath: string = path.resolve(__dirname, '../', 'store', bucketName, fileName)
         //文件不存在，返回404
         if (!fs.existsSync(realPath)) {
             throw new HttpException('请求下载的文件不存在', 404)
@@ -60,11 +60,11 @@ export class FileController {
         //下载文件的buffer，不进行处理，返回原始文件
         let buffer: Buffer = fs.readFileSync(realPath)
         //文件类型响应头
-        res.setHeader('Content-Type', mime.getType(file_name))
+        res.setHeader('Content-Type', mime.getType(fileName))
         //文件大小响应头
         res.setHeader('Content-Length', Buffer.byteLength(buffer))
         //下载响应头，不管浏览器支持不支持显示文件mime，都会直接弹出下载
-        res.setHeader('Content-Disposition', 'attachment; filename=' + file_name)
+        res.setHeader('Content-Disposition', 'attachment; filename=' + fileName)
         //发送文件buffer
         res.end(buffer)
         return
@@ -83,13 +83,13 @@ export class FileController {
             .leftJoinAndSelect("bucket.image_config", "image_config")
             .leftJoinAndSelect("bucket.audio_config", "audio_config")
             .leftJoinAndSelect("bucket.video_config", "video_config")
-            .where("bucket.name = :name", { name: obj.bucket_name })
+            .where("bucket.name = :name", { name: obj.bucketName })
             .getOne()
         if (!bucket) {
-            throw new HttpException('指定空间' + obj.bucket_name + '不存在', 401)
+            throw new HttpException('指定空间' + obj.bucketName + '不存在', 401)
         }
         //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
-        if (file.name !== obj.fileName) {
+        if (file.name !== obj.rawName) {
             throw new HttpException('上传文件名' + file.name + '与请求头中文件名' + obj.fileName + '不符', 403)
         }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
@@ -110,12 +110,12 @@ export class FileController {
        文件存在且token正确，处理后返回，不存在返回错误 
        这个接口不需要Guard，因为如果缺少参数就找不到路由   
     */
-    @Get('/visit/:bucket_name/:fileName')
+    @Get('/visit/:bucketName/:fileName')
     async visit( @Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
-        let { bucket_name, fileName } = param
+        let { bucketName, fileName } = param
         let { imagePostProcessString, token } = query
         //判断文件是否存在
-        let realPath: string = path.resolve(__dirname, '../', 'store', bucket_name, fileName)
+        let realPath: string = path.resolve(__dirname, '../', 'store', bucketName, fileName)
         if (!fs.existsSync(realPath)) {
             throw new HttpException('指定文件不存在', 404)
         }
@@ -124,10 +124,10 @@ export class FileController {
             .leftJoinAndSelect("bucket.image_config", "image_config")
             .leftJoinAndSelect("bucket.audio_config", "audio_config")
             .leftJoinAndSelect("bucket.video_config", "video_config")
-            .where("bucket.name = :name", { name: bucket_name })
+            .where("bucket.name = :name", { name: bucketName })
             .getOne()
         if (!bucket) {
-            throw new HttpException('指定空间' + bucket_name + '不存在', 401)
+            throw new HttpException('指定空间' + bucketName + '不存在', 401)
         }
         //私有空间需要验证token
         if (bucket.public_or_private === 'private') {

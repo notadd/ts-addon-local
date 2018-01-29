@@ -1,6 +1,6 @@
 type Mutation{
    #upload pretreatment 
-   uploadProcess(bucket_name:String,md5:String,contentName:String,contentSecret:String,tags:[String],imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
+   uploadProcess(bucketName:String,md5:String,contentName:String,contentSecret:String,tags:[String],imagePreProcessInfo:ImagePreProcessInfo):UploadProcessData
 }
 
 #upload request form 
@@ -8,9 +8,9 @@ type UploadProcessForm{
     #md5 of file
     md5:String
     #bucket name
-    bucket_name:String
+    bucketName:String
     #file name
-    fileName:String
+    rawName:String
     #file secret key
     contentSecret:String
     #array of tag

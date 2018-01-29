@@ -18,11 +18,11 @@ export class UploadParamGuard implements CanActivate {
                 if(!fields){
                     reject(new HttpException('表单字段不存在',400))
                 }
-                if(!fields.bucket_name){
-                    reject(new HttpException('缺少参数bucket_name',400))
+                if(!fields.bucketName){
+                    reject(new HttpException('缺少参数bucketName',400))
                 }
-                if(!fields.fileName){
-                    reject(new HttpException('缺少参数fileName',400))
+                if(!fields.rawName){
+                    reject(new HttpException('缺少参数rawName',400))
                 }
                 if(!fields.md5){
                     reject(new HttpException('缺少参数md5',400))

@@ -37,12 +37,26 @@ async function create(){
     })
 }
 
-function alpha(){
-    gm('../../test.jpeg').convert()
-    .channel('alpha')
-    .fx('0.5')
-    .write('../../alpha.jpeg',function (err){
+function format(){
+    gm('../../test.jpeg').write('../../test.png',function (err){
         console.log(err)
     })
 }
 
+
+function png32(){
+    gm('../../test.png').define('png:format=png32').write('../../test32.png',err=>{
+        console.log(err)
+    })
+}
+//png32()
+//console.log( gm('../../test.png').define('png:format','png32'))
+
+function alpha(){
+    gm('../../test32.png').channel('alpha')
+    //.fx('0.5')
+    .write('../../alpha.png',function (err){
+        console.log(err)
+    })
+}
+alpha()

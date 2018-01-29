@@ -3,6 +3,6 @@ export interface UploadForm{
     contentSecret?:string
     tagsString?:string
     md5:string
-    bucket_name:string
-    fileName:string
+    bucketName:string
+    rawName:string
 }

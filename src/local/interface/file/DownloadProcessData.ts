@@ -3,8 +3,8 @@ export interface DownloadProcessData{
     message:string
     method:string
     headers: {
-        bucket_name:string
-        file_name:string
+        bucketName:string
+        fileName:string
     }
     url:string
 }

@@ -7,8 +7,8 @@ export interface UploadProcessData{
       imagePreProcessString?:string
       contentSecret?: string
       tagsString?: string
-      bucket_name:string
-      fileName:string
+      bucketName:string
+      rawName:string
       md5:string
     }
 }
