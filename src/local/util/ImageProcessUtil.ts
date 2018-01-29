@@ -1,22 +1,25 @@
 import { Component, Inject, HttpException } from '@nestjs/common';
-import { ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor, Blur } from '../interface/file/ImageProcessInfo'
-import { ImageMetadata } from '../interface/file/ImageMetadata'
+import { ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor, Blur } from '../interface/file/ImageProcessInfo';
+import { ImageMetadata } from '../interface/file/ImageMetadata';
+import { Bucket } from '../model/Bucket';
 import { KindUtil } from './KindUtil';
-import { Bucket } from '../model/Bucket'
-import { SharpInstance } from 'sharp'
+import { FileUtil } from './FileUtil';
+import { SharpInstance } from 'sharp';
 import { isArray } from 'util';
-import * as sharp from 'sharp'
-import * as crypto from 'crypto'
-import * as path from 'path'
-import * as fs from 'fs'
-import * as gm from 'gm'
+import * as sharp from 'sharp';
+import * as crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as gm from 'gm';
+
 
 /* 图片处理工具类 */
 @Component()
 export class ImageProcessUtil {
     private readonly gravity: Set<string>
     constructor(
-        private readonly kindUtil: KindUtil
+        private readonly kindUtil: KindUtil,
+        private readonly fileUtil: FileUtil
     ) {
         //重心集合，在裁剪与水印中使用
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
@@ -31,21 +34,7 @@ export class ImageProcessUtil {
         //为路径时
         if ((typeof pathOrBuffer) === 'string') {
             let ex: HttpException
-            await new Promise((resolver, reject) => {
-                //获取图片大小
-                fs.stat(pathOrBuffer, (err, stats) => {
-                    if (err) {
-                        reject(new HttpException('获取文件状态错误', 410))
-                    }
-                    size = stats.size
-                    resolver()
-                })
-            }).catch(err => {
-                ex = err
-            })
-            if (ex) {
-                throw ex
-            }
+            size = await this.fileUtil.size(pathOrBuffer as string)
             //计算sha256为图片名称
             name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
         } else {
@@ -72,34 +61,20 @@ export class ImageProcessUtil {
         let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
-        let ex: HttpException
-        //根据绝对路径保存图片
-        await new Promise((resolver, reject) => {
-            fs.writeFile(absolute_path, buffer, (err) => {
-                if (err) {
-                    reject(new HttpException('文件写入磁盘错误:' + err.toString(), 407))
-                }
-                resolver()
-            })
-        }).catch(err => {
-            ex = err
-        })
-        if (ex) {
-            throw ex
-        }
+        await this.fileUtil.write(absolute_path, buffer)
         //返回处理后元数据
         return metadata
     }
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
     async processAndOutput(bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
-
         //返回Buffer对象
         return await this.postProcess(imagePath, bucket, imageProcessInfo)
     }
 
 
     //sharp实例预处理函数，用于上传预处理使用，只支持缩放、裁剪、水印、旋转四个参数
+    //这个函数直接输出处理后的buffer，因为其中可能生成临时文件，临时文件删除后sharp实例获取Buffer会出错
     async preProcess(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePreProcessInfo): Promise<Buffer> {
         let instance: SharpInstance = sharp(imagePath)
         //因为sharp支持角度过少，旋转采用gm生成旋转临时图片，保存临时图片路径，最后删除
@@ -161,31 +136,34 @@ export class ImageProcessUtil {
             //预处理时，只有明确指定添加水印才会添加
             //水印在旋转之前添加，一起旋转
             if (watermark === true) {
+                //获取生成的临时图片路径，这个图片已经添加了水印
                 watermarkImagePath = await this.watermark(bucket, instance, metadata, watermark, width2, height2)
-                //重新设置sharp实例引用，为生成的临时图片，这个图片已经使用gm加上了水印
+                //重新设置sharp实例引用，为生成的临时图片，这个图片已经使用gm加上了水印，这里必然加水印
                 instance = sharp(watermarkImagePath)
             }
             if (rotate) {
+                //获取中间生成的临时文件路径，因为旋转需要使用gm
                 rotateImagePath = await this.rotate(instance, metadata, rotate, width2, height2)
+                //重新获取Sharp实例
                 instance = sharp(rotateImagePath)
             }
             if (format) this.format(instance, format)
             if (lossless) {
                 this.output(instance, format ? format : metadata.format, lossless, null, null)
             }
-            return await instance.toBuffer()
         } catch (err) {
             throw new HttpException(err.toString(), 408)
-        } finally {
-            //删除旋转临时图片
-            if (rotateImagePath && fs.existsSync(rotateImagePath)) {
-                fs.unlinkSync(rotateImagePath)
-            }
-            //删除水印临时图片
-            if (watermarkImagePath && fs.existsSync(watermarkImagePath)) {
-                fs.unlinkSync(watermarkImagePath)
-            }
+        } 
+        //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
+        //删除旋转临时图片
+        if (rotateImagePath) {
+            await this.fileUtil.deleteIfExist(rotateImagePath)
         }
+        //删除水印临时图片
+        if (watermarkImagePath) {
+            await this.fileUtil.deleteIfExist(watermarkImagePath)
+        }
+        return await instance.toBuffer()
     }
 
     //sharp实例后处理函数、用于输出访问图片时使用
@@ -247,6 +225,7 @@ export class ImageProcessUtil {
                     height2 = metadata.height
                 }
             }
+            //这里无论如何肉会进入水印方法，然后根据配置与参数决定是否添加水印
             watermarkImagePath = await this.watermark(bucket, instance, metadata, watermark, width2, height2)
             //这里不一定会加水印，如果加了水印，要重新设置sharp实例为指向临时文件
             if (watermarkImagePath) {
@@ -263,24 +242,20 @@ export class ImageProcessUtil {
             if (lossless || quality || progressive) {
                 this.output(instance, format ? format : metadata.format, lossless, quality, progressive)
             }
-            //如果旋转90度，计算水印的原图宽高要调换
-            if (rotate && rotate === 90) {
-                [width2, height2] = [height2, width2]
-            }
-
-            return await instance.toBuffer()
+            
         } catch (err) {
             throw new HttpException(err.toString(), 408)
-        } finally {
-            //删除旋转临时图片
-            if (rotateImagePath && fs.existsSync(rotateImagePath)) {
-                fs.unlinkSync(rotateImagePath)
-            }
-            //删除水印临时图片
-            if (watermarkImagePath && fs.existsSync(watermarkImagePath)) {
-                fs.unlinkSync(watermarkImagePath)
-            }
         }
+        //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
+        //删除旋转临时图片
+        if (rotateImagePath) {
+            await this.fileUtil.deleteIfExist(rotateImagePath)
+        }
+        //删除水印临时图片
+        if (watermarkImagePath) {
+            await this.fileUtil.deleteIfExist(watermarkImagePath)
+        }
+        return await instance.toBuffer()
     }
 
 
@@ -612,13 +587,13 @@ export class ImageProcessUtil {
             }
             //方位为北
             else if (gravity === 'north') {
-                x=0
+                x = 0
                 gravity = 'North'
             }
             //方位为中心
             else if (gravity === 'center') {
-                x=0
-                y=0
+                x = 0
+                y = 0
                 gravity = 'Center'
             } else {
                 throw new Error('水印方位不正确')
