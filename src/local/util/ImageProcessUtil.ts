@@ -16,7 +16,7 @@ import * as gm from 'gm'
 export class ImageProcessUtil {
     private readonly gravity: Set<string>
     constructor(
-        private readonly kindUtil:KindUtil
+        private readonly kindUtil: KindUtil
     ) {
         //重心集合，在裁剪与水印中使用
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
@@ -30,20 +30,20 @@ export class ImageProcessUtil {
         let size, name
         //为路径时
         if ((typeof pathOrBuffer) === 'string') {
-            let ex:HttpException
+            let ex: HttpException
             await new Promise((resolver, reject) => {
                 //获取图片大小
                 fs.stat(pathOrBuffer, (err, stats) => {
                     if (err) {
-                        reject(new HttpException('获取文件状态错误',410))
+                        reject(new HttpException('获取文件状态错误', 410))
                     }
                     size = stats.size
                     resolver()
                 })
-            }).catch(err=>{
+            }).catch(err => {
                 ex = err
             })
-            if(ex){
+            if (ex) {
                 throw ex
             }
             //计算sha256为图片名称
@@ -74,20 +74,20 @@ export class ImageProcessUtil {
         let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
-        let ex:HttpException
+        let ex: HttpException
         //根据绝对路径保存图片
         await new Promise((resolver, reject) => {
             fs.writeFile(absolute_path, buffer, (err) => {
                 if (err) {
-                    reject(new HttpException('文件写入磁盘错误:'+err.toString(),407))
+                    reject(new HttpException('文件写入磁盘错误:' + err.toString(), 407))
                 }
                 resolver()
             })
-        }).catch(err=>{
+        }).catch(err => {
             ex = err
         })
         if (ex) {
-           throw ex
+            throw ex
         }
         //返回处理后元数据
         return metadata
@@ -102,12 +102,12 @@ export class ImageProcessUtil {
 
 
     //sharp实例预处理函数，用于上传预处理使用，只支持缩放、裁剪、水印、旋转四个参数
-    async preProcess(imagePath: string, bucket: Bucket, imageProcessInfo:ImagePreProcessInfo): Promise<SharpInstance> {
+    async preProcess(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePreProcessInfo): Promise<SharpInstance> {
         let instance: SharpInstance = sharp(imagePath)
-        if(!imageProcessInfo){
+        if (!imageProcessInfo) {
             return instance
         }
-        let { resize, tailor, watermark, rotate, format , lossless} = imageProcessInfo as ImagePostProcessInfo
+        let { resize, tailor, watermark, rotate, format, lossless } = imageProcessInfo as ImagePostProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
         try {
@@ -151,30 +151,38 @@ export class ImageProcessUtil {
                     let result1 = this.resize(instance, resize, metadata.width, metadata.height)
                     width2 = result1.width
                     height2 = result1.height
-                }else{
+                } else {
                     width2 = metadata.width
                     height2 = metadata.height
-                } 
+                }
             }
-            await this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate, width2, height2)
             if (format) this.format(instance, format)
-            if (lossless){
-                this.output(instance,format?format:metadata.format,lossless,null,null)
-            } 
+            if (lossless) {
+                this.output(instance, format ? format : metadata.format, lossless, null, null)
+            }
+            //水印统一最后添加
+            //预处理时，只有明确指定添加水印才会添加
+            if (watermark === true) {
+                //如果旋转90度，计算水印的原图宽高要调换
+                if (rotate && rotate === 90) {
+                    [width2, height2] = [height2, width2]
+                }
+                await this.watermark(bucket, instance, watermark, width2, height2)
+            }
             return instance
         } catch (err) {
-            throw new HttpException(err.toString(),408)
+            throw new HttpException(err.toString(), 408)
         }
     }
 
     //sharp实例后处理函数、用于输出访问图片时使用
     async postProcess(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo): Promise<SharpInstance> {
         let instance: SharpInstance = sharp(imagePath)
-        if(!imageProcessInfo){
+        if (!imageProcessInfo) {
             return instance
         }
-        let { resize, tailor, watermark, rotate,  blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo
+        let { resize, tailor, watermark, rotate, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo
         //获取处理之前元数据
         let metadata: ImageMetadata = await this.getMetadata(imagePath)
         try {
@@ -218,23 +226,28 @@ export class ImageProcessUtil {
                     let result1 = this.resize(instance, resize, metadata.width, metadata.height)
                     width2 = result1.width
                     height2 = result1.height
-                }else{
+                } else {
                     width2 = metadata.width
                     height2 = metadata.height
-                } 
+                }
             }
-            await this.watermark(bucket, instance, watermark, width2, height2)
             if (rotate) this.rotate(instance, rotate, width2, height2)
             if (blur) this.blur(instance, blur)
             if (sharpen) this.sharpen(instance, sharpen)
             if (format) this.format(instance, format)
             if (strip) this.strip(instance, strip)
-            if (lossless || quality || progressive){
-                this.output(instance,format?format:metadata.format,lossless,quality,progressive)
-            } 
+            if (lossless || quality || progressive) {
+                this.output(instance, format ? format : metadata.format, lossless, quality, progressive)
+            }
+            //如果旋转90度，计算水印的原图宽高要调换
+            if (rotate && rotate === 90) {
+                [width2, height2] = [height2, width2]
+            }
+            //访问图片时，默认按照配置决定是否启用水印，可以使用设置覆盖配置
+            await this.watermark(bucket, instance, watermark, width2, height2)
             return instance
         } catch (err) {
-            throw new HttpException(err.toString(),408)
+            throw new HttpException(err.toString(), 408)
         }
     }
 
@@ -352,13 +365,13 @@ export class ImageProcessUtil {
             if (data.width >= preWidth && data.height < preHeight) {
                 //按照高度缩放比缩放
                 height = data.height
-                width = data.width * data.height / preHeight
+                width = preWidth * data.height / preHeight
             }
             //宽度大于，而高度小于等于时
             else if (data.width < preWidth && data.height >= preHeight) {
                 //按照宽度缩放比缩放
                 width = data.width
-                height = data.height * data.width / preWidth
+                height = preHeight * data.width / preWidth
             }
             //两个都大于时
             else if (data.width < preWidth && data.height < preHeight) {
@@ -383,12 +396,12 @@ export class ImageProcessUtil {
             if (data.width <= preWidth && data.height > preHeight) {
                 //按照高度缩放比缩放
                 height = data.height
-                width = data.width * data.height / preHeight
+                width = preWidth * data.height / preHeight
             }
             //当宽度小于限制值，高度大于等于限制值时，按照宽度缩放比缩放
             else if (data.width > preWidth && data.height <= preHeight) {
                 width = data.width
-                height = data.height * data.width / preWidth
+                height = preHeight * data.width / preWidth
             }
             //当宽、高都小于限制值时
             else if (data.width > preWidth && data.height > preHeight) {
@@ -418,7 +431,7 @@ export class ImageProcessUtil {
     //中心：center，宽度、高度分别对称于垂直、水平中间线
     //然后计算偏移，x正向为右、负向为左，y正向为下，负向为上，如果偏移后超出外边界，则自动丢弃
     //在测试中出现了超出内边界出现not found错误的问题，可能是暂时错误，暂时不管
-    tailor(instance: SharpInstance, tailor: Tailor, preWidth: number, preHeight: number):any{
+    tailor(instance: SharpInstance, tailor: Tailor, preWidth: number, preHeight: number): any {
         //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
         let { x, y, gravity } = tailor
         //声明裁剪宽高，初始值为参数值
@@ -495,11 +508,12 @@ export class ImageProcessUtil {
             height = preHeight - top
         }
         //为sharp实例添加裁剪处理
-        instance.extract({ 
-            left:Math.floor(left), 
-            top:Math.floor(top), 
-            width:Math.floor(width), 
-            height:Math.floor(height) })
+        instance.extract({
+            left: Math.floor(left),
+            top: Math.floor(top),
+            width: Math.floor(width),
+            height: Math.floor(height)
+        })
         return { width, height }
     }
 
@@ -508,7 +522,8 @@ export class ImageProcessUtil {
     //根据gravity给水印图片定位，如果是四个角，则角点重合，如果是四条边，则边重合，关于中心线对称，如果是中心，则关于两条中心线对称
     //根据x、y进行偏移，x、y只支持正整数，如果是四个角，都是向原图内部偏移，东西两条边，只向内部偏移x，南北两条边，只向内部偏移y，重心不偏移
     //且水印图片宽高都不能超过原图，超过不能输出，如果水印图片宽高加上相应偏移超过了超过了原图宽高，则偏移会自动调整
-    async watermark(bucket: Bucket, instance: SharpInstance, watermark: boolean, preWidth: number, preHeight: number):Promise<void>{
+    async watermark(bucket: Bucket, instance: SharpInstance, watermark: boolean, preWidth: number, preHeight: number): Promise<void> {
+        console.log({ preWidth, preHeight })
         let enable: boolean
         if (watermark === true) enable = true
         else if (watermark === false) enable = false
@@ -522,16 +537,16 @@ export class ImageProcessUtil {
             //透明度暂时不使用
             let optcity = bucket.image_config.watermark_opacity
             let gravity = bucket.image_config.watermark_gravity
-            let shuiyin_path = path.resolve(__dirname,'../')+bucket.image_config.watermark_save_key
+            let shuiyin_path = path.resolve(__dirname, '../') + bucket.image_config.watermark_save_key
             //水印图片宽高
             let { width, height } = await this.getMetadata(shuiyin_path)
             //计算短边自适应后水印图片宽高
             if (preWidth < preHeight) {
-                height = height * preWidth * ws / (100*width)
+                height = height * preWidth * ws / (100 * width)
                 width = preWidth * ws / 100
             } else {
-                width = width * preHeight * ws / (100*height)
-                height = preHeight * ws / 100  
+                width = width * preHeight * ws / (100 * height)
+                height = preHeight * ws / 100
             }
             //水印图片左偏移，顶部偏移
             let left, top
@@ -611,20 +626,21 @@ export class ImageProcessUtil {
             }) */
             let buffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
             //为sharp实例添加水印处理
-            instance.overlayWith(buffer, { 
-                left:Math.floor(left), 
-                top:Math.floor(top) })
+            instance.overlayWith(buffer, {
+                left: Math.floor(left),
+                top: Math.floor(top)
+            })
         }
     }
 
     /* 旋转，sharp只支持90、180、270度，由于sharp的旋转，不会改变宽高，所以90、180度旋转后需要宽高倒置 */
-    rotate(instance: SharpInstance, rotate: number ,width:number , height:number) {
+    rotate(instance: SharpInstance, rotate: number, width: number, height: number) {
         if (rotate !== 90 && rotate !== 180 && rotate !== 270) {
             throw new Error('旋转角度不正确')
         }
         instance.rotate(rotate)
-        if(rotate===90||rotate===270){
-            instance.resize(Math.floor(height),Math.floor(width))
+        if (rotate === 90 || rotate === 270) {
+            instance.resize(Math.floor(height), Math.floor(width))
         }
     }
 
@@ -652,20 +668,20 @@ export class ImageProcessUtil {
        toFormat方法也支持选项，其中质量、渐进、无损等选项可以设置,虽然函数定义中没有无损选项，但实际上可以处理无损参数
        目前质量、无损、渐进等在output中设置，format只支持jpeg、png、webp、tiff等格式，不支持bmp、gif等格式
     */
-    format(instance:SharpInstance,format:string){
-        if(this.kindUtil.isImage(format)){
+    format(instance: SharpInstance, format: string) {
+        if (this.kindUtil.isImage(format)) {
             instance.toFormat(format)
-        }else{
+        } else {
             throw new Error('格式参数错误')
         }
     }
 
     /* 去除元信息后稍微变大一点 */
-    strip(instance:SharpInstance,strip:boolean){
-        if(strip===true){
-        }else if(strip===false){
+    strip(instance: SharpInstance, strip: boolean) {
+        if (strip === true) {
+        } else if (strip === false) {
             instance.withMetadata()
-        }else{
+        } else {
             throw new Error('去除元信息参数错误')
         }
     }
@@ -674,38 +690,38 @@ export class ImageProcessUtil {
        渐进显示会变大
 
     */
-    output(instance:SharpInstance,format:string,lossless:boolean,quality:number,progressive:boolean){
-        if(lossless!==undefined&&lossless!==null&&lossless!==true&&lossless!==false){
+    output(instance: SharpInstance, format: string, lossless: boolean, quality: number, progressive: boolean) {
+        if (lossless !== undefined && lossless !== null && lossless !== true && lossless !== false) {
             throw new Error('无损参数错误')
         }
-        if(quality!==undefined&&quality!==null&&!Number.isInteger(quality)){
+        if (quality !== undefined && quality !== null && !Number.isInteger(quality)) {
             throw new Error('质量参数错误')
         }
-        if(progressive!==undefined&&progressive!==null&&progressive!==true&&progressive!==false){
+        if (progressive !== undefined && progressive !== null && progressive !== true && progressive !== false) {
             throw new Error('渐进参数错误')
         }
-        let options:any =  {
-            force:true
+        let options: any = {
+            force: true
         }
-        if(lossless!==undefined&&lossless!==null) options.lossless = lossless
-        if(quality!==undefined&&quality!==null) options.quality = quality
-        if(progressive!==undefined&&progressive!==null) options.progressive = progressive
+        if (lossless !== undefined && lossless !== null) options.lossless = lossless
+        if (quality !== undefined && quality !== null) options.quality = quality
+        if (progressive !== undefined && progressive !== null) options.progressive = progressive
         //jpeg不支持无损，加上了也无所谓
-        if(format==='jpeg'){
+        if (format === 'jpeg') {
             instance.jpeg(options)
         }
         //png不支持质量、无损选项，加上了也不影响
-        else if(format==='png'){
+        else if (format === 'png') {
             instance.png(options)
         }
         //webp则三个都支持
-        else if(format==='webp'){
+        else if (format === 'webp') {
             instance.webp(options)
         }
         //tiff不支持渐进、无损选项，加上也无所谓
-        else if(format==='tiff'){
+        else if (format === 'tiff') {
             instance.tiff(options)
-        }else{
+        } else {
             //不支持对其他类型的无损、质量、渐进处理，但是不报错
         }
     }
