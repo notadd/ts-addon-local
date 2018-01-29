@@ -35,17 +35,6 @@ export class AbstractFile{
         nullable:false 
     })
     name: string;
-
-    //文件存储的绝对路径，方便使用
-    //绝对路径必须唯一
-    @Column({ 
-        name:'absolute_path',
-        type:'varchar',
-        length: 200,
-        nullable:false,
-        unique:true
-    })
-    absolute_path: string;
   
     @Column({ 
         name:'type',

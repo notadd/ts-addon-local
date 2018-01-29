@@ -190,8 +190,7 @@ export class ConfigService {
       image.width = metadata.width
       image.height = metadata.height
       image.size = metadata.size
-      image.absolute_path = path.resolve(__dirname,'../','store', buckets[i].name, metadata.name + '.' + metadata.format)
-      let isExist: Image = await this.imageRepository.findOne({ absolute_path:image.absolute_path })
+      let isExist: Image = await this.imageRepository.findOne({ name:metadata.name,bucketId:buckets[i].id})
       //只有指定路径图片不存在时才会保存
       if (!isExist) {
         try {
@@ -202,7 +201,7 @@ export class ConfigService {
           data.code = 403
           data.message = '保存水印图片出现错误' + err.toString()
           //保存图片出现错误，要删除存储图片
-          fs.unlinkSync(image.absolute_path)
+          fs.unlinkSync(path.resolve(__dirname,'../','store',buckets[i].name,image.name+'.'+image.type))
         }
         if (data.code === 403) {
           break
@@ -212,7 +211,8 @@ export class ConfigService {
       //不管图片是否已经存在，图片配置都需要更新
       try {
         await this.imageConfigRepository.updateById(buckets[i].image_config.id, {
-          watermark_save_key: image.absolute_path,
+          //水印路径为相对路径
+          watermark_save_key: '/store/'+buckets[i].name+'/'+image.name+'.'+image.type,
           watermark_gravity: obj.gravity,
           watermark_opacity: obj.opacity,
           watermark_ws: obj.ws,

@@ -522,7 +522,7 @@ export class ImageProcessUtil {
             //透明度暂时不使用
             let optcity = bucket.image_config.watermark_opacity
             let gravity = bucket.image_config.watermark_gravity
-            let shuiyin_path = bucket.image_config.watermark_save_key
+            let shuiyin_path = path.resolve(__dirname,'../')+bucket.image_config.watermark_save_key
             //水印图片宽高
             let { width, height } = await this.getMetadata(shuiyin_path)
             //计算短边自适应后水印图片宽高

@@ -38,7 +38,7 @@ export class FileService {
 
 
     async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<void> {
-        let { imagePreProcessString, contentSecret, tagsString, md5 ,bucketName, rawName} = obj
+        let { imagePreProcessString, contentSecret, tagsString, md5, bucketName, rawName } = obj
         let imageProcessInfo: ImagePreProcessInfo, tags: string[]
         try {
             if (tagsString) {
@@ -60,7 +60,7 @@ export class FileService {
                 }
             }
         } catch (err) {
-            throw new HttpException('JSON解析错误:' + err.toString(),405)
+            throw new HttpException('JSON解析错误:' + err.toString(), 405)
         }
         //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
         let metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo)
@@ -81,7 +81,6 @@ export class FileService {
             image.type = metadata.format
             image.width = metadata.width
             image.height = metadata.height
-            image.absolute_path = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
             if (tags) {
                 image.tags = tags
             }
@@ -91,7 +90,7 @@ export class FileService {
             try {
                 await this.imageRepository.save(image)
             } catch (err) {
-                throw new HttpException('文件保存到数据库失败:'+err.toString(),406)
+                throw new HttpException('文件保存到数据库失败:' + err.toString(), 406)
             }
             return
         } else {
@@ -99,25 +98,25 @@ export class FileService {
         }
     }
 
-    async getAll(data:any,bucket:Bucket){
+    async getAll(data: any, bucket: Bucket) {
         data.files = await bucket.files
         data.images = await bucket.images
-        data.audios  = await bucket.audios
+        data.audios = await bucket.audios
         data.videos = await bucket.videos
         data.documents = await bucket.documents
-       
+
         let tokenUtil = this.tokenUtil
-        let addUrl = async function (value){
-          value.url = '/'+bucket.name+'/'+value.name+'.'+value.type
-          if(bucket.public_or_private==='private'){
-            value.url+='?token='+await tokenUtil.getToken(data.baseUrl+value.url,bucket)
-          }
+        let addUrl = async function (value) {
+            value.url = '/' + bucket.name + '/' + value.name + '.' + value.type
+            if (bucket.public_or_private === 'private') {
+                value.url += '?token=' + await tokenUtil.getToken(data.baseUrl + value.url, bucket)
+            }
         }
         await data.files.forEach(addUrl)
         await data.images.forEach(addUrl)
         await data.audios.forEach(addUrl)
         await data.videos.forEach(addUrl)
         await data.documents.forEach(addUrl)
-        return 
-      }
+        return
+    }
 }
