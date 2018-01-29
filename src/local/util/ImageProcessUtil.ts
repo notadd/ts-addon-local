@@ -162,9 +162,13 @@ export class ImageProcessUtil {
             //水印在旋转之前添加，一起旋转
             if (watermark === true) {
                 watermarkImagePath = await this.watermark(bucket, instance, metadata, watermark, width2, height2)
+                //重新设置sharp实例引用，为生成的临时图片，这个图片已经使用gm加上了水印
                 instance = sharp(watermarkImagePath)
             }
-            if (rotate) rotateImagePath = await this.rotate(instance, rotate, width2, height2)
+            if (rotate) {
+                rotateImagePath = await this.rotate(instance, metadata, rotate, width2, height2)
+                instance = sharp(rotateImagePath)
+            }
             if (format) this.format(instance, format)
             if (lossless) {
                 this.output(instance, format ? format : metadata.format, lossless, null, null)
@@ -173,14 +177,14 @@ export class ImageProcessUtil {
         } catch (err) {
             throw new HttpException(err.toString(), 408)
         } finally {
-            /* //删除旋转临时图片
+            //删除旋转临时图片
             if (rotateImagePath && fs.existsSync(rotateImagePath)) {
                 fs.unlinkSync(rotateImagePath)
             }
             //删除水印临时图片
             if (watermarkImagePath && fs.existsSync(watermarkImagePath)) {
                 fs.unlinkSync(watermarkImagePath)
-            } */
+            }
         }
     }
 
@@ -191,6 +195,7 @@ export class ImageProcessUtil {
         //因为sharp不支持水印透明度，采用gm添加水印，因为gm不支持水印图片大小调整，则生成临时水印图片，最后删除
         let rotateImagePath: string, watermarkImagePath: string
         if (!imageProcessInfo) {
+            //由于try块最后finally要删除临时图片，所以这里需要生成buffer，删除图片之后生成buffer出错
             return await instance.toBuffer()
         }
         let { resize, tailor, watermark, rotate, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo
@@ -242,8 +247,15 @@ export class ImageProcessUtil {
                     height2 = metadata.height
                 }
             }
-            watermarkImagePath = await this.watermark(bucket, instance,metadata, watermark, width2, height2)
-            if (rotate) rotateImagePath = await this.rotate(instance, rotate, width2, height2)
+            watermarkImagePath = await this.watermark(bucket, instance, metadata, watermark, width2, height2)
+            //这里不一定会加水印，如果加了水印，要重新设置sharp实例为指向临时文件
+            if (watermarkImagePath) {
+                instance = sharp(watermarkImagePath)
+            }
+            if (rotate) {
+                rotateImagePath = await this.rotate(instance, metadata, rotate, width2, height2)
+                instance = sharp(rotateImagePath)
+            }
             if (blur) this.blur(instance, blur)
             if (sharpen) this.sharpen(instance, sharpen)
             if (format) this.format(instance, format)
@@ -542,7 +554,7 @@ export class ImageProcessUtil {
     //根据gravity给水印图片定位，如果是四个角，则角点重合，如果是四条边，则边重合，关于中心线对称，如果是中心，则关于两条中心线对称
     //根据x、y进行偏移，x、y只支持正整数，如果是四个角，都是向原图内部偏移，东西两条边，只向内部偏移x，南北两条边，只向内部偏移y，重心不偏移
     //且水印图片宽高都不能超过原图，超过不能输出，如果水印图片宽高加上相应偏移超过了超过了原图宽高，则偏移会自动调整
-    async watermark(bucket: Bucket, instance: SharpInstance,metadata:ImageMetadata,watermark: boolean, preWidth: number, preHeight: number): Promise<string> {
+    async watermark(bucket: Bucket, instance: SharpInstance, metadata: ImageMetadata, watermark: boolean, preWidth: number, preHeight: number): Promise<string> {
         let enable: boolean
         if (watermark === true) enable = true
         else if (watermark === false) enable = false
@@ -585,22 +597,28 @@ export class ImageProcessUtil {
             }
             //方位为东
             else if (gravity === 'east') {
+                y = 0
                 gravity = 'East'
             }
             //方位为西
             else if (gravity === 'west') {
+                y = 0
                 gravity = 'West'
             }
             //方位为南
             else if (gravity === 'south') {
+                x = 0
                 gravity = 'South'
             }
             //方位为北
             else if (gravity === 'north') {
+                x=0
                 gravity = 'North'
             }
             //方位为中心
             else if (gravity === 'center') {
+                x=0
+                y=0
                 gravity = 'Center'
             } else {
                 throw new Error('水印方位不正确')
@@ -615,8 +633,8 @@ export class ImageProcessUtil {
             }
             let buffer: Buffer = await instance.toBuffer()
             let shuiyinBuffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
-            let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw' + (+new Date())+'.'+metadata.format)
-            let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin' + (+new Date())+shuiyin_path.substring(shuiyin_path.lastIndexOf('.')))
+            let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw' + (+new Date()) + '.' + metadata.format)
+            let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin' + (+new Date()) + shuiyin_path.substring(shuiyin_path.lastIndexOf('.')))
             let ex: HttpException
             //根据绝对路径保存临时图片,这个是原图
             await new Promise((resolver, reject) => {
@@ -647,7 +665,7 @@ export class ImageProcessUtil {
                 throw ex
             }
             await new Promise((resolve, reject) => {
-                gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry('+'+x+'+'+y).dissolve(opacity).write(temp_path, err => {
+                gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry('+' + x + '+' + y).dissolve(opacity).write(temp_path, err => {
                     if (err) reject(new HttpException('为图片添加水印出现错误:' + err.toString(), 407))
                     resolve()
                 })
@@ -660,16 +678,18 @@ export class ImageProcessUtil {
             let a = true
             fs.unlinkSync(shuiyin_temp_path)
             return temp_path
+        } else {
+            return null
         }
     }
 
     /* 旋转，sharp只支持90、180、270度，由于sharp的旋转，不会改变宽高，所以90、180度旋转后需要宽高倒置 */
-    async rotate(instance: SharpInstance, rotate: number, width: number, height: number): Promise<string> {
+    async rotate(instance: SharpInstance, metadata: ImageMetadata, rotate: number, width: number, height: number): Promise<string> {
         if (!Number.isInteger(rotate)) {
             throw new Error('旋转角度不正确')
         }
         let buffer: Buffer = await instance.toBuffer()
-        let temp_path = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '')
+        let temp_path = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '.' + metadata.format)
         let ex: HttpException
         //根据绝对路径保存图片
         await new Promise((resolver, reject) => {
@@ -696,7 +716,6 @@ export class ImageProcessUtil {
         if (ex) {
             throw ex
         }
-        instance = sharp(temp_path)
         return temp_path
     }
 
