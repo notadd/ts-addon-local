@@ -93,7 +93,7 @@ export class ImageProcessUtil {
 
     //根据图片处理信息处理指定路径图片，返回内存中字节存储,用于向客户端输出图片
     async processAndOutput(bucket: Bucket, imagePath: string, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<Buffer> {
-        
+
         //返回Buffer对象
         return await this.postProcess(imagePath, bucket, imageProcessInfo)
     }
@@ -161,7 +161,8 @@ export class ImageProcessUtil {
             //预处理时，只有明确指定添加水印才会添加
             //水印在旋转之前添加，一起旋转
             if (watermark === true) {
-                watermarkImagePath = await this.watermark(bucket, instance, watermark, width2, height2)
+                watermarkImagePath = await this.watermark(bucket, instance, metadata, watermark, width2, height2)
+                instance = sharp(watermarkImagePath)
             }
             if (rotate) rotateImagePath = await this.rotate(instance, rotate, width2, height2)
             if (format) this.format(instance, format)
@@ -241,7 +242,7 @@ export class ImageProcessUtil {
                     height2 = metadata.height
                 }
             }
-            watermarkImagePath = await this.watermark(bucket, instance, watermark, width2, height2)
+            watermarkImagePath = await this.watermark(bucket, instance,metadata, watermark, width2, height2)
             if (rotate) rotateImagePath = await this.rotate(instance, rotate, width2, height2)
             if (blur) this.blur(instance, blur)
             if (sharpen) this.sharpen(instance, sharpen)
@@ -541,8 +542,8 @@ export class ImageProcessUtil {
     //根据gravity给水印图片定位，如果是四个角，则角点重合，如果是四条边，则边重合，关于中心线对称，如果是中心，则关于两条中心线对称
     //根据x、y进行偏移，x、y只支持正整数，如果是四个角，都是向原图内部偏移，东西两条边，只向内部偏移x，南北两条边，只向内部偏移y，重心不偏移
     //且水印图片宽高都不能超过原图，超过不能输出，如果水印图片宽高加上相应偏移超过了超过了原图宽高，则偏移会自动调整
-    async watermark(bucket: Bucket, instance: SharpInstance, watermark: boolean, preWidth: number, preHeight: number): Promise<string> {
-        let enable: boolean, temp_path: string
+    async watermark(bucket: Bucket, instance: SharpInstance,metadata:ImageMetadata,watermark: boolean, preWidth: number, preHeight: number): Promise<string> {
+        let enable: boolean
         if (watermark === true) enable = true
         else if (watermark === false) enable = false
         else if (watermark == undefined) enable = !!bucket.image_config.watermark_enable
@@ -566,60 +567,40 @@ export class ImageProcessUtil {
                 width = width * preHeight * ws / (100 * height)
                 height = preHeight * ws / 100
             }
-            //水印图片左偏移，顶部偏移
-            let left: string, top: string
             //方位为西北
             if (gravity === 'northwest') {
-                left = '+' + x
-                top = '+' + y
                 gravity = 'NorthWest'
             }
             //方位为东北
             else if (gravity === 'northeast') {
-                left = '-' + x
-                top = '+' + y
                 gravity = 'NorthEast'
             }
             //方位为西南
             else if (gravity === 'southwest') {
-                left = '+' + x
-                top = '-' + y
                 gravity = 'SouthWest'
             }
             //方位为东南
             else if (gravity === 'southeast') {
-                left = '-' + x
-                top = '-' + y
                 gravity = 'SouthEast'
             }
             //方位为东
             else if (gravity === 'east') {
-                left = '-' + x
-                top = '+' + 0
                 gravity = 'East'
             }
             //方位为西
             else if (gravity === 'west') {
-                left = '+' + x
-                top = '+' + 0
                 gravity = 'West'
             }
             //方位为南
             else if (gravity === 'south') {
-                left = '+' + 0
-                top = '-' + y
                 gravity = 'South'
             }
             //方位为北
             else if (gravity === 'north') {
-                left = '+' + 0
-                top = '+' + y
                 gravity = 'North'
             }
             //方位为中心
             else if (gravity === 'center') {
-                left = '+' + 0
-                top = '+' + 0
                 gravity = 'Center'
             } else {
                 throw new Error('水印方位不正确')
@@ -634,8 +615,8 @@ export class ImageProcessUtil {
             }
             let buffer: Buffer = await instance.toBuffer()
             let shuiyinBuffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
-            let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw'+(+new Date()))
-            let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin'+(+new Date()) )
+            let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw' + (+new Date())+'.'+metadata.format)
+            let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin' + (+new Date())+shuiyin_path.substring(shuiyin_path.lastIndexOf('.')))
             let ex: HttpException
             //根据绝对路径保存临时图片,这个是原图
             await new Promise((resolver, reject) => {
@@ -666,7 +647,7 @@ export class ImageProcessUtil {
                 throw ex
             }
             await new Promise((resolve, reject) => {
-                gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry(left + top).dissolve(opacity).write(temp_path, err => {
+                gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry('+'+x+'+'+y).dissolve(opacity).write(temp_path, err => {
                     if (err) reject(new HttpException('为图片添加水印出现错误:' + err.toString(), 407))
                     resolve()
                 })
@@ -677,14 +658,8 @@ export class ImageProcessUtil {
                 throw ex
             }
             let a = true
-            //fs.unlinkSync(shuiyin_temp_path)
-            instance = sharp(temp_path)
+            fs.unlinkSync(shuiyin_temp_path)
             return temp_path
-            /* //为sharp实例添加水印处理
-            instance.overlayWith(buffer, {
-                left: Math.floor(left),
-                top: Math.floor(top)
-            }) */
         }
     }
 
