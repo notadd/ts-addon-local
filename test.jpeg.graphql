@@ -60,7 +60,7 @@ query buckets{
 query downprocess{
   public:downloadProcess(
     type:"jpeg",
-    bucket_name:"public",
+    bucketName:"public",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code
@@ -68,13 +68,13 @@ query downprocess{
     url
     method
     headers{
-			bucket_name
+			bucketName
       file_name
     }
   }
   private:downloadProcess(
     type:"jpeg",
-    bucket_name:"private",
+    bucketName:"private",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code
@@ -82,7 +82,7 @@ query downprocess{
     url
     method
     headers{
-			bucket_name
+			bucketName
       file_name
     }
   }
@@ -90,7 +90,7 @@ query downprocess{
 
 mutation uploadprocess{
   public:uploadProcess(
-    bucket_name:"public",
+    bucketName:"public",
     md5:"4f58f848b46a2ac6a817c9f5289a0f97",
     contentName:"test.jpeg",
     tags:["微信","商城"],
@@ -117,8 +117,8 @@ mutation uploadprocess{
     method
     form{
       md5
-      fileName
-      bucket_name
+      rawName
+      bucketName
       tagsString
       contentSecret
       imagePreProcessString
@@ -126,7 +126,7 @@ mutation uploadprocess{
     }
   }
   private:uploadProcess(
-    bucket_name:"private",
+    bucketName:"private",
     md5:"4f58f848b46a2ac6a817c9f5289a0f97",
     contentName:"test.jpeg",
     tags:["微信","商城"],
@@ -145,8 +145,8 @@ mutation uploadprocess{
     method
     form{
       md5
-      fileName
-      bucket_name
+      rawName
+      bucketName
       tagsString
       contentSecret
       imagePreProcessString
@@ -157,7 +157,7 @@ mutation uploadprocess{
 query one{
   public:one(
     type:"jpeg",
-    bucket_name:"public",
+    bucketName:"public",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d",
     imagePostProcessInfo:{
       resize:{
@@ -174,7 +174,7 @@ query one{
   }
   private:one(
     type:"jpeg",
-    bucket_name:"private",
+    bucketName:"private",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d",
     imagePostProcessInfo:{
       resize:{
@@ -193,7 +193,7 @@ query one{
 }
 
 query allFile{
-  public:all(bucket_name:"public"){
+  public:all(bucketName:"public"){
     code
     message
     baseUrl
@@ -214,7 +214,7 @@ query allFile{
       url
     }
   }
-   private:all(bucket_name:"private"){
+   private:all(bucketName:"private"){
     code
     message
     baseUrl
@@ -240,7 +240,7 @@ query allFile{
 mutation deleteFile{
   private:deleteFile(
     type:"jpeg",
-    bucket_name:"private",
+    bucketName:"private",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code
@@ -248,7 +248,7 @@ mutation deleteFile{
   }
   public:deleteFile(
     type:"jpeg",
-    bucket_name:"public",
+    bucketName:"public",
     name:"a4bf57d029a03cb80b614147b9aaf497d4c4384443a191ee850230b4b0b1896d"
   ){
     code

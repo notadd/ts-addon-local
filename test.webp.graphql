@@ -60,7 +60,7 @@ query buckets{
 query downprocess{
   downloadProcess(
     type:"webp",
-    bucket_name:"public",
+    bucketName:"public",
     name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25"
   ){
     code
@@ -68,7 +68,7 @@ query downprocess{
     url
     method
     headers{
-      bucket_name
+      bucketName
       file_name
     }
   }
@@ -76,7 +76,7 @@ query downprocess{
 
 mutation uploadprocess{
   uploadProcess(
-    bucket_name:"public",
+    bucketName:"public",
     md5:"4f58f848b46a2ac6a817c9f5289a0f97",
     contentName:"test.jpeg",
     tags:["微信","商城"],
@@ -98,7 +98,7 @@ mutation uploadprocess{
       contentSecret
       tagsString
       md5
-      bucket_name
+      bucketName
       fileName
     }
   }
@@ -107,7 +107,7 @@ mutation uploadprocess{
 query one{
   public:one(
     type:"webp",
-    bucket_name:"public",
+    bucketName:"public",
     name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25",
     imagePostProcessInfo:{
       resize:{
@@ -124,7 +124,7 @@ query one{
   }
   private:one(
     type:"webp",
-    bucket_name:"private",
+    bucketName:"private",
     name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25",
     imagePostProcessInfo:{
       resize:{
@@ -142,7 +142,7 @@ query one{
 }
 
 query allFile{
-  public:all(bucket_name:"public"){
+  public:all(bucketName:"public"){
     code
     message
     baseUrl
@@ -163,7 +163,7 @@ query allFile{
       url
     }
   }
-   private:all(bucket_name:"private"){
+   private:all(bucketName:"private"){
     code
     message
     baseUrl
@@ -189,7 +189,7 @@ query allFile{
 mutation deleteFile{
   private:deleteFile(
     type:"webp",
-    bucket_name:"private",
+    bucketName:"private",
     name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25"
   ){
     code
@@ -197,7 +197,7 @@ mutation deleteFile{
   }
   public:deleteFile(
     type:"webp",
-    bucket_name:"public",
+    bucketName:"public",
     name:"cefc8fc7b4ea5cfd024c9b6a0e74aead9bffb86cb428f2954c968f317b8ede25"
   ){
     code
