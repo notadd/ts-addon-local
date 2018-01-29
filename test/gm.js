@@ -22,9 +22,9 @@ const sharp = require('sharp')
 async function create(){
     //let buffer = await sharp('../../tu/shuiyin.jpeg').resize(300,200).toBuffer()
     //fs.writeFileSync('../../shuiyin.jpeg',buffer)
-    let g= gm('../../test.jpeg').composite('../../shuiyin.jpeg')
+    let g= gm('../../kb2.png').composite('../../shuiyin.jpeg')
     .gravity('Center')
-    .geometry('+100+10')
+    .geometry('+0+0')
     //.page()
     .dissolve(30)
     //.geometry(1024,640)
@@ -36,7 +36,7 @@ async function create(){
         console.log(err)
     })
 }
-
+create()
 function format(){
     gm('../../test.jpeg').write('../../test.png',function (err){
         console.log(err)
@@ -59,4 +59,4 @@ function alpha(){
         console.log(err)
     })
 }
-alpha()
+//alpha()

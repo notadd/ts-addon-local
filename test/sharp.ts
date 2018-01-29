@@ -243,8 +243,8 @@ function create(){
     create: {
       width: 300,
       height: 200,
-      channels: 4,
-      background: { r:0, g: 100, b: 0, alpha: 0 }
+      channels: 3,
+      background: { r:255, g: 255, b: 255, alpha: 0.1 }
     }
   }).toFile('../../kb2.png',(err,info)=>{
     console.log(info)
@@ -258,7 +258,7 @@ async function join(){
       width: 500,
       height: 200,
       channels: 4,
-      background:  { r:0, g: 100, b: 0, alpha: 0.5 }
+      background:  { r:0, g:0, b: 0, alpha: 1 }
     }
   }).toFormat('png').toBuffer()
 
@@ -268,4 +268,4 @@ async function join(){
   })
 }
 
-join()
+create()

@@ -23,8 +23,6 @@ const graphql= require('graphql')
 export class LocalExceptionFilter implements ExceptionFilter {
 
   catch(exception: HttpException, response) {
-    console.log('接收到异常：')
-    console.log(exception)
     let status = exception.getStatus()
     let message = exception.getResponse()
 
