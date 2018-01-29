@@ -69,7 +69,7 @@ query downprocess{
     method
     headers{
 			bucketName
-      file_name
+      fileName
     }
   }
   private:downloadProcess(
@@ -83,7 +83,7 @@ query downprocess{
     method
     headers{
 			bucketName
-      file_name
+      fileName
     }
   }
 }

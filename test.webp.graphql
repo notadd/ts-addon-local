@@ -69,7 +69,7 @@ query downprocess{
     method
     headers{
       bucketName
-      file_name
+      fileName
     }
   }
 }
@@ -99,7 +99,7 @@ mutation uploadprocess{
       tagsString
       md5
       bucketName
-      fileName
+      rawName
     }
   }
 }
