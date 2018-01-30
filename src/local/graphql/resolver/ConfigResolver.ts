@@ -149,81 +149,69 @@ export class ConfigResolver {
             code: 200,
             message: ''
         }
-        let { name, gravity, opacity, x, y, ws } = body
-        //验证参数存在，其中数字为0也可以
-        if (!name || !body.base64 || !gravity || (opacity !== 0 && !opacity) || (x !== 0 && !x) || (y !== 0 && !y) || (ws !== 0 && !ws)) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        //验证参数正确
-        if (!this.gravity.has(gravity)) {
-            data.code = 400
-            data.message = '不允许的水印图片位置'
-            return data
-        }
-        if (!Number.isInteger(x)) {
-            data.code = 400
-            data.message = 'x偏移不是整数'
-            return data
-        }
-        if (!Number.isInteger(y)) {
-            data.code = 400
-            data.message = 'y偏移不是整数'
-            return data
-        }
-        if (!Number.isInteger(opacity)) {
-            data.code = 400
-            data.message = '透明度不是整数'
-            return data
-        } else if (opacity <= 0) {
-            data.code = 400
-            data.message = '透明度不大于0'
-            return data
-        } else if (opacity > 100) {
-            data.code = 400
-            data.message = '透明度大于100'
-            return data
-        } else {
-
-        }
-        if (!Number.isInteger(ws)) {
-            data.code = 400
-            data.message = '短边自适应比例不是整数'
-            return data
-        } else if (ws <= 0) {
-            data.code = 400
-            data.message = '短边自适应比例不大于0'
-            return data
-        } else {
-            //暂定短边自适应比例可以大于100
-        }
-        //保存图片的base64编码为文件，保存目录为当前目录下
+        //水印图片临时保存路径
+        let temp_path: string
         try {
-            await this.fileUtil.write(__dirname + '/' + name, Buffer.from(body.base64, 'base64'))
+            let { name, gravity, opacity, x, y, ws } = body
+            //验证参数存在，其中数字为0也可以
+            if (!name || !body.base64 || !gravity || (opacity !== 0 && !opacity) || (x !== 0 && !x) || (y !== 0 && !y) || (ws !== 0 && !ws)) {
+                throw new HttpException('缺少参数', 400)
+            }
+            //验证参数正确
+            if (!this.gravity.has(gravity)) {
+                throw new HttpException('不允许的水印图片位置', 400)
+            }
+            if (!Number.isInteger(x)) {
+                throw new HttpException('x偏移不是整数', 400)
+            }
+            if (!Number.isInteger(y)) {
+                throw new HttpException('y偏移不是整数', 400)
+            }
+            if (!Number.isInteger(opacity)) {
+                throw new HttpException('透明度不是整数', 400)
+            } else if (opacity <= 0) {
+                throw new HttpException('透明度小于0', 400)
+            } else if (opacity > 100) {
+                throw new HttpException('透明度大于100', 400)
+            } else {
+
+            }
+            if (!Number.isInteger(ws)) {
+                throw new HttpException('短边自适应比例不是整数', 400)
+            } else if (ws <= 0) {
+                throw new HttpException('短边自适应比例不大于0', 400)
+            } else {
+                //暂定短边自适应比例可以大于100
+            }
+            //保存图片的base64编码为文件，保存目录为当前目录下
+            temp_path = __dirname + '/' + name
+            await this.fileUtil.write(temp_path, Buffer.from(body.base64, 'base64'))
+            //删除base64字符串，太大了
+            delete body.base64
+            //上传文件对象，存储了上传文件名、临时保存路径
+            let file: UploadFile = {
+                name: name,
+                path: temp_path
+            }
+            if (!this.kindUtil.isImage(file.name.substr(file.name.lastIndexOf('.') + 1))) {
+                throw new HttpException('不允许的水印图片类型', 400)
+            }
+            //保存后台水印配置
+            await this.configService.saveImageWatermark(file, body)
         } catch (err) {
-            data.code = 402
-            data.message = '文件写入错误'
-        }
-        //删除base64字符串，太大了
-        delete body.base64
-        if (data.code !== 200) {
-            return data
-        }
-        //上传文件对象，存储了上传文件名、临时保存路径
-        let file: UploadFile = {
-            name: name,
-            path: __dirname + '/' + name
-        }
-        if (!this.kindUtil.isImage(file.name.substr(file.name.lastIndexOf('.') + 1))) {
-            data.code = 400
-            data.message = '不允许的水印图片类型'
-            return data
-        }
-        //保存后台水印配置
-        await this.configService.saveImageWatermark(data, file, body)
-        if (data.code !== 200) {
-            return data
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
+        } finally {
+            //删除保存的临时水印图片，这里有可能没有到保存水印图片这一步就异常了
+            if (temp_path) {
+                await this.fileUtil.deleteIfExist(temp_path)
+            }
         }
         return data
     }
