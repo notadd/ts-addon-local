@@ -58,7 +58,7 @@ export class ConfigService {
     if (exist) {
       try {
         await this.bucketRepository.updateById(exist.id, newBucket)
-        //创建新目录，暂定不删除旧目录
+        //创建新目录，暂定不删除旧目录,只是新建这次配置的目录
         if (!this.fileUtil.exist(directory_path)) {
           try{
             await this.fileUtil.mkdir(directory_path)
@@ -99,8 +99,14 @@ export class ConfigService {
     bucket.image_config = image_config
     try {
       await this.bucketRepository.save(bucket)
-      if (!fs.existsSync(directory_path)) {
-        fs.mkdirSync(directory_path)
+      if (!this.fileUtil.exist(directory_path)) {
+        try{
+          await this.fileUtil.mkdir(directory_path)
+        }catch(err){
+          data.code = err.getStatus()
+          data.message = err.getResponse()
+          return data
+        }
       }
       data.code = 200
       data.message = '空间保存成功'
@@ -208,7 +214,7 @@ export class ConfigService {
           data.code = 403
           data.message = '保存水印图片出现错误' + err.toString()
           //保存图片出现错误，要删除存储图片
-          fs.unlinkSync(path.resolve(__dirname,'../','store',buckets[i].name,image.name+'.'+image.type))
+          await this.fileUtil.delete(path.resolve(__dirname,'../','store',buckets[i].name,image.name+'.'+image.type))
         }
         if (data.code === 403) {
           break
