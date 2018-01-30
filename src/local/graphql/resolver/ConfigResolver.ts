@@ -88,18 +88,23 @@ export class ConfigResolver {
             code: 200,
             message: "图片保存格式配置保存成功"
         }
-        let format: string = body.format
-        //验证参数
-        if (format == undefined || format.length == 0) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        //保存格式
-        await this.configService.saveImageFormat(data, body)
-        //格式参数不正确、配置不存在、保存失败
-        if (data.code == 401 || data.code == 402 || data.code == 403) {
-            return data
+        try {
+            let format: string = body.format
+            //验证参数
+            if (format == undefined || format.length == 0) {
+                throw new HttpException('缺少参数', 400)
+            }
+            //保存格式
+            await this.configService.saveImageFormat(body)
+        } catch (err) {
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
         }
         return data
     }
