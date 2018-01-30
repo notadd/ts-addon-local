@@ -209,6 +209,7 @@ export class ConfigResolver {
             }
         } finally {
             //删除保存的临时水印图片，这里有可能没有到保存水印图片这一步就异常了
+            //resolver级别生成的临时水印图片，也应该在这个级别删除，不应该留到Service中
             if (temp_path) {
                 await this.fileUtil.deleteIfExist(temp_path)
             }
@@ -223,17 +224,22 @@ export class ConfigResolver {
             code: 200,
             message: "音频保存格式配置保存成功"
         }
-        let format: string = body.format
-        if (!format) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        //保存格式到数据库
-        await this.configService.saveAudioFormat(data, body)
-        //格式参数不正确、配置不存在、保存失败
-        if (data.code == 401 || data.code == 402 || data.code == 403) {
-            return data
+        try {
+            let format: string = body.format
+            if (!format) {
+                throw new HttpException('缺少参数', 400)
+            }
+            //保存格式到数据库
+            await this.configService.saveAudioFormat(body)
+        } catch (err) {
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
         }
         return data
     }
