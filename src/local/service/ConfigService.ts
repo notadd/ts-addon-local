@@ -42,7 +42,7 @@ export class ConfigService {
     this.video_resolution = new Set(['raw', 'p1080', 'p720', 'p480'])
   }
 
-  async saveBucketConfig(data: any, body: BucketConfig) {
+  async saveBucketConfig(body: BucketConfig): Promise<void> {
     let exist: Bucket
     let newBucket: any = {
       name: body.name,
@@ -60,22 +60,12 @@ export class ConfigService {
         await this.bucketRepository.updateById(exist.id, newBucket)
         //创建新目录，暂定不删除旧目录,只是新建这次配置的目录
         if (!this.fileUtil.exist(directory_path)) {
-          try{
-            await this.fileUtil.mkdir(directory_path)
-          }catch(err){
-            data.code = err.getStatus()
-            data.message = err.getResponse()
-            return data
-          }
+          await this.fileUtil.mkdir(directory_path)
         }
-        data.code = 200
-        data.message = '空间配置更新成功'
       } catch (err) {
-        data.code = 401
-        data.message = '空间配置更新失败' + err.toString()
-        return 
+        throw new HttpException('空间配置更新失败' + err.toString(), 401)
       }
-      return exist
+      return
     }
     let bucket: Bucket = new Bucket()
     let audio_config: AudioConfig = new AudioConfig()
@@ -100,58 +90,36 @@ export class ConfigService {
     try {
       await this.bucketRepository.save(bucket)
       if (!this.fileUtil.exist(directory_path)) {
-        try{
-          await this.fileUtil.mkdir(directory_path)
-        }catch(err){
-          data.code = err.getStatus()
-          data.message = err.getResponse()
-          return data
-        }
+        await this.fileUtil.mkdir(directory_path)
       }
-      data.code = 200
-      data.message = '空间保存成功'
-      return bucket
     } catch (err) {
-      data.code = 401
-      data.message = '空间保存失败' + err.toString()
-      return null
+      throw new HttpException('空间保存失败' + err.toString(), 401)
     }
   }
 
-  async saveImageFormat(data: any, body: ImageFormat): Promise<any> {
+  async saveImageFormat(body: ImageFormat): Promise<void> {
     let { format } = body
     format = format.toLowerCase()
     if (!this.image_format.has(format)) {
-      data.code = 401
-      data.message = '保存格式不正确'
-      return
+      throw new HttpException('保存格式不正确', 402)
     }
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
-      data.code = 402
-      data.message = '空间配置不存在'
-      return
+      throw new HttpException('空间配置不存在', 401)
     }
     try {
       await buckets.forEach(async (bucket) => {
         await this.imageConfigRepository.updateById(bucket.image_config.id, { format })
       })
-      data.code = 200
-      data.message = '图片保存格式配置成功'
-      return
     } catch (err) {
-      data.code = 403
-      data.message = '图片保存格式配置失败' + err.toString()
-      return
+      throw new HttpException('图片保存格式配置失败' + err.toString(), 403)
     }
   }
 
-  async saveEnableImageWatermark(data: any, body: EnableImageWatermark): Promise<void> {
+  async saveEnableImageWatermark(body: EnableImageWatermark): Promise<void> {
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
-      data.code = 401
-      data.message = '空间配置不存在'
-      return
+      throw new HttpException('空间配置不存在', 401)
     }
     let watermark_enable: number
     if (body.enable) {
@@ -163,22 +131,15 @@ export class ConfigService {
       await buckets.forEach(async (bucket) => {
         await this.imageConfigRepository.updateById(bucket.image_config.id, { watermark_enable })
       })
-      data.code = 200
-      data.message = '水印启用配置成功'
-      return
     } catch (err) {
-      data.code = 402
-      data.message = '水印启用保存失败' + err.toString()
-      return
+      throw new HttpException('水印启用保存失败' + err.toString(), 402)
     }
   }
 
-  async saveImageWatermark(data: any, file: any, obj: any): Promise<void> {
+  async saveImageWatermark(file: any, obj: any): Promise<void> {
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
-      data.code = 401
-      data.message = '空间配置不存在'
-      return
+      throw new HttpException('空间配置不存在', 401)
     }
     for (let i = 0; i < buckets.length; i++) {
       let metadata: ImageMetadata
@@ -186,14 +147,11 @@ export class ConfigService {
       let format = buckets[i].image_config.format || 'raw'
       //根据不同的图片保存类型，处理并且存储图片，返回处理后元数据
       if (format === 'raw') {
-        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { shrip: true , watermark:false} as ImagePostProcessInfo)
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { shrip: true, watermark: false } as ImagePostProcessInfo)
       } else if (format === 'webp_damage') {
-        metadata= await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', shrip: true , watermark:false} as ImagePostProcessInfo)
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', shrip: true, watermark: false } as ImagePostProcessInfo)
       } else if (format === 'webp_undamage') {
-        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', lossless: true, shrip: true , watermark:false} as ImagePostProcessInfo)
-      }
-      if(data.code!==200){
-        return
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', lossless: true, shrip: true, watermark: false } as ImagePostProcessInfo)
       }
       let image: Image = new Image()
       image.bucket = buckets[i]
@@ -203,21 +161,15 @@ export class ConfigService {
       image.width = metadata.width
       image.height = metadata.height
       image.size = metadata.size
-      let isExist: Image = await this.imageRepository.findOne({ name:metadata.name,bucketId:buckets[i].id})
+      let isExist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: buckets[i].id })
       //只有指定路径图片不存在时才会保存
       if (!isExist) {
         try {
           await this.imageRepository.save(image)
-          data.code = 200
-          data.message = '保存水印图片成功'
         } catch (err) {
-          data.code = 403
-          data.message = '保存水印图片出现错误' + err.toString()
           //保存图片出现错误，要删除存储图片
-          await this.fileUtil.delete(path.resolve(__dirname,'../','store',buckets[i].name,image.name+'.'+image.type))
-        }
-        if (data.code === 403) {
-          break
+          await this.fileUtil.delete(path.resolve(__dirname, '../', 'store', buckets[i].name, image.name + '.' + image.type))
+          throw new HttpException('保存水印图片出现错误' + err.toString(), 403)
         }
       }
       //更新图片配置，这里的水印图片路径为图片的绝对路径
@@ -225,91 +177,61 @@ export class ConfigService {
       try {
         await this.imageConfigRepository.updateById(buckets[i].image_config.id, {
           //水印路径为相对路径
-          watermark_save_key: '/store/'+buckets[i].name+'/'+image.name+'.'+image.type,
+          watermark_save_key: '/store/' + buckets[i].name + '/' + image.name + '.' + image.type,
           watermark_gravity: obj.gravity,
           watermark_opacity: obj.opacity,
           watermark_ws: obj.ws,
           watermark_x: obj.x,
           watermark_y: obj.y
         })
-        data.code = 200
-        data.message = '更新水印配置成功'
       } catch (err) {
-        data.code = 403
-        data.message = '保存水印配置出现错误' + err.toString()
-      }
-      if (data.code === 403) {
-        break
+        throw new HttpException('保存水印配置出现错误' + err.toString(), 403)
       }
     }
     //删除临时文件
     await this.fileUtil.delete(file.path)
-    if (data.code === 402 || data.code === 403) {
-      return
-    }
   }
 
-  async saveAudioFormat(data: any, body: AudioFormat): Promise<any> {
+  async saveAudioFormat(body: AudioFormat): Promise<any> {
     let { format } = body
     format = format.toLowerCase()
     if (format != 'raw' && format != 'mp3' && format != 'aac') {
-      data.code = 401
-      data.message = '保存格式不正确'
-      return
+      throw new HttpException('保存格式不正确', 401)
     }
-
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["audio_config"] })
     if (buckets.length !== 2) {
-      data.code = 402
-      data.message = '空间配置不存在'
-      return
+      throw new HttpException('空间配置不存在', 401)
     }
     try {
       await buckets.forEach(async (bucket) => {
-        await this.audioConfigRepository.updateById(bucket.audio_config.id,{format})
+        await this.audioConfigRepository.updateById(bucket.audio_config.id, { format })
       })
-      data.code = 200
-      data.message = '音频保存格式配置成功'
-      return
     } catch (err) {
-      data.code = 403
-      data.message = '音频保存格式配置失败' + err.toString()
-      return
+      throw new HttpException('音频保存格式配置失败' + err.toString(), 403)
     }
   }
 
-  async saveVideoFormat(data: any, body: VideoFormat): Promise<any> {
+  async saveVideoFormat(body: VideoFormat): Promise<any> {
     let { format, resolution } = body
     format = format.toLowerCase()
     if (format != 'raw' && format != 'vp9' && format != 'h264' && format != 'h265') {
-      data.code = 401
-      data.message = '编码格式不正确'
-      return
+      throw new HttpException('编码格式不正确', 401)
     }
     resolution = resolution.toLowerCase()
     if (resolution != 'raw' && resolution != 'p1080' && resolution != 'p720' && resolution != 'p480') {
-      data.code = 401
-      data.message = '分辨率格式不正确'
-      return
+      throw new HttpException('分辨率格式不正确', 401)
     }
 
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["video_config"] })
     if (buckets.length !== 2) {
-      data.code = 402
-      data.message = '空间配置不存在'
-      return
+      throw new HttpException('空间配置不存在', 401)
     }
     try {
       await buckets.forEach(async (bucket) => {
-        await this.videoConfigRepository.updateById(bucket.video_config.id,{format,resolution})
+        await this.videoConfigRepository.updateById(bucket.video_config.id, { format, resolution })
       })
-      data.code = 200
-      data.message = '视频保存格式配置成功'
-      return
     } catch (err) {
-      data.code = 403
-      data.message = '视频保存格式配置失败' + err.toString()
-      return
+      throw new HttpException('视频保存格式配置失败'+err.toString(), 403)
     }
   }
 }

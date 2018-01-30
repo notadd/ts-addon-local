@@ -23,6 +23,7 @@ import { Repository } from 'typeorm';
 /* 本地存储配置的resolver */
 @Resolver('Config')
 //这个异常过滤器目前神码异常都接收不到，所有异常都会被转化为GraphqlError，然后发送给前端
+//因为nestjs/garphql在创建外部函数执行上下文时只加入了Guard、Interceptor的逻辑
 @UseFilters(new LocalExceptionFilter())
 export class ConfigResolver {
 
@@ -147,7 +148,7 @@ export class ConfigResolver {
     async  imageWatermark(req: any, body: ImageWatermark): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
-            message: ''
+            message: '图片水印配置成功'
         }
         //水印图片临时保存路径
         let temp_path: string
