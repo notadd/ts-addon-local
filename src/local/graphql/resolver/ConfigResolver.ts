@@ -1,7 +1,7 @@
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark';
+import { Component, UseGuards, UseFilters, HttpException } from '@nestjs/common';
 import { LocalExceptionFilter } from '../../exception/LocalExceptionFilter';
 import { ImageWatermark } from '../../interface/config/ImageWatermark';
-import { Component, UseGuards, UseFilters, HttpException } from '@nestjs/common';
 import { BucketConfig } from '../../interface/config/BucketConfig';
 import { BucketsData } from '../../interface/config/BucketsData';
 import { ImageFormat } from '../../interface/config/ImageFormat';
@@ -14,9 +14,10 @@ import { BucketGuard } from '../../guard/BucketGuard';
 import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KindUtil } from '../../util/KindUtil';
+import { FileUtil } from '../../util/FileUtil';
 import { Bucket } from '../../model/Bucket';
 import { Repository } from 'typeorm';
-import * as fs from 'fs';
+
 
 
 /* 本地存储配置的resolver */
@@ -29,6 +30,7 @@ export class ConfigResolver {
     private readonly gravity: Set<string>
 
     constructor(
+        private readonly fileUtil: FileUtil,
         private readonly kindUtil: KindUtil,
         private readonly configService: ConfigService,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
@@ -63,7 +65,7 @@ export class ConfigResolver {
             data.message = '缺少参数'
             return data
         }
-        if(!isPublic&&(token_expire<0||token_expire>1800)){
+        if (!isPublic && (token_expire < 0 || token_expire > 1800)) {
             data.code = 400
             data.message = 'token超时不正确'
             return data
@@ -183,15 +185,12 @@ export class ConfigResolver {
             //暂定短边自适应比例可以大于100
         }
         //保存图片的base64编码为文件，保存目录为当前目录下
-        await new Promise((resolve, reject) => {
-            fs.writeFile(__dirname + '/' + name, Buffer.from(body.base64, 'base64'), (err) => {
-                if (err) {
-                    data.code = 402
-                    data.message = '文件写入错误'
-                }
-                resolve()
-            })
-        })
+        try{
+            await this.fileUtil.write(__dirname + '/' + name,Buffer.from(body.base64, 'base64'))
+        }catch(err){
+            data.code = 402
+            data.message = '文件写入错误'
+        }
         //删除base64字符串，太大了
         delete body.base64
         if (data.code !== 200) {
@@ -199,8 +198,8 @@ export class ConfigResolver {
         }
         //上传文件对象，存储了上传文件名、临时保存路径
         let file: UploadFile = {
-            name : name,
-            path : __dirname + '/' + name
+            name: name,
+            path: __dirname + '/' + name
         }
         if (!this.kindUtil.isImage(file.name.substr(file.name.lastIndexOf('.') + 1))) {
             data.code = 400

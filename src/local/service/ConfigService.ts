@@ -1,23 +1,23 @@
-
-import { InjectRepository } from '@nestjs/typeorm'
-import { Component } from '@nestjs/common'
-import { Repository } from 'typeorm'
-import { EnableImageWatermark } from '../interface/config/EnableImageWatermark'
-import { BucketConfig } from '../interface/config/BucketConfig'
-import { ImageFormat } from '../interface/config/ImageFormat'
-import { AudioFormat } from '../interface/config/AudioFormat'
-import { VideoFormat } from '../interface/config/VideoFormat'
-import { ImageMetadata } from '../interface/file/ImageMetadata'
-import { ImageProcessUtil } from '../util/ImageProcessUtil'
+import { EnableImageWatermark } from '../interface/config/EnableImageWatermark';
+import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
+import { BucketConfig } from '../interface/config/BucketConfig';
+import { ImageMetadata } from '../interface/file/ImageMetadata';
+import { ImageFormat } from '../interface/config/ImageFormat';
+import { AudioFormat } from '../interface/config/AudioFormat';
+import { VideoFormat } from '../interface/config/VideoFormat';
+import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { ImageConfig } from '../model/ImageConfig';
 import { AudioConfig } from '../model/AudioConfig';
 import { VideoConfig } from '../model/VideoConfig';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FileUtil } from '../util/FileUtil';
+import { Component, HttpException } from '@nestjs/common';
 import { Bucket } from '../model/Bucket';
 import { Image } from '../model/Image';
-import * as  crypto from 'crypto'
-import * as  path from 'path'
-import * as  fs from 'fs'
-import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
+import { Repository } from 'typeorm';
+import * as  crypto from 'crypto';
+import * as  path from 'path';
+
 
 @Component()
 export class ConfigService {
@@ -28,6 +28,7 @@ export class ConfigService {
   private readonly video_resolution: Set<String>
 
   constructor(
+    private readonly fileUtil: FileUtil,
     private readonly imageProcessUtil: ImageProcessUtil,
     @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
     @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>,
@@ -58,8 +59,14 @@ export class ConfigService {
       try {
         await this.bucketRepository.updateById(exist.id, newBucket)
         //创建新目录，暂定不删除旧目录
-        if (!fs.existsSync(directory_path)) {
-          fs.mkdirSync(directory_path)
+        if (!this.fileUtil.exist(directory_path)) {
+          try{
+            await this.fileUtil.mkdir(directory_path)
+          }catch(err){
+            data.code = err.getStatus()
+            data.message = err.getResponse()
+            return data
+          }
         }
         data.code = 200
         data.message = '空间配置更新成功'
@@ -230,7 +237,7 @@ export class ConfigService {
       }
     }
     //删除临时文件
-    fs.unlinkSync(file.path)
+    await this.fileUtil.delete(file.path)
     if (data.code === 402 || data.code === 403) {
       return
     }

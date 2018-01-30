@@ -9,18 +9,19 @@ import { AllBody } from '../../interface/file/AllBody';
 import { AllData } from '../../interface/file/AllData';
 import { OneBody } from '../../interface/file/OneBody';
 import { OneData } from '../../interface/file/OneData';
+import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
 import { Document } from '../../model/Document';
 import { KindUtil } from '../../util/KindUtil';
+import { FileUtil } from '../../util/FileUtil';
 import { Bucket } from '../../model/Bucket';
 import { Audio } from '../../model/Audio';
 import { Video } from '../../model/Video';
 import { Image } from '../../model/Image';
 import { File } from '../../model/File';
 import * as path from 'path';
-import * as fs from 'fs';
-import { CommonData } from '../../interface/Common';
+
 /*文件Resolver，包含了文件下载预处理、上传预处理
   获取单个文件url、获取多个文件信息以及url、删除文件等接口
 */
@@ -28,6 +29,7 @@ import { CommonData } from '../../interface/Common';
 export class FileResolver {
 
   constructor(
+    private readonly fileUtil: FileUtil,
     private readonly kindUtil: KindUtil,
     private readonly tokenUtil: TokenUtil,
     private readonly fileService: FileService,
@@ -54,9 +56,9 @@ export class FileResolver {
       code: 200,
       message: '下载预处理成功',
       method: 'get',
-      headers:{
-        bucketName:'',
-        fileName:''
+      headers: {
+        bucketName: '',
+        fileName: ''
       },
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
@@ -113,11 +115,11 @@ export class FileResolver {
       url: req.protocol + '://' + req.get('host') + '/local/file/upload',
       form: {
         md5: '',
-        rawName:'',
-        bucketName:'',
-        tagsString:null,
-        contentSecret:null,
-        imagePreProcessString:null,
+        rawName: '',
+        bucketName: '',
+        tagsString: null,
+        contentSecret: null,
+        imagePreProcessString: null,
       }
     }
     //可以根据md5对文件内容进行校验
@@ -255,8 +257,8 @@ export class FileResolver {
              data.message：响应信息
   */
   @Mutation('deleteFile')
-  async deleteFile(req:any, body:FileLocationBody): Promise<CommonData> {
-    let data:CommonData = {
+  async deleteFile(req: any, body: FileLocationBody): Promise<CommonData> {
+    let data: CommonData = {
       code: 200,
       message: '删除成功'
     }
@@ -288,12 +290,12 @@ export class FileResolver {
     }
     //删除目录下存储文件
     let realPath = path.resolve(__dirname, '../../', 'store', bucketName, name + '.' + type)
-    if (!fs.existsSync(realPath)) {
+    if (!this.fileUtil.exist(realPath)) {
       data.code = 404
       data.message = '要删除的文件不存在'
       return data
     }
-    fs.unlinkSync(realPath)
+    await this.fileUtil.delete(realPath)
     return data
   }
 }

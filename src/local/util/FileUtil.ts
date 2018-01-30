@@ -58,7 +58,6 @@ export class FileUtil {
         if (ex) {
             throw ex
         }
-
     }
 
     async deleteIfExist(path: string): Promise<void> {
@@ -109,4 +108,20 @@ export class FileUtil {
         return fs.existsSync(path)
     }
 
+    async mkdir(path:string):Promise<void>{
+        let ex: HttpException
+        await new Promise((resolver, reject) => {
+            fs.mkdir(path, (err) => {
+                if (err) {
+                    reject(new HttpException('创建目录错误:' + err.toString(), 407))
+                }
+                resolver()
+            })
+        }).catch(err => {
+            ex = err
+        })
+        if (ex) {
+            throw ex
+        }
+    }
 } 
