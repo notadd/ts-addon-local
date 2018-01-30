@@ -12,7 +12,7 @@ export class FileUtil {
         await new Promise((resolver, reject) => {
             fs.writeFile(path, buffer, (err) => {
                 if (err) {
-                    reject(new HttpException('文件写入磁盘错误:' + err.toString(), 407))
+                    reject(new HttpException('文件写入磁盘错误:' + err.toString(), 405))
                 }
                 resolver()
             })
@@ -29,7 +29,7 @@ export class FileUtil {
         await new Promise((resolver, reject) => {
             fs.readFile(path, (err, buffer) => {
                 if (err) {
-                    reject(new HttpException('读取文件错误:' + err.toString(), 407))
+                    reject(new HttpException('读取文件错误:' + err.toString(), 405))
                 }
                 result = buffer
                 resolver()
@@ -48,7 +48,7 @@ export class FileUtil {
         await new Promise((resolver, reject) => {
             fs.unlink(path, (err) => {
                 if (err) {
-                    reject(new HttpException('文件删除错误:' + err.toString(), 407))
+                    reject(new HttpException('文件删除错误:' + err.toString(), 406))
                 }
                 resolver()
             })
@@ -66,7 +66,7 @@ export class FileUtil {
             await new Promise((resolver, reject) => {
                 fs.unlink(path, (err) => {
                     if (err) {
-                        reject(new HttpException('文件删除错误:' + err.toString(), 407))
+                        reject(new HttpException('文件删除错误:' + err.toString(), 406))
                     }
                     resolver()
                 })

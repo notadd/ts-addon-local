@@ -25,12 +25,12 @@ export class TokenUtil {
         let str = url + expire + bucket.token_secret_key
         let generateMd5 = crypto.createHash('md5').update(str).digest('hex')
         if (md5 !== generateMd5) {
-            throw new HttpException('token验证错误',412)
+            throw new HttpException('token验证错误',413)
         }
         //当前时间
         let now = Math.floor(+new Date() / 1000)
         if (now > expire) {
-            throw new HttpException('token超时',413)
+            throw new HttpException('token超时',414)
         }
     }
 }

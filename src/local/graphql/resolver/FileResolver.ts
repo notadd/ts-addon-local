@@ -83,7 +83,7 @@ export class FileResolver {
         //其他类型暂不支持
       }
       if (!file) {
-        throw new HttpException('指定文件' + name + '不存在', 402)
+        throw new HttpException('指定文件' + name + '不存在', 404)
       }
       data.headers.bucketName = bucket.name
       data.headers.fileName = file.name + '.' + file.type
@@ -143,8 +143,12 @@ export class FileResolver {
       data.form.rawName = contentName
       data.form.bucketName = bucket.name
       data.form.contentSecret = contentSecret
-      data.form.tagsString = JSON.stringify(tags)
-      data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
+      try {
+        data.form.tagsString = JSON.stringify(tags)
+        data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
+      } catch (err) {
+        throw new HttpException('JSON解析错误' + err.toString(), 409)
+      }
     } catch (err) {
       if (err instanceof HttpException) {
         data.code = err.getStatus()
@@ -194,7 +198,7 @@ export class FileResolver {
       if (kind === 'image') {
         let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
         if (!image) {
-          throw new HttpException('指定图片' + name + '.' + type + '不存在', 402)
+          throw new HttpException('指定图片' + name + '.' + type + '不存在', 404)
         }
         //所有文件调用统一的拼接Url方法 
         data.url += '/' + bucketName + '/' + name + '.' + type
@@ -303,7 +307,7 @@ export class FileResolver {
       if (kind === 'image') {
         let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
         if (!image) {
-          throw new HttpException('文件' + name + '不存在于数据库中', 402)
+          throw new HttpException('文件' + name + '不存在于数据库中', 404)
         }
         await this.imageRepository.delete({ name, bucketId: bucket.id })
       } else {

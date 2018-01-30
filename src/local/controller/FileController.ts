@@ -93,13 +93,13 @@ export class FileController {
             }
             //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
             if (file.name !== obj.rawName) {
-                throw new HttpException('上传文件名' + file.name + '与请求头中文件名' + obj.fileName + '不符', 403)
+                throw new HttpException('上传文件名' + file.name + '与请求头中文件名' + obj.fileName + '不符', 411)
             }
             let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
             //对上传文件进行md5校验
             let buffer: Buffer = await this.fileUtil.read(file.path)
             if (!(crypto.createHash('md5').update(buffer).digest('hex') === md5)) {
-                throw new HttpException('文件md5校验失败', 409)
+                throw new HttpException('文件md5校验失败', 411)
             }
             //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
             await this.fileService.saveUploadFile(bucket, file, obj)
@@ -142,7 +142,7 @@ export class FileController {
         if (bucket.public_or_private === 'private') {
             //token不存在
             if (!token) {
-                throw new HttpException('访问私有空间文件需要token', 411)
+                throw new HttpException('访问私有空间文件需要token', 412)
             }
             //请求的全路径，包含协议、域名、端口、查询字符串，需要URL解码
             let fullUrl: string = decodeURI(req.protocol + '://' + req.get('host') + req.originalUrl)
@@ -163,7 +163,7 @@ export class FileController {
             try {
                 imagePostProcessInfo = JSON.parse(imagePostProcessString)
             } catch (err) {
-                throw new HttpException('JSON解析错误:' + err.toString(), 405)
+                throw new HttpException('JSON解析错误:' + err.toString(), 409)
             }
 
         }

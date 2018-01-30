@@ -28,6 +28,10 @@ export class ConfigResolver {
 
     //图片水印方位的集合，九宫格
     private readonly gravity: Set<string>
+    private readonly image_format: Set<String>
+    private readonly audio_format: Set<String>
+    private readonly video_format: Set<String>
+    private readonly video_resolution: Set<String>
 
     constructor(
         private readonly fileUtil: FileUtil,
@@ -35,6 +39,10 @@ export class ConfigResolver {
         private readonly configService: ConfigService,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
     ) {
+        this.image_format = new Set(['raw', 'webp_damage', 'webp_undamage'])
+        this.audio_format = new Set(['raw', 'mp3', 'aac'])
+        this.video_format = new Set(['raw', 'vp9', 'h264', 'h265'])
+        this.video_resolution = new Set(['raw', 'p1080', 'p720', 'p480'])
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
     }
 
@@ -91,6 +99,9 @@ export class ConfigResolver {
             //验证参数
             if (format == undefined || format.length == 0) {
                 throw new HttpException('缺少参数', 400)
+            }
+            if (!this.image_format.has(format)) {
+                throw new HttpException('保存格式不正确', 400)
             }
             //保存格式
             await this.configService.saveImageFormat(body)
@@ -227,6 +238,9 @@ export class ConfigResolver {
             if (!format) {
                 throw new HttpException('缺少参数', 400)
             }
+            if (format != 'raw' && format != 'mp3' && format != 'aac') {
+                throw new HttpException('音频保存格式不正确', 400)
+            }
             //保存格式到数据库
             await this.configService.saveAudioFormat(body)
         } catch (err) {
@@ -254,6 +268,12 @@ export class ConfigResolver {
             let { format, resolution } = body
             if (!format || !resolution) {
                 throw new HttpException('缺少参数', 400)
+            }
+            if (format != 'raw' && format != 'vp9' && format != 'h264' && format != 'h265') {
+                throw new HttpException('编码格式不正确', 400)
+            }
+            if (resolution != 'raw' && resolution != 'p1080' && resolution != 'p720' && resolution != 'p480') {
+                throw new HttpException('分辨率格式不正确', 400)
             }
             //保存格式到数据库
             await this.configService.saveVideoFormat(body)

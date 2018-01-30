@@ -22,11 +22,6 @@ import * as  path from 'path';
 @Component()
 export class ConfigService {
 
-  private readonly image_format: Set<String>
-  private readonly audio_format: Set<String>
-  private readonly video_format: Set<String>
-  private readonly video_resolution: Set<String>
-
   constructor(
     private readonly fileUtil: FileUtil,
     private readonly imageProcessUtil: ImageProcessUtil,
@@ -35,12 +30,7 @@ export class ConfigService {
     @InjectRepository(ImageConfig) private readonly imageConfigRepository: Repository<ImageConfig>,
     @InjectRepository(AudioConfig) private readonly audioConfigRepository: Repository<AudioConfig>,
     @InjectRepository(VideoConfig) private readonly videoConfigRepository: Repository<VideoConfig>
-  ) {
-    this.image_format = new Set(['raw', 'webp_damage', 'webp_undamage'])
-    this.audio_format = new Set(['raw', 'mp3', 'aac'])
-    this.video_format = new Set(['raw', 'vp9', 'h264', 'h265'])
-    this.video_resolution = new Set(['raw', 'p1080', 'p720', 'p480'])
-  }
+  ) {}
 
   async saveBucketConfig(body: BucketConfig): Promise<void> {
     let exist: Bucket
@@ -63,7 +53,7 @@ export class ConfigService {
           await this.fileUtil.mkdir(directory_path)
         }
       } catch (err) {
-        throw new HttpException('空间配置更新失败' + err.toString(), 401)
+        throw new HttpException('空间配置更新失败' + err.toString(), 410)
       }
       return
     }
@@ -93,16 +83,13 @@ export class ConfigService {
         await this.fileUtil.mkdir(directory_path)
       }
     } catch (err) {
-      throw new HttpException('空间保存失败' + err.toString(), 401)
+      throw new HttpException('空间保存失败' + err.toString(), 410)
     }
   }
 
   async saveImageFormat(body: ImageFormat): Promise<void> {
     let { format } = body
     format = format.toLowerCase()
-    if (!this.image_format.has(format)) {
-      throw new HttpException('保存格式不正确', 402)
-    }
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["image_config"] })
     if (buckets.length !== 2) {
       throw new HttpException('空间配置不存在', 401)
@@ -112,7 +99,7 @@ export class ConfigService {
         await this.imageConfigRepository.updateById(bucket.image_config.id, { format })
       })
     } catch (err) {
-      throw new HttpException('图片保存格式配置失败' + err.toString(), 403)
+      throw new HttpException('图片保存格式更新失败' + err.toString(), 410)
     }
   }
 
@@ -132,7 +119,7 @@ export class ConfigService {
         await this.imageConfigRepository.updateById(bucket.image_config.id, { watermark_enable })
       })
     } catch (err) {
-      throw new HttpException('水印启用保存失败' + err.toString(), 402)
+      throw new HttpException('水印启用更新失败' + err.toString(), 410)
     }
   }
 
@@ -169,7 +156,7 @@ export class ConfigService {
         } catch (err) {
           //保存图片出现错误，要删除存储图片
           await this.fileUtil.delete(path.resolve(__dirname, '../', 'store', buckets[i].name, image.name + '.' + image.type))
-          throw new HttpException('保存水印图片出现错误' + err.toString(), 403)
+          throw new HttpException('水印图片保存失败' + err.toString(), 410)
         }
       }
       //更新图片配置，这里的水印图片路径为图片的绝对路径
@@ -185,7 +172,7 @@ export class ConfigService {
           watermark_y: obj.y
         })
       } catch (err) {
-        throw new HttpException('保存水印配置出现错误' + err.toString(), 403)
+        throw new HttpException('图片水印更新失败' + err.toString(), 410)
       }
     }
     //删除临时文件
@@ -195,9 +182,6 @@ export class ConfigService {
   async saveAudioFormat(body: AudioFormat): Promise<any> {
     let { format } = body
     format = format.toLowerCase()
-    if (format != 'raw' && format != 'mp3' && format != 'aac') {
-      throw new HttpException('保存格式不正确', 401)
-    }
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["audio_config"] })
     if (buckets.length !== 2) {
       throw new HttpException('空间配置不存在', 401)
@@ -207,21 +191,14 @@ export class ConfigService {
         await this.audioConfigRepository.updateById(bucket.audio_config.id, { format })
       })
     } catch (err) {
-      throw new HttpException('音频保存格式配置失败' + err.toString(), 403)
+      throw new HttpException('音频保存格式更新失败' + err.toString(), 410)
     }
   }
 
   async saveVideoFormat(body: VideoFormat): Promise<any> {
     let { format, resolution } = body
     format = format.toLowerCase()
-    if (format != 'raw' && format != 'vp9' && format != 'h264' && format != 'h265') {
-      throw new HttpException('编码格式不正确', 401)
-    }
     resolution = resolution.toLowerCase()
-    if (resolution != 'raw' && resolution != 'p1080' && resolution != 'p720' && resolution != 'p480') {
-      throw new HttpException('分辨率格式不正确', 401)
-    }
-
     let buckets: Bucket[] = await this.bucketRepository.find({ relations: ["video_config"] })
     if (buckets.length !== 2) {
       throw new HttpException('空间配置不存在', 401)
@@ -231,7 +208,7 @@ export class ConfigService {
         await this.videoConfigRepository.updateById(bucket.video_config.id, { format, resolution })
       })
     } catch (err) {
-      throw new HttpException('视频保存格式配置失败'+err.toString(), 403)
+      throw new HttpException('视频保存格式更新失败' + err.toString(), 410)
     }
   }
 }

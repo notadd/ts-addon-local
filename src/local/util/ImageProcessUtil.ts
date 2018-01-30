@@ -59,7 +59,6 @@ export class ImageProcessUtil {
         //获取处理后元数据
         let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
-        
         let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
         await this.fileUtil.write(absolute_path, buffer)
         //返回处理后元数据
