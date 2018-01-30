@@ -7,7 +7,7 @@ export class FileUtil {
 
     constructor() { }
 
-    async write(path: string, buffer: Buffer):Promise<void>{
+    async write(path: string, buffer: Buffer): Promise<void> {
         let ex: HttpException
         await new Promise((resolver, reject) => {
             fs.writeFile(path, buffer, (err) => {
@@ -24,7 +24,26 @@ export class FileUtil {
         }
     }
 
-    async deleteIfExist(path: string):Promise<void>{
+    async read(path: string): Promise<Buffer> {
+        let ex: HttpException, result: Buffer
+        await new Promise((resolver, reject) => {
+            fs.readFile(path, (err, buffer) => {
+                if (err) {
+                    reject(new HttpException('读取文件错误:' + err.toString(), 407))
+                }
+                result = buffer
+                resolver()
+            })
+        }).catch(err => {
+            ex = err
+        })
+        if (ex) {
+            throw ex
+        }
+        return result
+    }
+
+    async deleteIfExist(path: string): Promise<void> {
         if (fs.existsSync(path)) {
             let ex: HttpException
             await new Promise((resolver, reject) => {
@@ -44,12 +63,12 @@ export class FileUtil {
     }
 
     //获取文件状态，一般只有一个size能言用
-    async size(path:string):Promise<number>{
+    async size(path: string): Promise<number> {
         if (fs.existsSync(path)) {
             let ex: HttpException
             let size
             await new Promise((resolver, reject) => {
-                fs.stat(path, (err,stats) => {
+                fs.stat(path, (err, stats) => {
                     if (err) {
                         reject(new HttpException('获取文件状态错误:' + err.toString(), 407))
                     }
@@ -63,7 +82,7 @@ export class FileUtil {
                 throw ex
             }
             return size
-        }else{
+        } else {
             return null
         }
 
