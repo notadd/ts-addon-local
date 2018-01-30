@@ -47,31 +47,37 @@ export class ConfigResolver {
             code: 200,
             message: '空间配置保存成功'
         }
-        let { isPublic, name, token_expire, token_secret_key } = body
-        //验证参数存在
-        if (isPublic === undefined || isPublic === null || !name) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
+        //使用try-catch块是为了方便的转换错误码
+        //由于目前graphql还不支持异常过滤器，只能在resolver级别将异常转换为data返回
+        //如果直接抛出异常，异常会作为返回数据的errors字段返回，不好识别
+        try {
+            let { isPublic, name, token_expire, token_secret_key } = body
+            //验证参数存在
+            if (isPublic === undefined || isPublic === null || !name) {
+                throw new HttpException('缺少参数', 400)
+            }
+            //验证参数正确与否
+            if (isPublic !== true && isPublic !== false) {
+                throw new HttpException('isPublic参数不正确', 400)
+            }
+            if (!isPublic && (!token_expire || !token_secret_key)) {
+                throw new HttpException('缺少参数', 400)
+            }
+            if (!isPublic && (token_expire < 0 || token_expire > 1800)) {
+                throw new HttpException('token超时不正确', 400)
+            }
+            //进行保存,如果存在就更新
+            await this.configService.saveBucketConfig(body)
+        } catch (err) {
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
         }
-        //验证参数正确与否
-        if (isPublic !== true && isPublic !== false) {
-            data.code = 400
-            data.message = 'isPublic参数不正确'
-            return data
-        }
-        if (!isPublic && (!token_expire || !token_secret_key)) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        if (!isPublic && (token_expire < 0 || token_expire > 1800)) {
-            data.code = 400
-            data.message = 'token超时不正确'
-            return data
-        }
-        //进行保存,如果存在就更新
-        await this.configService.saveBucketConfig(data, body)
         return data
     }
 
@@ -185,9 +191,9 @@ export class ConfigResolver {
             //暂定短边自适应比例可以大于100
         }
         //保存图片的base64编码为文件，保存目录为当前目录下
-        try{
-            await this.fileUtil.write(__dirname + '/' + name,Buffer.from(body.base64, 'base64'))
-        }catch(err){
+        try {
+            await this.fileUtil.write(__dirname + '/' + name, Buffer.from(body.base64, 'base64'))
+        } catch (err) {
             data.code = 402
             data.message = '文件写入错误'
         }
