@@ -79,32 +79,33 @@ export class FileController {
     @UseGuards(UploadParamGuard)
     async upload( @Body() body): Promise<CommonData> {
         let { uploadForm: obj, uploadFile: file } = body
-        //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
-        let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
-            .leftJoinAndSelect("bucket.image_config", "image_config")
-            .leftJoinAndSelect("bucket.audio_config", "audio_config")
-            .leftJoinAndSelect("bucket.video_config", "video_config")
-            .where("bucket.name = :name", { name: obj.bucketName })
-            .getOne()
-        if (!bucket) {
-            throw new HttpException('指定空间' + obj.bucketName + '不存在', 401)
-        }
-        //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
-        if (file.name !== obj.rawName) {
-            throw new HttpException('上传文件名' + file.name + '与请求头中文件名' + obj.fileName + '不符', 403)
-        }
-        let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
-        //对上传文件进行md5校验
-        let buffer: Buffer = await this.fileUtil.read(file.path)
-        if (!(crypto.createHash('md5').update(buffer).digest('hex') === md5)) {
-            throw new HttpException('文件md5校验失败', 409)
-        }
-        //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
-        try{
+        //这里使用trycatch块主要是为了不论抛出神码异常，上传的临时文件都会被删除
+        try {
+            //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
+            let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+                .leftJoinAndSelect("bucket.image_config", "image_config")
+                .leftJoinAndSelect("bucket.audio_config", "audio_config")
+                .leftJoinAndSelect("bucket.video_config", "video_config")
+                .where("bucket.name = :name", { name: obj.bucketName })
+                .getOne()
+            if (!bucket) {
+                throw new HttpException('指定空间' + obj.bucketName + '不存在', 401)
+            }
+            //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
+            if (file.name !== obj.rawName) {
+                throw new HttpException('上传文件名' + file.name + '与请求头中文件名' + obj.fileName + '不符', 403)
+            }
+            let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
+            //对上传文件进行md5校验
+            let buffer: Buffer = await this.fileUtil.read(file.path)
+            if (!(crypto.createHash('md5').update(buffer).digest('hex') === md5)) {
+                throw new HttpException('文件md5校验失败', 409)
+            }
+            //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
             await this.fileService.saveUploadFile(bucket, file, obj)
-        }catch(err){
+        } catch (err) {
             throw err
-        }finally{
+        } finally {
             await this.fileUtil.delete(file.path)
         }
         return {
