@@ -36,7 +36,6 @@ async function create(){
         console.log(err)
     })
 }
-create()
 function format(){
     gm('../../test.jpeg').write('../../test.png',function (err){
         console.log(err)
@@ -60,3 +59,10 @@ function alpha(){
     })
 }
 //alpha()
+
+function  rotate(){
+    gm('../../test.jpeg').rotate('black',30).write('../../rotate.jpeg',err=>{
+        console.log(err)
+    })
+}
+rotate()

@@ -153,7 +153,11 @@ export class ImageProcessUtil {
                 this.output(instance, format ? format : metadata.format, lossless, null, null)
             }
         } catch (err) {
-            throw new HttpException(err.toString(), 408)
+            if(err instanceof HttpException){
+                throw err
+            }else{
+                throw new HttpException(err.toString(), 408)
+            }
         } 
         //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
         //删除旋转临时图片
@@ -246,7 +250,11 @@ export class ImageProcessUtil {
             }
             
         } catch (err) {
-            throw new HttpException(err.toString(), 408)
+            if(err instanceof HttpException){
+                throw err
+            }else{
+                throw new HttpException(err.toString(), 408)
+            }
         }
         //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
         //删除旋转临时图片
@@ -646,21 +654,9 @@ export class ImageProcessUtil {
         let temp_path = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '.' + metadata.format)
         let ex: HttpException
         //根据绝对路径保存图片
-        await new Promise((resolver, reject) => {
-            fs.writeFile(temp_path, buffer, (err) => {
-                if (err) {
-                    reject(new HttpException('文件写入磁盘错误:' + err.toString(), 407))
-                }
-                resolver()
-            })
-        }).catch(err => {
-            ex = err
-        })
-        if (ex) {
-            throw ex
-        }
+        await this.fileUtil.write(temp_path,buffer)
         await new Promise((resolve, reject) => {
-            gm(temp_path).rotate(rotate).write(temp_path, err => {
+            gm(temp_path).rotate('black',rotate).write(temp_path, err => {
                 if (err) reject(new HttpException('旋转文件图片出现错误:' + err.toString(), 407))
                 resolve()
             })
