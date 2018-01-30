@@ -103,7 +103,10 @@ export class FileUtil {
         } else {
             return null
         }
+    }
 
+    exist(path:string):boolean{
+        return fs.existsSync(path)
     }
 
 } 

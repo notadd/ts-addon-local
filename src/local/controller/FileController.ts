@@ -27,7 +27,6 @@ import { File } from '../model/File';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as mime from 'mime';
-import * as fs from 'fs';
 
 
 /*文件控制器，包含了文件下载、上传、访问功能
@@ -56,7 +55,7 @@ export class FileController {
         //文件绝对路径，这里并不查询数据库，直接从文件夹获取
         let realPath: string = path.resolve(__dirname, '../', 'store', bucketName, fileName)
         //文件不存在，返回404
-        if (!fs.existsSync(realPath)) {
+        if (!this.fileUtil.exist(realPath)) {
             throw new HttpException('请求下载的文件不存在', 404)
         }
         //下载文件的buffer，不进行处理，返回原始文件
@@ -106,7 +105,7 @@ export class FileController {
         }catch(err){
             throw err
         }finally{
-            this.fileUtil.delete(file.path)
+            await this.fileUtil.delete(file.path)
         }
         return {
             code: 200,
@@ -125,7 +124,7 @@ export class FileController {
         let { imagePostProcessString, token } = query
         //判断文件是否存在
         let realPath: string = path.resolve(__dirname, '../', 'store', bucketName, fileName)
-        if (!fs.existsSync(realPath)) {
+        if (!this.fileUtil.exist(realPath)) {
             throw new HttpException('指定文件不存在', 404)
         }
         //判断空间是否存在，由于要判断公有、私有空间，这里需要查询出空间
