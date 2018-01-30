@@ -43,6 +43,24 @@ export class FileUtil {
         return result
     }
 
+    async delete(path: string): Promise<void> {
+        let ex: HttpException
+        await new Promise((resolver, reject) => {
+            fs.unlink(path, (err) => {
+                if (err) {
+                    reject(new HttpException('文件删除错误:' + err.toString(), 407))
+                }
+                resolver()
+            })
+        }).catch(err => {
+            ex = err
+        })
+        if (ex) {
+            throw ex
+        }
+
+    }
+
     async deleteIfExist(path: string): Promise<void> {
         if (fs.existsSync(path)) {
             let ex: HttpException

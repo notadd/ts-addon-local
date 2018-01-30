@@ -32,11 +32,11 @@ export class ImageProcessUtil {
         let { format, width, height } = await sharp(pathOrBuffer).metadata()
         let size, name
         //为路径时
-        if ((typeof pathOrBuffer) === 'string') {
-            let ex: HttpException
-            size = await this.fileUtil.size(pathOrBuffer as string)
+        if (typeof pathOrBuffer === 'string') {
+            let buffer = await this.fileUtil.read(pathOrBuffer)
+            size = await this.fileUtil.size(pathOrBuffer)
             //计算sha256为图片名称
-            name = crypto.createHash('sha256').update(fs.readFileSync(pathOrBuffer)).digest('hex')
+            name = crypto.createHash('sha256').update(buffer).digest('hex')
         } else {
             //获取BUffer字节大小
             size = Buffer.byteLength(pathOrBuffer)
@@ -638,6 +638,7 @@ export class ImageProcessUtil {
                 throw ex
             }
             let a = true
+            await this.fileUtil.deleteIfExist(shuiyin_temp_path)
             fs.unlinkSync(shuiyin_temp_path)
             return temp_path
         } else {
