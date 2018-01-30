@@ -9,7 +9,6 @@ import { isArray } from 'util';
 import * as sharp from 'sharp';
 import * as crypto from 'crypto';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as gm from 'gm';
 
 
@@ -638,8 +637,7 @@ export class ImageProcessUtil {
                 throw ex
             }
             let a = true
-            await this.fileUtil.deleteIfExist(shuiyin_temp_path)
-            fs.unlinkSync(shuiyin_temp_path)
+            await this.fileUtil.delete(shuiyin_temp_path)
             return temp_path
         } else {
             return null

@@ -16,6 +16,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CommonData } from '../interface/Common'
 import { TokenUtil } from '../util/TokenUtil';
 import { Document } from '../model/Document';
+import { FileUtil } from '../util/FileUtil';
 import { KindUtil } from '../util/KindUtil';
 import * as  formidable from 'formidable';
 import { Bucket } from '../model/Bucket';
@@ -37,6 +38,7 @@ import * as fs from 'fs';
 export class FileController {
 
     constructor(
+        private readonly fileUtil: FileUtil,
         private readonly kindUtil: KindUtil,
         private readonly tokenUtil: TokenUtil,
         private readonly fileService: FileService,
@@ -50,7 +52,7 @@ export class FileController {
     @Get('/download')
     @UseGuards(DownloadParamGuard)
     async download( @Headers() headers: HeaderParam, @Response() res): Promise<any> {
-        let { bucketName, fileName} = headers
+        let { bucketName, fileName } = headers
         //文件绝对路径，这里并不查询数据库，直接从文件夹获取
         let realPath: string = path.resolve(__dirname, '../', 'store', bucketName, fileName)
         //文件不存在，返回404
@@ -58,7 +60,7 @@ export class FileController {
             throw new HttpException('请求下载的文件不存在', 404)
         }
         //下载文件的buffer，不进行处理，返回原始文件
-        let buffer: Buffer = fs.readFileSync(realPath)
+        let buffer: Buffer = await this.fileUtil.read(realPath)
         //文件类型响应头
         res.setHeader('Content-Type', mime.getType(fileName))
         //文件大小响应头
@@ -94,11 +96,18 @@ export class FileController {
         }
         let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
         //对上传文件进行md5校验
-        if (!(crypto.createHash('md5').update(fs.readFileSync(file.path)).digest('hex') === md5)) {
+        let buffer: Buffer = await this.fileUtil.read(file.path)
+        if (!(crypto.createHash('md5').update(buffer).digest('hex') === md5)) {
             throw new HttpException('文件md5校验失败', 409)
         }
         //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
-        await this.fileService.saveUploadFile(bucket, file, obj)
+        try{
+            await this.fileService.saveUploadFile(bucket, file, obj)
+        }catch(err){
+            throw err
+        }finally{
+            this.fileUtil.delete(file.path)
+        }
         return {
             code: 200,
             message: '上传文件成功'
