@@ -251,18 +251,23 @@ export class ConfigResolver {
             code: 200,
             message: "视频保存格式配置保存成功"
         }
-        //视频编码、分辨率
-        let { format, resolution } = body
-        if (!format || !resolution) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        //保存格式到数据库
-        await this.configService.saveVideoFormat(data, body)
-        //格式参数不正确、配置不存在、保存失败
-        if (data.code == 401 || data.code == 402 || data.code == 403) {
-            return data
+        try {
+            //视频编码、分辨率
+            let { format, resolution } = body
+            if (!format || !resolution) {
+                throw new HttpException('缺少参数', 400)
+            }
+            //保存格式到数据库
+            await this.configService.saveVideoFormat(body)
+        } catch (err) {
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
         }
         return data
     }
