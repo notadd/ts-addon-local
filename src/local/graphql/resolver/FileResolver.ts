@@ -13,6 +13,7 @@ import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
 import { Document } from '../../model/Document';
+import { HttpException } from '@nestjs/common';
 import { KindUtil } from '../../util/KindUtil';
 import { FileUtil } from '../../util/FileUtil';
 import { Bucket } from '../../model/Bucket';
@@ -51,7 +52,7 @@ export class FileResolver {
            data.headers:下载文件头信息，这里其实不需要，但是为了与又拍云统一，返回null
 */
   @Query('downloadProcess')
-  async downloadProcess(req: any, body: FileLocationBody): Promise<DownloadProcessData> {
+  async downloadProcess(req: any, body: FileLocationBody): Promise<DownloadProcessData | CommonData> {
     let data: DownloadProcessData = {
       code: 200,
       message: '下载预处理成功',
@@ -62,34 +63,45 @@ export class FileResolver {
       },
       url: req.protocol + '://' + req.get('host') + '/local/file/download'
     }
-    //验证参数存在
-    let { bucketName, name, type } = body
-    if (!bucketName || !name || !type) {
-      data.message = '缺少参数'
+    try {
+      //验证参数存在
+      let { bucketName, name, type } = body
+      if (!bucketName || !name || !type) {
+        throw new HttpException('缺少参数', 400)
+      }
+      let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+      //指定空间不存在
+      if (!bucket) {
+        throw new HttpException('指定空间' + bucketName + '不存在', 401)
+      }
+      //根据文件种类获取文件实例
+      let kind: string
+      let file: File | Audio | Video | Image | Document
+      if (this.kindUtil.isImage(type)) {
+        file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id })
+      } else {
+        //其他类型暂不支持
+      }
+      if (!file) {
+        throw new HttpException('指定文件' + name + '不存在', 402)
+      }
+      data.headers.bucketName = bucket.name
+      data.headers.fileName = file.name + '.' + file.type
+    } catch (err) {
+      let data: CommonData = {
+        code: null,
+        message: ''
+      }
+      if (err instanceof HttpException) {
+        data.code = err.getStatus()
+        data.message = err.getResponse() + ''
+      } else {
+        console.log(err)
+        data.code = 500
+        data.message = '出现了意外错误' + err.toString()
+      }
       return data
     }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
-    //指定空间不存在
-    if (!bucket) {
-      data.code = 401
-      data.message = '指定空间' + bucketName + '不存在'
-      return data
-    }
-    //根据文件种类获取文件实例
-    let kind: string
-    let file: File | Audio | Video | Image | Document
-    if (this.kindUtil.isImage(type)) {
-      file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id })
-    } else {
-      //其他类型暂不支持
-    }
-    if (!file) {
-      data.code = 402
-      data.message = '指定文件' + name + '不存在'
-      return data
-    }
-    data.headers.bucketName = bucket.name
-    data.headers.fileName = file.name + '.' + file.type
     return data
   }
 
@@ -105,7 +117,7 @@ export class FileResolver {
           data.url：上传时的url
           data.method： 上传方法
           data.form：   表单上传的字段对象，包含了imagePreProcessInfo、md5、contentSecret、tags字段，上传时需要加上file字段
-*/
+  */
   @Mutation('uploadProcess')
   async uploadProcess(req: any, body: UploadProcessBody): Promise<UploadProcessData> {
     let data: UploadProcessData = {
@@ -122,27 +134,26 @@ export class FileResolver {
         imagePreProcessString: null,
       }
     }
-    //可以根据md5对文件内容进行校验
-    let { bucketName, md5, contentName, contentSecret, tags, imagePreProcessInfo } = body
-    if (!bucketName || !contentName) {
-      data.code = 400
-      data.message = '缺少参数'
+    try {
+      //可以根据md5对文件内容进行校验
+      let { bucketName, md5, contentName, contentSecret, tags, imagePreProcessInfo } = body
+      if (!bucketName || !contentName) {
+        throw new HttpException('缺少参数', 400)
+      }
+      let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+      if (!bucket) {
+        data.code = 401
+        data.message = '指定空间' + bucketName + '不存在'
+        return data
+      }
+      data.form.md5 = md5
+      data.form.rawName = contentName
+      data.form.bucketName = bucket.name
+      data.form.contentSecret = contentSecret
+      data.form.tagsString = JSON.stringify(tags)
+      data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
       return data
     }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
-    if (!bucket) {
-      data.code = 401
-      data.message = '指定空间' + bucketName + '不存在'
-      return data
-    }
-    data.form.md5 = md5
-    data.form.rawName = contentName
-    data.form.bucketName = bucket.name
-    data.form.contentSecret = contentSecret
-    data.form.tagsString = JSON.stringify(tags)
-    data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
-    return data
-  }
 
   /* 获取访问单个文件url方法 ，从后台获取
      @Param bucketName：空间名
@@ -154,148 +165,148 @@ export class FileResolver {
              data.url：访问文件的全部url，包括域名、目录、文件名、扩展名、token、处理字符串,访问图片方法必须是get，不说明
   */
   @Query('one')
-  async  getFile(req: any, body: OneBody): Promise<OneData> {
-    let data: OneData = {
-      code: 200,
-      message: "获取文件url成功",
-      url: req.protocol + '://' + req.get('host') + '/local/file/visit'
-    }
+    async  getFile(req: any, body: OneBody): Promise < OneData > {
+      let data: OneData = {
+        code: 200,
+        message: "获取文件url成功",
+        url: req.protocol + '://' + req.get('host') + '/local/file/visit'
+      }
     //验证参数存在，图片后处理信息可选
     let { bucketName, name, type, imagePostProcessInfo } = body
-    if (!bucketName || !name || !type) {
-      data.code = 400
-      data.message = '缺少参数'
-      return data
-    }
+    if(!bucketName || !name || !type) {
+        data.code = 400
+        data.message = '缺少参数'
+        return data
+      }
     let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
-      .leftJoinAndSelect("bucket.image_config", "image_config")
-      .leftJoinAndSelect("bucket.audio_config", "audio_config")
-      .leftJoinAndSelect("bucket.video_config", "video_config")
-      .where("bucket.name = :name", { name: bucketName })
-      .getOne()
-    if (!bucket) {
-      data.code = 401
-      data.message = '空间不存在'
-      return data
-    }
+        .leftJoinAndSelect("bucket.image_config", "image_config")
+        .leftJoinAndSelect("bucket.audio_config", "audio_config")
+        .leftJoinAndSelect("bucket.video_config", "video_config")
+        .where("bucket.name = :name", { name: bucketName })
+        .getOne()
+    if(!bucket) {
+        data.code = 401
+        data.message = '空间不存在'
+        return data
+      }
     //根据文件种类处理
     let kind = this.kindUtil.getKind(type)
-    if (kind === 'image') {
-      let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
-      if (!image) {
-        data.code = 402
-        data.message = '指定图片不存在'
-        return data
-      }
-      //所有文件调用统一的拼接Url方法 
-      data.url += '/' + bucketName + '/' + name + '.' + type
-      //存储图片处理信息时
-      if (imagePostProcessInfo) {
-        //拼接图片处理的查询字符串
-        data.url += '?imagePostProcessString=' + JSON.stringify(imagePostProcessInfo)
-        //私有空间要拼接token，token使用它之前的完整路径计算
-        if (bucket.public_or_private === 'private') {
-          data.url += '&token=' + this.tokenUtil.getToken(data.url, bucket)
+    if(kind === 'image') {
+        let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
+        if (!image) {
+          data.code = 402
+          data.message = '指定图片不存在'
+          return data
+        }
+        //所有文件调用统一的拼接Url方法 
+        data.url += '/' + bucketName + '/' + name + '.' + type
+        //存储图片处理信息时
+        if (imagePostProcessInfo) {
+          //拼接图片处理的查询字符串
+          data.url += '?imagePostProcessString=' + JSON.stringify(imagePostProcessInfo)
+          //私有空间要拼接token，token使用它之前的完整路径计算
+          if (bucket.public_or_private === 'private') {
+            data.url += '&token=' + this.tokenUtil.getToken(data.url, bucket)
+          }
+        } else {
+          if (bucket.public_or_private === 'private') {
+            data.url += '?token=' + this.tokenUtil.getToken(data.url, bucket)
+          }
         }
       } else {
-        if (bucket.public_or_private === 'private') {
-          data.url += '?token=' + this.tokenUtil.getToken(data.url, bucket)
-        }
+        //暂不支持
       }
-    } else {
-      //暂不支持
-    }
     console.log(data.url)
     return data
-  }
-
-  /* 获取指定空间下文件信息以及相关访问url
-     @Param bucketName：文件所属空间
-     @Return data.code： 状态码，200为成功，其他为错误
-            data.message：响应信息
-            data.baseUrl：访问文件的基本url
-            data.files    分页后的文件信息数组，里面添加了访问文件url信息，url不包含域名，包含了文件密钥、token
-            data.imges：   图片信息数组
-            data.audios:  音频信息数组
-            data.videos:  视频信息数组
-            data.documents: 文档信息数组
-  */
-  @Query('all')
-  async  files(req: any, body: AllBody): Promise<AllData> {
-    let data: AllData = {
-      code: 200,
-      message: '获取空间下所有文件成功',
-      baseUrl: req.protocol + '://' + req.get('host') + '/local/file/visit',
-      files: [],
-      images: [],
-      audios: [],
-      videos: [],
-      documents: []
     }
+
+    /* 获取指定空间下文件信息以及相关访问url
+       @Param bucketName：文件所属空间
+       @Return data.code： 状态码，200为成功，其他为错误
+              data.message：响应信息
+              data.baseUrl：访问文件的基本url
+              data.files    分页后的文件信息数组，里面添加了访问文件url信息，url不包含域名，包含了文件密钥、token
+              data.imges：   图片信息数组
+              data.audios:  音频信息数组
+              data.videos:  视频信息数组
+              data.documents: 文档信息数组
+    */
+    @Query('all')
+    async  files(req: any, body: AllBody): Promise < AllData > {
+      let data: AllData = {
+        code: 200,
+        message: '获取空间下所有文件成功',
+        baseUrl: req.protocol + '://' + req.get('host') + '/local/file/visit',
+        files: [],
+        images: [],
+        audios: [],
+        videos: [],
+        documents: []
+      }
     let { bucketName } = body
-    if (!bucketName) {
-      data.code = 400
-      data.message = '缺少参数'
-      return data
-    }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
-    if (!bucket) {
-      data.code = 401
-      data.message = '空间' + bucketName + '不存在'
-      return
-    }
-    await this.fileService.getAll(data, bucket)
-    return data
-  }
-
-  /* 文件删除接口
-     当客户端需要删除某个文件时使用，
-     @Param bucketName：文件所属空间名
-     @Param type：       文件扩展名，即文件类型
-     @Param name：       文件名
-     @Return data.code：状态码，200为成功，其他为错误
-             data.message：响应信息
-  */
-  @Mutation('deleteFile')
-  async deleteFile(req: any, body: FileLocationBody): Promise<CommonData> {
-    let data: CommonData = {
-      code: 200,
-      message: '删除成功'
-    }
-    //验证参数
-    let { bucketName, type, name } = body
-    if (!bucketName || !name || !type) {
-      data.code = 400
-      data.message = '缺少参数'
-      return data
-    }
-    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
-    if (!bucket) {
-      data.code = 401
-      data.message = '空间' + bucketName + '不存在'
-      return data
-    }
-    //根据文件种类，查找、删除数据库
-    let kind = this.kindUtil.getKind(type)
-    if (kind === 'image') {
-      let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
-      if (!image) {
-        data.code = 402
-        data.message = '文件' + name + '不存在于数据库中'
+    if(!bucketName) {
+        data.code = 400
+        data.message = '缺少参数'
         return data
       }
-      await this.imageRepository.delete({ name, bucketId: bucket.id })
-    } else {
-      //其他类型暂不支持
+    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+    if(!bucket) {
+        data.code = 401
+        data.message = '空间' + bucketName + '不存在'
+        return
+      }
+    await this.fileService.getAll(data, bucket)
+    return data
     }
+
+    /* 文件删除接口
+       当客户端需要删除某个文件时使用，
+       @Param bucketName：文件所属空间名
+       @Param type：       文件扩展名，即文件类型
+       @Param name：       文件名
+       @Return data.code：状态码，200为成功，其他为错误
+               data.message：响应信息
+    */
+    @Mutation('deleteFile')
+    async deleteFile(req: any, body: FileLocationBody): Promise < CommonData > {
+      let data: CommonData = {
+        code: 200,
+        message: '删除成功'
+      }
+    //验证参数
+    let { bucketName, type, name } = body
+    if(!bucketName || !name || !type) {
+        data.code = 400
+        data.message = '缺少参数'
+        return data
+      }
+    let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+    if(!bucket) {
+        data.code = 401
+        data.message = '空间' + bucketName + '不存在'
+        return data
+      }
+    //根据文件种类，查找、删除数据库
+    let kind = this.kindUtil.getKind(type)
+    if(kind === 'image') {
+        let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
+        if (!image) {
+          data.code = 402
+          data.message = '文件' + name + '不存在于数据库中'
+          return data
+        }
+        await this.imageRepository.delete({ name, bucketId: bucket.id })
+      } else {
+        //其他类型暂不支持
+      }
     //删除目录下存储文件
     let realPath = path.resolve(__dirname, '../../', 'store', bucketName, name + '.' + type)
-    if (!this.fileUtil.exist(realPath)) {
-      data.code = 404
-      data.message = '要删除的文件不存在'
-      return data
-    }
+    if(!this.fileUtil.exist(realPath)) {
+        data.code = 404
+        data.message = '要删除的文件不存在'
+        return data
+      }
     await this.fileUtil.delete(realPath)
     return data
+    }
   }
-}

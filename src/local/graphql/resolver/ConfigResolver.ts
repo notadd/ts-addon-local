@@ -10,7 +10,6 @@ import { VideoFormat } from '../../interface/config/VideoFormat';
 import { UploadFile } from '../../interface/file/UploadFile';
 import { Resolver, Query, Mutation } from '@nestjs/graphql';
 import { ConfigService } from '../../service/ConfigService';
-import { BucketGuard } from '../../guard/BucketGuard';
 import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KindUtil } from '../../util/KindUtil';
@@ -41,8 +40,6 @@ export class ConfigResolver {
 
     /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
-    //这个guard也接收不到resolver中的参数，只能接收到req，很难获取参数来验证参数
-    @UseGuards(BucketGuard)
     async bucket(req: any, body: BucketConfig): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
