@@ -277,21 +277,28 @@ export class ConfigResolver {
     async buckets(): Promise<BucketsData> {
         let data: BucketsData = {
             code: 200,
-            message: '',
+            message: '获取空间配置成功',
             buckets: []
         }
-        //查询出所有空间的三个字段，其他字段保密
-        let buckets: Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
-            .select(['bucket.id', 'bucket.public_or_private', 'bucket.name'])
-            .getMany()
-        if (buckets.length !== 2) {
-            data.code = 401
-            data.message = '空间配置不存在'
-            return data
+        try {
+            //查询出所有空间的三个字段，其他字段保密
+            let buckets: Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
+                .select(['bucket.id', 'bucket.public_or_private', 'bucket.name'])
+                .getMany()
+            if (buckets.length !== 2) {
+                throw new HttpException('空间配置不存在', 401)
+            }
+            data.buckets = buckets
+        } catch (err) {
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
         }
-        data.code = 200
-        data.message = '获取空间配置成功'
-        data.buckets = buckets
         return data
     }
 }
