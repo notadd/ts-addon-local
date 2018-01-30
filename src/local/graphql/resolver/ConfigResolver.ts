@@ -116,25 +116,28 @@ export class ConfigResolver {
             code: 200,
             message: '图片水印启用配置保存成功'
         }
-        //验证参数
-        let enable: boolean = body.enable
-        //验证参数存在
-        if (enable === null || enable === undefined) {
-            data.code = 400
-            data.message = '缺少参数'
-            return data
-        }
-        //验证参数正确
-        if (enable !== true && enable !== false) {
-            data.code = 400
-            data.message = '参数错误'
-            return data
-        }
-        //保存配置
-        await this.configService.saveEnableImageWatermark(data, body)
-        //保存启用水印到数据库失败，无法模仿这个错误
-        if (data.code === 401 || data.code === 402) {
-            return data
+        try {
+            //验证参数
+            let enable: boolean = body.enable
+            //验证参数存在
+            if (enable === null || enable === undefined) {
+                throw new HttpException('缺少参数', 400)
+            }
+            //验证参数正确
+            if (enable !== true && enable !== false) {
+                throw new HttpException('参数enable错误', 400)
+            }
+            //保存配置
+            await this.configService.saveEnableImageWatermark(body)
+        } catch (err) {
+            if (err instanceof HttpException) {
+                data.code = err.getStatus()
+                data.message = err.getResponse() + ''
+            } else {
+                console.log(err)
+                data.code = 500
+                data.message = '出现了意外错误' + err.toString()
+            }
         }
         return data
     }
