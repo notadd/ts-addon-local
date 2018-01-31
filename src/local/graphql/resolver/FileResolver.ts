@@ -22,6 +22,7 @@ import { Video } from '../../model/Video';
 import { Image } from '../../model/Image';
 import { File } from '../../model/File';
 import * as path from 'path';
+import { IncomingMessage } from 'http';
 
 /*文件Resolver，包含了文件下载预处理、上传预处理
   获取单个文件url、获取多个文件信息以及url、删除文件等接口
@@ -287,7 +288,7 @@ export class FileResolver {
              data.message：响应信息
   */
   @Mutation('deleteFile')
-  async deleteFile(req: any, body: FileLocationBody): Promise<CommonData> {
+  async deleteFile(req: IncomingMessage, body: FileLocationBody): Promise<CommonData> {
     let data: CommonData = {
       code: 200,
       message: '删除成功'

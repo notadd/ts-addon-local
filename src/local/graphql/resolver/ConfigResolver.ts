@@ -16,6 +16,7 @@ import { KindUtil } from '../../util/KindUtil';
 import { FileUtil } from '../../util/FileUtil';
 import { Bucket } from '../../model/Bucket';
 import { Repository } from 'typeorm';
+import { IncomingMessage, IncomingHttpHeaders } from 'http';
 
 
 
@@ -48,7 +49,7 @@ export class ConfigResolver {
 
     /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
     @Mutation('bucket')
-    async bucket(req: any, body: BucketConfig): Promise<CommonData> {
+    async bucket(req: IncomingMessage, body: BucketConfig): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: '空间配置保存成功'
@@ -89,7 +90,7 @@ export class ConfigResolver {
 
     /* 图片保存格式配置*/
     @Mutation('imageFormat')
-    async imageFormat(req: any, body: ImageFormat): Promise<CommonData> {
+    async imageFormat(req: IncomingMessage, body: ImageFormat): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: "图片保存格式配置保存成功"
@@ -120,7 +121,7 @@ export class ConfigResolver {
 
     /* 图片水印启用配置 */
     @Mutation('enableImageWatermark')
-    async  enableImageWatermark(req: any, body: EnableImageWatermark): Promise<CommonData> {
+    async  enableImageWatermark(req: IncomingMessage, body: EnableImageWatermark): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: '图片水印启用配置保存成功'
@@ -153,7 +154,7 @@ export class ConfigResolver {
 
     /* 图片水印配置,其中水印图片以base64编码传输 */
     @Mutation('imageWatermark')
-    async  imageWatermark(req: any, body: ImageWatermark): Promise<CommonData> {
+    async  imageWatermark(req: IncomingMessage, body: ImageWatermark): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: '图片水印配置成功'
@@ -228,7 +229,7 @@ export class ConfigResolver {
 
     /* 音频保存格式配置*/
     @Mutation('audioFormat')
-    async  audioFormat(req, body: AudioFormat): Promise<CommonData> {
+    async  audioFormat(req: IncomingMessage, body: AudioFormat): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: "音频保存格式配置保存成功"
@@ -258,7 +259,7 @@ export class ConfigResolver {
 
     /* 视频保存配置*/
     @Mutation('videoFormat')
-    async videoFormat(req: any, body: VideoFormat): Promise<CommonData> {
+    async videoFormat(req: IncomingMessage, body: VideoFormat): Promise<CommonData> {
         let data: CommonData = {
             code: 200,
             message: "视频保存格式配置保存成功"
@@ -292,7 +293,7 @@ export class ConfigResolver {
 
     /* 获取所有空间信息字段 */
     @Query('buckets')
-    async buckets(): Promise<BucketsData> {
+    async buckets(req: IncomingMessage): Promise<BucketsData> {
         let data: BucketsData = {
             code: 200,
             message: '获取空间配置成功',
