@@ -1,106 +1,109 @@
-#resize data
+#缩放数据
 input ResizeData{
-    #the scaling of equal scale 
+    #等比缩放比例
     scale:Int
-    #the scaling of width
+    #宽度缩放比例
     wscale:Int
-    #the scaling of height
+    #高度缩放比例
     hscale:Int
-    #width
+    #宽度
     width:Int
-    #height
+    #高度
     height:Int
-    #pixel
+    #像素
     pixel:Int
 }
 
-#enum of resize mode
+#缩放模式枚举
 enum ResizeMode{
-    #equal scale
+    #等比缩放
     scale
-    #only scale width
+    #宽度缩放，高度不变
     wscale
-    #only scale height
+    #高度缩放，宽度不变
     hscale
-    #specify width and height
+    #指定宽高缩放
     both
-    #specify width and equal scale
+    #指定宽度等比缩放
     fw
-    #specify height and equal scale
+    #指定高度等比缩放
     fh
-    #specify pixel and equal scale
+    #指定像素等比缩放
     fp
-    #specify the max value of width and height 
+    #指定宽高最大值等比缩放
     fwfh
-    #specify the min value of width and height 
+    #指定宽高最小值等比缩放
     fwfh2
 }
 
-#resize info
+#缩放信息
 input Resize{
+    #缩放模式
     mode:ResizeMode
+    #缩放数据
     data:ResizeData
 }
 
-#tailor info 
+#裁剪信息
 input Tailor{
-    #whether tailor before resize
+    #是否在缩放之前裁剪
     isBefore:Boolean
-    #width of tailor image 
+    #裁剪图片宽度
     width:Int
-    #height of tailor image 
+    #裁剪图片高度
     height:Int
-    #horizontal shift of tailor image , positive number towards the right
+    #裁剪图片横轴偏移
     x:Int
-    #vertical shift of tailor image  , positive number towards the down
+    #纵轴偏移
     y:Int
-    #tailor image orientation
+    #裁剪图片方位，九宫格枚举之一
     gravity:Gravity
 }
 
-#blur info 
+#模糊信息
 input Blur{
-    #blur radius
+    #模糊半径，为了与又拍云统一，sharp库不支持这个参数，这里设置了也没用
     redius:Int
-    #standard deviation
+    #模糊标准差，10以及很模糊了
     sigma:Int
 }
 
 
-#image pretreatment info , used by uploading image 
+#图片上传预处理信息，图片上传时除了要进行预处理还要根据保存格式保存
+#只包含缩放、裁剪、水印、旋转四种处理
 input ImagePreProcessInfo{
-    #resize info 
+    #缩放
     resize:Resize
-    #tailor info
+    #裁剪
     tailor:Tailor
-    #whether watermark on image
+    #是否进行水印，这个指定了上传时是否加水印
     watermark:Boolean
-    #rotation angle
+    #旋转，角度
     rotate:Int
 }
 
-#image postprocessing info
+#获取图片访问url时后处理信息，包含了所有处理模式
 input ImagePostProcessInfo{
-    #resize info 
+    #缩放
     resize:Resize
-    #tailor info
+    #裁剪
     tailor:Tailor
-    #whether watermark on image
+    #水印，这个水印可以覆盖默认的水印启用配置
     watermark:Boolean
-    #rotation angle
+    #旋转
     rotate:Int
-    #blur info
+    #模糊
     blur:Blur
-    #whether sharpen
+    #锐化
     sharpen:Boolean
-    #output format
+    #输出格式
     format:String
-    #thether output as lossless , only supported by webp
+    #是否无损输出，只有webp支持这个参数
     lossless:Boolean
-    #quality of image
+    #图片质量
     quality:Int
-    #progressive display 
+    #渐进显示
     progressive:Boolean
-    #Remove meta information
+    #去除元数据
     strip:Boolean
 }
