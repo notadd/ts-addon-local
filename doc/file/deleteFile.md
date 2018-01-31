@@ -1,12 +1,15 @@
 type Mutation{
-    #delete specified file 
+    #删除文件字段
+    #bucketName：所属空间
+    #name：文件存储名
+    #type：文件扩展名
     deleteFile(bucketName:String,name:String,type:String):DeleteFileData
 }
 
-#return data
+#返回数据
 type DeleteFileData{
-    #error code 
+    #错误码
     code:Int
-    #error message
+    #错误信息
     message:String
 }
