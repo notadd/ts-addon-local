@@ -1,5 +1,9 @@
 type Mutation{
-    #bucket configuration
+    #空间配置字段，私有空间、公有空间都通过这个字段配置
+    #isPublic：是否是公有空间
+    #name    ：空间名，作为存储目录名使用
+    #token_expire:只有私有空间才有，token超时，单位秒，不能大于1800
+    #token_secret_key:token密钥，用来生成token
     bucket(
         isPublic:Boolean,
         name:String,
@@ -7,10 +11,10 @@ type Mutation{
         token_secret_key:String):ConfigData
 }
 
-#config return data
+#所有配置字段的返回数据
 type ConfigData{
-    #error code
+    #错误码，200为成功，其他为错误
     code:Int
-    #code message
+    #错误信息
     message:String
 }
