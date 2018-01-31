@@ -1,13 +1,15 @@
 type Mutation{
-    #config format of uploaded audio
+    #音频保存格式配置字段
+    #参数format为枚举值之一
     audioFormat(format:AudioFormat):ConfigData
 }
-#the enum of image audio
+
+#音频保存格式的枚举
 enum AudioFormat {
-  #original format
+  #保存为原始格式，即上传什么格式就保存什么格式
   raw
-  #mp3
+  #mp3格式
   mp3
-  #aac
+  #aac格式
   aac
 }
