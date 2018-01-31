@@ -1,23 +1,34 @@
 type Query{
-    #get all kinds of file and it's url in specified bucket
+    #获取指定空间下所有文件的字段
+    #bucketName：空间名
     all(bucketName:String):AllData
 }
 
-#file info
+#文件信息
 type File{
+    #id
     id:Int
+    #原名
     raw_name:String
+    #存储文件名
     name:String
+    #文件所属标签数组
     tags:[String]
+    #文件扩展名
     type:String
+    #文件大小
     size:Int
+    #文件密钥
     content_secret:String
+    #创建日期
     create_date:String
+    #更新日期
     update_date:String
+    #访问文件的相对url，与baseUrl拼接即可访问
     url:String
 }
 
-#image info
+#图片信息
 type Image{
     id:Int
     raw_name:String
@@ -32,7 +43,7 @@ type Image{
     url:String
 }
 
-#audio info
+#音频信息
 type Audio{
     id:Int
     raw_name:String
@@ -46,7 +57,7 @@ type Audio{
     url:String
 }
 
-#video info
+#视频信息
 type Video{
     id:Int
     raw_name:String
@@ -59,7 +70,7 @@ type Video{
     url:String
 }
 
-#document info
+#文档信息
 type Document{
     id:Int
     raw_name:String
@@ -72,22 +83,22 @@ type Document{
     url:String
 }
 
-#return data
+#返回数据
 type AllData{
-    #error data
+    #错误码
     code:Int
-    #error message
+    #错误信息
     message:String
-    #base url for visit file , need to append the url of info
+    #访问文件基本url
     baseUrl:String
-    #array of file info 
+    #文件信息数组
     files:[File]
-    #array of image info 
+    #图片信息数组 
     images:[Image]
-    #array of audio info
+    #音频信息数组
     audios:[Audio]
-    #array of video info
+    #视频信息数组
     videos:[Video]
-    #array of document info
+    #文档信息数组
     documents:[Document]
 }
