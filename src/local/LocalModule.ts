@@ -24,7 +24,7 @@ const typeormOptions = require('./typeorm')
   modules: [TypeOrmModule.forRoot([ImageConfig, AudioConfig, VideoConfig, Bucket, Image, File, Video, Audio, Document], typeormOptions)],
   controllers: [FileController],
   components: [ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil],
-  exports: [ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil]
+  exports: []
 }) 
 
 export class LocalModule { }
