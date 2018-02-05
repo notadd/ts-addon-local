@@ -1,15 +1,16 @@
 import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
 import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
+import { HttpException, Component} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HttpException } from '@nestjs/common';
+import { Repository ,Connection} from 'typeorm';
 import { TokenUtil } from '../util/TokenUtil';
 import { FileUtil } from '../util/FileUtil';
 import { KindUtil } from '../util/KindUtil';
 import { Bucket } from '../model/Bucket';
 import { Image } from '../model/Image';
-import { Repository } from 'typeorm';
 import * as path from 'path';
+
 
 class StoreComponent {
 
@@ -20,7 +21,9 @@ class StoreComponent {
         private readonly imageProcessUtil: ImageProcessUtil,
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
-    ) { }
+    ) { 
+      this.kindUtil = new KindUtil()
+    }
 
     async delete(bucketName: string, name: string, type: string): Promise<void> {
         //验证参数
@@ -143,7 +146,12 @@ class StoreComponent {
     }
 }
 
-export const storeComponentProvider = {
-    provider: 'StoreComponentToken',
-    useClass: StoreComponent
+export const StoreComponentProvider = {
+    provide: 'StoreComponentToken',
+    useFactory: (kindUtil:KindUtil,fileUtil:FileUtil,tokenUtil:TokenUtil,imageProcessUtil:ImageProcessUtil,connection:Connection)=>{
+        let imageRepository:Repository<Image> = connection.getRepository(Image)
+        let bucketRepository: Repository<Bucket> = connection.getRepository(Bucket)
+        return new StoreComponent(kindUtil,fileUtil,tokenUtil,imageProcessUtil,imageRepository,bucketRepository)
+    },
+    inject:[KindUtil,FileUtil,TokenUtil,ImageProcessUtil,Connection]
 }

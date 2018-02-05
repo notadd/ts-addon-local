@@ -1,4 +1,5 @@
 import { ConfigResolver } from './graphql/resolver/ConfigResolver';
+import { StoreComponentProvider } from './export/StoreComponent';
 import { FileResolver } from './graphql/resolver/FileResolver';
 import { FileController } from './controller/FileController';
 import { ImageProcessUtil } from './util/ImageProcessUtil';
@@ -20,11 +21,11 @@ import { Image } from './model/Image';
 import { File } from './model/File';
 const typeormOptions = require('./typeorm')
 
-@Module({ 
+@Module({
   modules: [TypeOrmModule.forRoot([ImageConfig, AudioConfig, VideoConfig, Bucket, Image, File, Video, Audio, Document], typeormOptions)],
   controllers: [FileController],
-  components: [ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil],
-  exports: []
-}) 
+  components: [ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil, StoreComponentProvider],
+  exports: [StoreComponentProvider]
+})
 
 export class LocalModule { }
