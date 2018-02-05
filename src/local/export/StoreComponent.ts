@@ -3,6 +3,7 @@ import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HttpException } from '@nestjs/common';
+import { TokenUtil } from '../util/TokenUtil';
 import { FileUtil } from '../util/FileUtil';
 import { KindUtil } from '../util/KindUtil';
 import { Bucket } from '../model/Bucket';
@@ -15,6 +16,7 @@ class StoreComponent {
     constructor(
         private readonly kindUtil: KindUtil,
         private readonly fileUtil: FileUtil,
+        private readonly tokenUtil: TokenUtil,
         private readonly imageProcessUtil: ImageProcessUtil,
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
@@ -102,8 +104,42 @@ class StoreComponent {
         await this.fileUtil.deleteIfExist(tempPath)
         return { bucketName, name: metadata.name, type: metadata.format }
     }
-    async getUrl(bucketName: string, name: string, type: string, imageProcessInfo: ImagePostProcessInfo): Promise<string> {
-
+    async getUrl(req:any,bucketName: string, name: string, type: string, imagePostProcessInfo: ImagePostProcessInfo): Promise<string> {
+        //验证参数
+        if (!bucketName || !name || !type) {
+            throw new HttpException('缺少参数', 400)
+        }
+        let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+        if (!bucket) {
+            throw new HttpException('指定空间' + bucketName + '不存在', 401)
+        }
+        let url:string = req.protocol + '://' + req.get('host') + '/local/file/visit'
+        //根据文件种类，查找、删除数据库
+        let kind = this.kindUtil.getKind(type)
+        if (kind === 'image') {
+            let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
+            if (!image) {
+              throw new HttpException('指定图片' + name + '.' + type + '不存在', 404)
+            }
+            //所有文件调用统一的拼接Url方法 
+            url += '/' + bucketName + '/' + name + '.' + type
+            //存储图片处理信息时
+            if (imagePostProcessInfo) {
+              //拼接图片处理的查询字符串
+              url += '?imagePostProcessString=' + JSON.stringify(imagePostProcessInfo)
+              //私有空间要拼接token，token使用它之前的完整路径计算
+              if (bucket.public_or_private === 'private') {
+                url += '&token=' + this.tokenUtil.getToken(url, bucket)
+              }
+            } else {
+              if (bucket.public_or_private === 'private') {
+                url += '?token=' + this.tokenUtil.getToken(url, bucket)
+              }
+            }
+        } else {
+            //其他类型暂不支持
+        }
+        return url
     }
 }
 

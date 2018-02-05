@@ -173,7 +173,7 @@ export class FileResolver {
              data.url：访问文件的全部url，包括域名、目录、文件名、扩展名、token、处理字符串,访问图片方法必须是get，不说明
   */
   @Query('one')
-  async  getFile(req: any, body: OneBody): Promise<OneData> {
+  async  getOne(req: any, body: OneBody): Promise<OneData> {
     let data: OneData = {
       code: 200,
       message: "获取文件url成功",
