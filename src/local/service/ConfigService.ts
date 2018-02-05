@@ -30,7 +30,7 @@ export class ConfigService {
     @InjectRepository(ImageConfig) private readonly imageConfigRepository: Repository<ImageConfig>,
     @InjectRepository(AudioConfig) private readonly audioConfigRepository: Repository<AudioConfig>,
     @InjectRepository(VideoConfig) private readonly videoConfigRepository: Repository<VideoConfig>
-  ) {}
+  ) { }
 
   async saveBucketConfig(body: BucketConfig): Promise<void> {
     let exist: Bucket
@@ -134,11 +134,11 @@ export class ConfigService {
       let format = buckets[i].image_config.format || 'raw'
       //根据不同的图片保存类型，处理并且存储图片，返回处理后元数据
       if (format === 'raw') {
-        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { shrip: true, watermark: false } as ImagePostProcessInfo)
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { strip: true, watermark: false })
       } else if (format === 'webp_damage') {
-        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', shrip: true, watermark: false } as ImagePostProcessInfo)
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', strip: true, watermark: false })
       } else if (format === 'webp_undamage') {
-        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', lossless: true, shrip: true, watermark: false } as ImagePostProcessInfo)
+        metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], { format: 'webp', lossless: true, strip: true, watermark: false })
       }
       let image: Image = new Image()
       image.bucket = buckets[i]
