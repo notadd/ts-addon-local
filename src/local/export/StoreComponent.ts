@@ -1,8 +1,7 @@
 import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
+import { HttpException, Component , Inject} from '@nestjs/common';
 import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
-import { HttpException, Component} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository ,Connection} from 'typeorm';
 import { TokenUtil } from '../util/TokenUtil';
 import { FileUtil } from '../util/FileUtil';
@@ -19,8 +18,8 @@ class StoreComponent {
         private readonly fileUtil: FileUtil,
         private readonly tokenUtil: TokenUtil,
         private readonly imageProcessUtil: ImageProcessUtil,
-        @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
+        @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
+        @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>
     ) { 
       this.kindUtil = new KindUtil()
     }

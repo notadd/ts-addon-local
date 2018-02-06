@@ -1,4 +1,6 @@
+import { RepositorysProvider } from './database/RepositorysProvider';
 import { ConfigResolver } from './graphql/resolver/ConfigResolver';
+import { ConnectionProvider } from './database/ConnectionProvider';
 import { StoreComponentProvider } from './export/StoreComponent';
 import { FileResolver } from './graphql/resolver/FileResolver';
 import { FileController } from './controller/FileController';
@@ -19,12 +21,11 @@ import { Audio } from './model/Audio';
 import { Video } from './model/Video';
 import { Image } from './model/Image';
 import { File } from './model/File';
-const typeormOptions = require('./typeorm')
 
 @Module({
-  modules: [TypeOrmModule.forFeature([ImageConfig, AudioConfig, VideoConfig, Bucket, Image, File, Video, Audio, Document]),TypeOrmModule.forRoot(typeormOptions)],
+  modules: [],
   controllers: [FileController],
-  components: [ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil],
+  components: [ConnectionProvider,...RepositorysProvider,ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil],
   exports: []
 })
 

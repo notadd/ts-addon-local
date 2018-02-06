@@ -1,5 +1,5 @@
+import { Component, UseGuards, UseFilters, HttpException ,Inject} from '@nestjs/common';
 import { EnableImageWatermark } from '../../interface/config/EnableImageWatermark';
-import { Component, UseGuards, UseFilters, HttpException } from '@nestjs/common';
 import { LocalExceptionFilter } from '../../exception/LocalExceptionFilter';
 import { ImageWatermark } from '../../interface/config/ImageWatermark';
 import { BucketConfig } from '../../interface/config/BucketConfig';
@@ -11,7 +11,6 @@ import { UploadFile } from '../../interface/file/UploadFile';
 import { Resolver, Query, Mutation } from '@nestjs/graphql';
 import { ConfigService } from '../../service/ConfigService';
 import { CommonData } from '../../interface/Common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { KindUtil } from '../../util/KindUtil';
 import { FileUtil } from '../../util/FileUtil';
 import { Bucket } from '../../model/Bucket';
@@ -38,7 +37,7 @@ export class ConfigResolver {
         private readonly fileUtil: FileUtil,
         private readonly kindUtil: KindUtil,
         private readonly configService: ConfigService,
-        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
+        @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>
     ) {
         this.image_format = new Set(['raw', 'webp_damage', 'webp_undamage'])
         this.audio_format = new Set(['raw', 'mp3', 'aac'])

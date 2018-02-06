@@ -8,7 +8,7 @@ import { Audio } from '../model/Audio';
 import { Video } from '../model/Video';
 import { Image } from '../model/Image';
 import { File } from '../model/File';
-export const ConectionProvider = {
+export const ConnectionProvider = {
     provide:'LocalModule.Connection',
     useFactory:async ()=>{
         return await createConnection({

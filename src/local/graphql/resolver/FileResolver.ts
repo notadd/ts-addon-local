@@ -9,11 +9,10 @@ import { AllBody } from '../../interface/file/AllBody';
 import { AllData } from '../../interface/file/AllData';
 import { OneBody } from '../../interface/file/OneBody';
 import { OneData } from '../../interface/file/OneData';
+import { HttpException ,Inject} from '@nestjs/common';
 import { CommonData } from '../../interface/Common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
 import { Document } from '../../model/Document';
-import { HttpException } from '@nestjs/common';
 import { KindUtil } from '../../util/KindUtil';
 import { FileUtil } from '../../util/FileUtil';
 import { Bucket } from '../../model/Bucket';
@@ -21,8 +20,9 @@ import { Audio } from '../../model/Audio';
 import { Video } from '../../model/Video';
 import { Image } from '../../model/Image';
 import { File } from '../../model/File';
-import * as path from 'path';
 import { IncomingMessage } from 'http';
+import * as path from 'path';
+
 
 /*文件Resolver，包含了文件下载预处理、上传预处理
   获取单个文件url、获取多个文件信息以及url、删除文件等接口
@@ -35,9 +35,9 @@ export class FileResolver {
     private readonly kindUtil: KindUtil,
     private readonly tokenUtil: TokenUtil,
     private readonly fileService: FileService,
-    @InjectRepository(File) private readonly fileRepository: Repository<File>,
-    @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-    @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
+    @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
+    @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
+    @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) {
   }
 
   /* 文件下载预处理接口

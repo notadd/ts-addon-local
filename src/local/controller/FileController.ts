@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards, HttpException, Inject } from '@nestjs/common';
 import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
 import { DownloadParamGuard } from '../guard/DownloadParamGuard';
@@ -12,7 +12,6 @@ import { QueryParam } from '../interface/file/QueryParam';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
-import { InjectRepository } from '@nestjs/typeorm';
 import { CommonData } from '../interface/Common'
 import { TokenUtil } from '../util/TokenUtil';
 import { Document } from '../model/Document';
@@ -42,9 +41,9 @@ export class FileController {
         private readonly tokenUtil: TokenUtil,
         private readonly fileService: FileService,
         private readonly imageProcessUtil: ImageProcessUtil,
-        @InjectRepository(File) private readonly fileRepository: Repository<File>,
-        @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
+        @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
+        @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
+        @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) {
     }
 
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */

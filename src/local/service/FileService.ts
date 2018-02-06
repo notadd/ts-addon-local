@@ -1,11 +1,10 @@
 import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
+import { Component, Inject, forwardRef, HttpException} from '@nestjs/common';
 import { ImageMetadata } from '../interface/file/ImageMetadata';
-import { Component, Inject, forwardRef, HttpException } from '@nestjs/common';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { UploadFile } from '../interface/file/UploadFile';
 import { UploadForm } from '../interface/file/UploadForm';
 import { PathParam } from '../interface/file/PathParam';
-import { InjectRepository } from '@nestjs/typeorm';
 import { CommonData } from '../interface/Common';
 import { ConfigService } from './ConfigService';
 import { TokenUtil } from '../util/TokenUtil';
@@ -30,11 +29,11 @@ export class FileService {
         private readonly kindUtil: KindUtil,
         private readonly tokenUtil: TokenUtil,
         private readonly imageProcessUtil: ImageProcessUtil,
-        @InjectRepository(File) private readonly fileRepository: Repository<File>,
-        @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
-        @InjectRepository(Audio) private readonly audioRepository: Repository<Audio>,
-        @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
-        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) { }
+        @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
+        @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
+        @Inject('LocalModule.AudioRepository') private readonly audioRepository: Repository<Audio>,
+        @Inject('LocalModule.VideoRepository') private readonly videoRepository: Repository<Video>,
+        @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) { }
 
 
     async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<void> {
