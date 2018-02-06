@@ -34,9 +34,9 @@ export class ConfigResolver {
     private readonly video_resolution: Set<String>
 
     constructor(
-        private readonly fileUtil: FileUtil,
-        private readonly kindUtil: KindUtil,
-        private readonly configService: ConfigService,
+        @Inject(FileUtil) private readonly fileUtil: FileUtil,
+        @Inject(KindUtil) private readonly kindUtil: KindUtil,
+        @Inject(ConfigService) private readonly configService: ConfigService,
         @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>
     ) {
         this.image_format = new Set(['raw', 'webp_damage', 'webp_undamage'])

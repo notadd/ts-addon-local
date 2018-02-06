@@ -36,11 +36,11 @@ import * as mime from 'mime';
 export class FileController {
 
     constructor(
-        private readonly fileUtil: FileUtil,
-        private readonly kindUtil: KindUtil,
-        private readonly tokenUtil: TokenUtil,
-        private readonly fileService: FileService,
-        private readonly imageProcessUtil: ImageProcessUtil,
+        @Inject(FileUtil) private readonly fileUtil: FileUtil,
+        @Inject(KindUtil) private readonly kindUtil: KindUtil,
+        @Inject(TokenUtil) private readonly tokenUtil: TokenUtil,
+        @Inject(FileService) private readonly fileService: FileService,
+        @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
         @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
         @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
         @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) {

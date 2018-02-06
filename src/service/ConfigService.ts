@@ -22,8 +22,8 @@ import * as  path from 'path';
 export class ConfigService {
 
   constructor(
-    private readonly fileUtil: FileUtil,
-    private readonly imageProcessUtil: ImageProcessUtil,
+    @Inject(FileUtil) private readonly fileUtil: FileUtil,
+    @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
     @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
     @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>,
     @Inject('LocalModule.ImageConfigRepository') private readonly imageConfigRepository: Repository<ImageConfig>,

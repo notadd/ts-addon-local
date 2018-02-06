@@ -14,10 +14,10 @@ import * as path from 'path';
 class StoreComponent {
 
     constructor(
-        private readonly kindUtil: KindUtil,
-        private readonly fileUtil: FileUtil,
-        private readonly tokenUtil: TokenUtil,
-        private readonly imageProcessUtil: ImageProcessUtil,
+        @Inject(KindUtil) private readonly kindUtil: KindUtil,
+        @Inject(FileUtil) private readonly fileUtil: FileUtil,
+        @Inject(TokenUtil) private readonly tokenUtil: TokenUtil,
+        @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
         @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
         @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>
     ) { 
