@@ -11,17 +11,18 @@ import { ImageConfig } from './model/ImageConfig';
 import { AudioConfig } from './model/AudioConfig';
 import { VideoConfig } from './model/VideoConfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module ,Global} from '@nestjs/common';
 import { TokenUtil } from './util/TokenUtil';
 import { Document } from './model/Document';
 import { FileUtil } from './util/FileUtil';
 import { KindUtil } from './util/KindUtil';
-import { Module } from '@nestjs/common';
 import { Bucket } from './model/Bucket';
 import { Audio } from './model/Audio';
 import { Video } from './model/Video';
 import { Image } from './model/Image';
 import { File } from './model/File';
 
+@Global()
 @Module({
   modules: [],
   controllers: [FileController],
