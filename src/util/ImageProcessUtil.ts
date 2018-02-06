@@ -17,8 +17,8 @@ import * as gm from 'gm';
 export class ImageProcessUtil {
     private readonly gravity: Set<string>
     constructor(
-        private readonly kindUtil: KindUtil,
-        private readonly fileUtil: FileUtil
+        @Inject(KindUtil) private readonly kindUtil: KindUtil,
+        @Inject(FileUtil) private readonly fileUtil: FileUtil
     ) {
         //重心集合，在裁剪与水印中使用
         this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])

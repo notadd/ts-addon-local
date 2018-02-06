@@ -26,9 +26,9 @@ import * as path from 'path';
 export class FileService {
 
     constructor(
-        private readonly kindUtil: KindUtil,
-        private readonly tokenUtil: TokenUtil,
-        private readonly imageProcessUtil: ImageProcessUtil,
+        @Inject(KindUtil) private readonly kindUtil: KindUtil,
+        @Inject(TokenUtil) private readonly tokenUtil: TokenUtil,
+        @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
         @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
         @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
         @Inject('LocalModule.AudioRepository') private readonly audioRepository: Repository<Audio>,
