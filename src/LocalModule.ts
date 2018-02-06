@@ -1,7 +1,7 @@
+import { StoreComponentProvider } from './export/StoreComponentProvider';
 import { RepositorysProvider } from './database/RepositorysProvider';
 import { ConfigResolver } from './graphql/resolver/ConfigResolver';
 import { ConnectionProvider } from './database/ConnectionProvider';
-import { StoreComponentProvider } from './export/StoreComponent';
 import { FileResolver } from './graphql/resolver/FileResolver';
 import { FileController } from './controller/FileController';
 import { ImageProcessUtil } from './util/ImageProcessUtil';
@@ -25,8 +25,8 @@ import { File } from './model/File';
 @Module({
   modules: [],
   controllers: [FileController],
-  components: [ConnectionProvider,...RepositorysProvider,ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil],
-  exports: []
+  components: [ConnectionProvider,...RepositorysProvider,ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil,StoreComponentProvider],
+  exports: [StoreComponentProvider]
 })
 
 export class LocalModule { }

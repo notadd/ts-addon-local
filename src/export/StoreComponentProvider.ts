@@ -147,10 +147,9 @@ class StoreComponent {
 
 export const StoreComponentProvider = {
     provide: 'StoreComponentToken',
-    useFactory: (kindUtil:KindUtil,fileUtil:FileUtil,tokenUtil:TokenUtil,imageProcessUtil:ImageProcessUtil,connection:Connection)=>{
-        let imageRepository:Repository<Image> = connection.getRepository(Image)
-        let bucketRepository: Repository<Bucket> = connection.getRepository(Bucket)
+    useFactory: (kindUtil:KindUtil,fileUtil:FileUtil,tokenUtil:TokenUtil,imageProcessUtil:ImageProcessUtil,imageRepository:Repository<Image>,bucketRepository:Repository<Bucket>)=>{
         return new StoreComponent(kindUtil,fileUtil,tokenUtil,imageProcessUtil,imageRepository,bucketRepository)
     },
-    inject:[KindUtil,FileUtil,TokenUtil,ImageProcessUtil,Connection]
+    inject:[KindUtil,FileUtil,TokenUtil,ImageProcessUtil,'LocalModule.ImageRepository','LocalModule.BucketRepository']
+   
 }
