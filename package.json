@@ -4,7 +4,7 @@
   "description": "基于nestjs本地存储插件",
   "scripts": {
     "start": "node index.js",
-    "start:watch": "/usr/local/node-v8.9.0-linux-x64/node_global/bin/nodemon",
+    "start:watch": "nodemon",
     "prestart:prod": "tsc",
     "start:prod": "node dist/server.js"
   },
