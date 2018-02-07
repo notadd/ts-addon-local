@@ -20,9 +20,7 @@ class StoreComponent {
         @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
         @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
         @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>
-    ) {
-        this.kindUtil = new KindUtil()
-    }
+    ) {}
 
     async delete(bucketName: string, name: string, type: string): Promise<void> {
         //验证参数
