@@ -55,6 +55,7 @@ class StoreComponent {
         if (!bucketName || !rawName || !base64) {
             throw new HttpException('缺少参数', 400)
         }
+        imagePreProcessInfo = !imagePreProcessInfo?{}:imagePreProcessInfo
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder('bucket')
             .leftJoinAndSelect('bucket.image_config', 'image_config')
             .where('bucket.name = :name', { name: bucketName })
