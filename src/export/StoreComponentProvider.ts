@@ -50,7 +50,7 @@ class StoreComponent {
         await this.fileUtil.delete(realPath)
     }
 
-    async upload(bucketName: string, rawName: string, base64: string): Promise<{ bucketName: string, name: string, type: string }> {
+    async upload(bucketName: string, rawName: string, base64: string , imagePreProcessInfo:ImagePreProcessInfo): Promise<{ bucketName: string, name: string, type: string }> {
         let tempPath: string = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '' + rawName)
         if (!bucketName || !rawName || !base64) {
             throw new HttpException('缺少参数', 400)
@@ -69,15 +69,21 @@ class StoreComponent {
         let kind: string = this.kindUtil.getKind(type)
         try {
             if (kind === 'image') {
-                let imagePostProcessInfo: ImagePostProcessInfo
+                let imagePostProcessInfo:ImagePostProcessInfo = imagePreProcessInfo
                 let format = bucket.image_config.format || 'raw'
                 //根据不同的图片保存类型，处理并且存储图片，返回处理后元数据
                 if (format === 'raw') {
-                    imagePostProcessInfo = { strip: true, watermark: false }
+                    imagePostProcessInfo.strip = true
+                    imagePostProcessInfo.watermark = false 
                 } else if (format === 'webp_damage') {
-                    imagePostProcessInfo = { format: 'webp', strip: true, watermark: false }
+                    imagePostProcessInfo.format = 'webp'
+                    imagePostProcessInfo.strip = true
+                    imagePostProcessInfo.watermark = false 
                 } else if (format === 'webp_undamage') {
-                    imagePostProcessInfo = { format: 'webp', lossless: true, strip: true, watermark: false }
+                    imagePostProcessInfo.format = 'webp'
+                    imagePostProcessInfo.lossless = true
+                    imagePostProcessInfo.strip = true
+                    imagePostProcessInfo.watermark = false 
                 }
                 metadata = await this.imageProcessUtil.processAndStore(tempPath, bucket, imagePostProcessInfo)
                 let image: Image = new Image()
