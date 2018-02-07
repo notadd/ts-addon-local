@@ -43,7 +43,7 @@ class StoreComponent {
             //其他类型暂不支持
         }
         //删除目录下存储文件
-        let realPath = path.resolve(__dirname, '../../', 'store', bucketName, name + '.' + type)
+        let realPath = path.resolve(__dirname, '../', 'store', bucketName, name + '.' + type)
         if (!this.fileUtil.exist(realPath)) {
             throw new HttpException('要删除的文件不存在', 404)
         }
