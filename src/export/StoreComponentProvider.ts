@@ -120,7 +120,7 @@ class StoreComponent {
 
     async getUrl(req: any, bucketName: string, name: string, type: string, imagePostProcessInfo: ImagePostProcessInfo): Promise<string> {
         //验证参数
-        if (!bucketName || !name || !type || !req || !req.protocoll || !req.get('host')) {
+        if (!bucketName || !name || !type || !req || !req.protocol || !req.get('host')) {
             throw new HttpException('缺少参数', 400)
         }
         let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
