@@ -176,8 +176,8 @@ export class FileController {
             let metadata: ImageMetadata = await this.imageProcessUtil.getMetadata(buffer)
             //设置文件类型头信息
             res.setHeader('Content-Type', mime.getType(metadata.format))
-            //设置文件大小头信息
-            res.setHeader('Content-Length', Buffer.byteLength(buffer))
+            //不设置内容长度，会出现错误err_content_mismatch
+            //res.setHeader('Content-Length', Buffer.byteLength(buffer))
             //私有空间
             if (bucket.public_or_private === 'private') {
                 //文件不缓存，因为有token，暂时这样处理，也可以设置一个缓存时间
