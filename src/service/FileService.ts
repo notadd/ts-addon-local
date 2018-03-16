@@ -91,7 +91,7 @@ export class FileService {
             } catch (err) {
                 throw new HttpException('文件保存到数据库失败:' + err.toString(), 406)
             }
-            return '/'+bucket.name+'/'+image.name+'.'+image.type
+            return '/visit/'+bucket.name+'/'+image.name+'.'+image.type
         } else {
             //暂时不支持其他种类文件
         }
