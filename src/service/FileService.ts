@@ -69,7 +69,7 @@ export class FileService {
             let exist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id })
             //如果处理后得到文件已存在，不保存，正确返回
             if (exist) {
-                return
+                return '/visit/'+bucket.name+'/'+exist.name+'.'+exist.type
             }
             //不存在，保存处理后文件
             let image: Image = new Image()
