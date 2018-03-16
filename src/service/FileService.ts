@@ -36,7 +36,7 @@ export class FileService {
         @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) { }
 
 
-    async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<void> {
+    async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<string> {
         let { imagePreProcessString, contentSecret, tagsString, md5, bucketName, rawName } = obj
         let imageProcessInfo: ImagePreProcessInfo, tags: string[]
         try {
@@ -91,7 +91,7 @@ export class FileService {
             } catch (err) {
                 throw new HttpException('文件保存到数据库失败:' + err.toString(), 406)
             }
-            return
+            return '/'+bucket.name+'/'+image.name+'.'+image.type
         } else {
             //暂时不支持其他种类文件
         }

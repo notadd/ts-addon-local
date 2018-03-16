@@ -76,8 +76,9 @@ export class FileController {
     */
     @Post('/upload')
     @UseGuards(UploadParamGuard)
-    async upload( @Body() body): Promise<CommonData> {
+    async upload( @Body() body): Promise<CommonData&{url:string}> {
         let { uploadForm: obj, uploadFile: file } = body
+        let url:string
         //这里使用trycatch块主要是为了不论抛出神码异常，上传的临时文件都会被删除，最后异常仍旧会被过滤器处理
         try {
             //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
@@ -101,7 +102,7 @@ export class FileController {
                 throw new HttpException('文件md5校验失败', 411)
             }
             //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
-            await this.fileService.saveUploadFile(bucket, file, obj)
+            url = await this.fileService.saveUploadFile(bucket, file, obj)
         } catch (err) {
             throw err
         } finally {
@@ -109,7 +110,8 @@ export class FileController {
         }
         return {
             code: 200,
-            message: '上传文件成功'
+            message: '上传文件成功',
+            url
         }
     }
 
