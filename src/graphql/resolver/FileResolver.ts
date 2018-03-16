@@ -121,6 +121,7 @@ export class FileResolver {
       message: '',
       method: 'post',
       url: req.protocol + '://' + req.get('host') + '/local/file/upload',
+      baseUrl:req.protocol + '://' + req.get('host'),
       form: {
         md5: '',
         rawName: '',
