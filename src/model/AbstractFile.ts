@@ -6,7 +6,7 @@ export class AbstractFile{
     
     @PrimaryGeneratedColumn({
         name:'id',
-        type:'int'
+        type:'integer'
     })
     id: number;
   
@@ -14,8 +14,7 @@ export class AbstractFile{
         name:'raw_name',
         type:'varchar',
         length: 50,
-        nullable:false,
-        charset:'utf8'
+        nullable:false
     })
     raw_name: string;
 
@@ -46,7 +45,7 @@ export class AbstractFile{
   
     @Column({
         name:'size',
-        type:'int',
+        type:'integer',
         nullable:true
     })
     size: number;

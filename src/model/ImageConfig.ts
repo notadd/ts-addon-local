@@ -2,21 +2,20 @@ import { Entity, Column, PrimaryColumn, Index, OneToOne, JoinColumn, OneToMany }
 import { Bucket } from './Bucket'
 /* 图片配置实体类 */
 @Entity({
-    name: 'image_config'
+  name: 'image_config'
 })
-export class ImageConfig{
+export class ImageConfig {
 
   //主键，需要设置插入，1默认为公有空间配置，2默认为私有空间配置
   @PrimaryColumn({
     name: 'id',
-    type: 'int'
+    type: 'integer'
   })
   id: number;
-    //保存格式，raw、webp_damage、webp_undamage
+  //保存格式，raw、webp_damage、webp_undamage
   @Column({
     name: 'format',
-    type: 'enum',
-    enum: ['raw', 'webp_damage', 'webp_undamage'],
+    type: 'varchar',
     nullable: true
   })
   format: string;
@@ -24,7 +23,7 @@ export class ImageConfig{
   //是否启用水印，true、false
   @Column({
     name: 'watermark_enable',
-    type: 'tinyint',
+    type: 'smallint',
     nullable: true
   })
   watermark_enable: number
@@ -41,8 +40,7 @@ export class ImageConfig{
   //水印位置，九宫格
   @Column({
     name: 'watermark_gravity',
-    type: 'enum',
-    enum: ['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'],
+    type: 'varchar',
     nullable: true
   })
   watermark_gravity: string;
@@ -50,7 +48,7 @@ export class ImageConfig{
   //水印横轴偏移
   @Column({
     name: 'watermark_x',
-    type: 'int',
+    type: 'integer',
     nullable: true
   })
   watermark_x: number;
@@ -58,7 +56,7 @@ export class ImageConfig{
   //水印纵轴偏移
   @Column({
     name: 'watermark_y',
-    type: 'int',
+    type: 'integer',
     nullable: true
   })
   watermark_y: number;
@@ -66,7 +64,7 @@ export class ImageConfig{
   //水印透明度
   @Column({
     name: 'watermark_opacity',
-    type: 'int',
+    type: 'integer',
     nullable: true
   })
   watermark_opacity: number;
@@ -74,12 +72,12 @@ export class ImageConfig{
   //水印与图片短边自适应比例
   @Column({
     name: 'watermark_ws',
-    type: 'int',
+    type: 'integer',
     nullable: true
   })
   watermark_ws: number;
 
-  @OneToOne(type => Bucket,bucket=>bucket.image_config)
+  @OneToOne(type => Bucket, bucket => bucket.image_config)
   @JoinColumn()
   bucket?: Bucket;
 }
