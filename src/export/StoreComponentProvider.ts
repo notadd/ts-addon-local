@@ -162,6 +162,6 @@ export const StoreComponentProvider = {
     useFactory: (kindUtil: KindUtil, fileUtil: FileUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>) => {
         return new StoreComponent(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository)
     },
-    inject: [KindUtil, FileUtil, TokenUtil, ImageProcessUtil, 'LocalModule.ImageRepository', 'LocalModule.BucketRepository']
+    inject: [KindUtil, FileUtil, TokenUtil, ImageProcessUtil, 'ImageRepository', 'BucketRepository']
 
 }

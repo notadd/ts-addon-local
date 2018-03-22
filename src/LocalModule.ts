@@ -1,7 +1,5 @@
 import { StoreComponentProvider } from './export/StoreComponentProvider';
-import { RepositorysProvider } from './database/RepositorysProvider';
 import { ConfigResolver } from './graphql/resolver/ConfigResolver';
-import { ConnectionProvider } from './database/ConnectionProvider';
 import { FileResolver } from './graphql/resolver/FileResolver';
 import { FileController } from './controller/FileController';
 import { ImageProcessUtil } from './util/ImageProcessUtil';
