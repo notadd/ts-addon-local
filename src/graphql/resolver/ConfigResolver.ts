@@ -14,9 +14,9 @@ import { ConfigService } from '../../service/ConfigService';
 import { IncomingMessage, IncomingHttpHeaders } from 'http';
 import { CommonData } from '../../interface/Common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Bucket } from '../../model/Bucket.entity';
 import { KindUtil } from '../../util/KindUtil';
 import { FileUtil } from '../../util/FileUtil';
-import { Bucket } from '../../model/Bucket';
 import { Repository } from 'typeorm';
 
 

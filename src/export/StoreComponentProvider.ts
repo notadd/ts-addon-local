@@ -3,11 +3,11 @@ import { HttpException, Component, Inject } from '@nestjs/common';
 import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { Repository, Connection } from 'typeorm';
+import { Bucket } from '../model/Bucket.entity';
+import { Image } from '../model/Image.entity';
 import { TokenUtil } from '../util/TokenUtil';
 import { FileUtil } from '../util/FileUtil';
 import { KindUtil } from '../util/KindUtil';
-import { Bucket } from '../model/Bucket';
-import { Image } from '../model/Image';
 import * as path from 'path';
 
 
