@@ -10,6 +10,7 @@ import { FileService } from './service/FileService';
 import { ImageConfig } from './model/ImageConfig';
 import { AudioConfig } from './model/AudioConfig';
 import { VideoConfig } from './model/VideoConfig';
+import { TypeOrmModule } from  '@nestjs/typeorm';
 import { Module ,Global} from '@nestjs/common';
 import { TokenUtil } from './util/TokenUtil';
 import { Document } from './model/Document';
@@ -23,9 +24,9 @@ import { File } from './model/File';
 
 @Global()
 @Module({
-  modules: [],
+  modules: [TypeOrmModule.forFeature([Bucket,ImageConfig,AudioConfig,VideoConfig,File,Document,Audio,Video,Image])],
   controllers: [FileController],
-  components: [ConnectionProvider,...RepositorysProvider,ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil,StoreComponentProvider],
+  components: [ConfigResolver, ConfigService, FileResolver, FileService, KindUtil, FileUtil, TokenUtil, ImageProcessUtil,StoreComponentProvider],
   exports: [StoreComponentProvider]
 })
 

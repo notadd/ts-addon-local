@@ -12,6 +12,7 @@ import { QueryParam } from '../interface/file/QueryParam';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CommonData } from '../interface/Common'
 import { TokenUtil } from '../util/TokenUtil';
 import { Document } from '../model/Document';
@@ -41,9 +42,9 @@ export class FileController {
         @Inject(TokenUtil) private readonly tokenUtil: TokenUtil,
         @Inject(FileService) private readonly fileService: FileService,
         @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
-        @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
-        @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
-        @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) {
+        @InjectRepository(File) private readonly fileRepository: Repository<File>,
+        @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
+        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
     }
 
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */

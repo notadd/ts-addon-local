@@ -11,6 +11,7 @@ import { OneBody } from '../../interface/file/OneBody';
 import { OneData } from '../../interface/file/OneData';
 import { HttpException ,Inject} from '@nestjs/common';
 import { CommonData } from '../../interface/Common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { TokenUtil } from '../../util/TokenUtil';
 import { Document } from '../../model/Document';
 import { KindUtil } from '../../util/KindUtil';
@@ -35,9 +36,9 @@ export class FileResolver {
     @Inject(KindUtil) private readonly kindUtil: KindUtil,
     @Inject(TokenUtil) private readonly tokenUtil: TokenUtil,
     @Inject(FileService) private readonly fileService: FileService,
-    @Inject('LocalModule.FileRepository') private readonly fileRepository: Repository<File>,
-    @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
-    @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>) {
+    @InjectRepository(File) private readonly fileRepository: Repository<File>,
+    @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
   }
 
   /* 文件下载预处理接口
