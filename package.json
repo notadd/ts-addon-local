@@ -3,9 +3,11 @@
     "version": "1.0.0",
     "description": "基于nestjs本地存储插件",
     "scripts": {
+        "build": "node --max_old_space_size=4096 ./node_modules/gulp/bin/gulp.js build",
+        "prepublish": "node --max_old_space_size=4096 ./node_modules/gulp/bin/gulp.js build",
+        "publish": "node ./node_modules/lerna/bin/lerna.js publish -m \"chore(release): publish %s\"",
         "start": "node index.js",
         "start:watch": "nodemon",
-        "prestart:prod": "tsc",
         "start:prod": "node dist/server.js"
     },
     "repository": {
@@ -34,11 +36,12 @@
         "reflect-metadata": "^0.1.10",
         "request": "^2.83.0",
         "rxjs": "^5.4.0",
-        "sharp": "^0.19.0",
+        "sharp": "^0.20.1",
         "typeorm": "^0.1.9",
         "typescript": "^2.5.2"
     },
     "devDependencies": {
+        "@notadd/addon-local": "^2.0.0",
         "@notadd/gulp-typescript": "^4.0.2",
         "@types/node": "^8.0.28",
         "@types/sharp": "^0.17.6",
