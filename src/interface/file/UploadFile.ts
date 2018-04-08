@@ -1,5 +1,7 @@
-export interface UploadFile{
+export interface UploadFile {
     name: string
+
     path: string
+
     size?: number
 }

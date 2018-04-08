@@ -19,8 +19,6 @@ import { KindUtil } from '../../util/KindUtil';
 import { FileUtil } from '../../util/FileUtil';
 import { Repository } from 'typeorm';
 
-
-
 /* 本地存储配置的resolver */
 @Resolver('Config')
 @UseInterceptors(ExceptionInterceptor)
@@ -28,9 +26,13 @@ export class ConfigResolver {
 
     //图片水印方位的集合，九宫格
     private readonly gravity: Set<string>
+
     private readonly image_format: Set<String>
+
     private readonly audio_format: Set<String>
+
     private readonly video_format: Set<String>
+
     private readonly video_resolution: Set<String>
 
     constructor(
@@ -39,11 +41,11 @@ export class ConfigResolver {
         @Inject(ConfigService) private readonly configService: ConfigService,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
     ) {
-        this.image_format = new Set(['raw', 'webp_damage', 'webp_undamage'])
-        this.audio_format = new Set(['raw', 'mp3', 'aac'])
-        this.video_format = new Set(['raw', 'vp9', 'h264', 'h265'])
-        this.video_resolution = new Set(['raw', 'p1080', 'p720', 'p480'])
-        this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
+        this.image_format = new Set([ 'raw', 'webp_damage', 'webp_undamage' ])
+        this.audio_format = new Set([ 'raw', 'mp3', 'aac' ])
+        this.video_format = new Set([ 'raw', 'vp9', 'h264', 'h265' ])
+        this.video_resolution = new Set([ 'raw', 'p1080', 'p720', 'p480' ])
+        this.gravity = new Set([ 'northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast' ])
     }
 
     /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
@@ -87,7 +89,7 @@ export class ConfigResolver {
 
     /* 图片水印启用配置 */
     @Mutation('enableImageWatermark')
-    async  enableImageWatermark(req: IncomingMessage, body: EnableImageWatermark): Promise<CommonData> {
+    async enableImageWatermark(req: IncomingMessage, body: EnableImageWatermark): Promise<CommonData> {
         //验证参数
         let enable: boolean = body.enable
         //验证参数存在
@@ -105,7 +107,7 @@ export class ConfigResolver {
 
     /* 图片水印配置,其中水印图片以base64编码传输 */
     @Mutation('imageWatermark')
-    async  imageWatermark(req: IncomingMessage, body: ImageWatermark): Promise<CommonData> {
+    async imageWatermark(req: IncomingMessage, body: ImageWatermark): Promise<CommonData> {
         //水印图片临时保存路径
         let temp_path: string
         try {
@@ -169,7 +171,7 @@ export class ConfigResolver {
 
     /* 音频保存格式配置*/
     @Mutation('audioFormat')
-    async  audioFormat(req: IncomingMessage, body: AudioFormat): Promise<CommonData> {
+    async audioFormat(req: IncomingMessage, body: AudioFormat): Promise<CommonData> {
         let format: string = body.format
         if (!format) {
             throw new HttpException('缺少参数', 400)
@@ -206,7 +208,7 @@ export class ConfigResolver {
     async buckets(req: IncomingMessage): Promise<BucketsData> {
         //查询出所有空间的三个字段，其他字段保密
         let buckets: Bucket[] = await this.bucketRepository.createQueryBuilder('bucket')
-            .select(['bucket.id', 'bucket.public_or_private', 'bucket.name'])
+            .select([ 'bucket.id', 'bucket.public_or_private', 'bucket.name' ])
             .getMany()
         if (buckets.length !== 2) {
             throw new HttpException('空间配置不存在', 401)

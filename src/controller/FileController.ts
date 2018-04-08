@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Request, Response, Body, Param, Headers, Query, UseFilters, UseGuards, HttpException, Inject } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Request,
+    Response,
+    Body,
+    Param,
+    Headers,
+    Query,
+    UseFilters,
+    UseGuards,
+    HttpException,
+    Inject
+} from '@nestjs/common';
 import { ImagePostProcessInfo } from '../interface/file/ImageProcessInfo';
 import { LocalExceptionFilter } from '../exception/LocalExceptionFilter';
 import { DownloadParamGuard } from '../guard/DownloadParamGuard';
@@ -6,28 +20,21 @@ import { ImageMetadata } from '../interface/file/ImageMetadata';
 import { UploadParamGuard } from '../guard/UploadParamGuard';
 import { ImageProcessUtil } from '../util/ImageProcessUtil';
 import { HeaderParam } from '../interface/file/HeaderParam';
-import { UploadFile } from '../interface/file/UploadFile';
-import { UploadForm } from '../interface/file/UploadForm';
 import { QueryParam } from '../interface/file/QueryParam';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PathParam } from '../interface/file/PathParam';
 import { FileService } from '../service/FileService';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Document } from '../model/Document.entity';
 import { CommonData } from '../interface/Common';
 import { Bucket } from '../model/Bucket.entity';
 import { TokenUtil } from '../util/TokenUtil';
-import { Audio } from '../model/Audio.entity';
-import { Video } from '../model/Video.entity';
 import { Image } from '../model/Image.entity';
 import { File } from '../model/File.entity';
 import { FileUtil } from '../util/FileUtil';
 import { KindUtil } from '../util/KindUtil';
-import * as  formidable from 'formidable';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as mime from 'mime';
-
 
 /*文件控制器，包含了文件下载、上传、访问功能
   访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
@@ -35,7 +42,16 @@ import * as mime from 'mime';
 @Controller('local/file')
 @UseFilters(new LocalExceptionFilter())
 export class FileController {
-
+    /**
+     * @param { FileUtil } fileUtil
+     * @param { KindUtil } kindUtil
+     * @param { TokenUtil } tokenUtil
+     * @param { FileService } fileService
+     * @param { ImageProcessUtil } imageProcessUtil
+     * @param { Repository<File> } fileRepository
+     * @param { Repository<Image> } imageRepository
+     * @param { Repository<Bucket> } bucketRepository
+     */
     constructor(
         @Inject(FileUtil) private readonly fileUtil: FileUtil,
         @Inject(KindUtil) private readonly kindUtil: KindUtil,
@@ -50,7 +66,7 @@ export class FileController {
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */
     @Get('/download')
     @UseGuards(DownloadParamGuard)
-    async download( @Headers() headers: HeaderParam, @Response() res): Promise<any> {
+    async download(@Headers() headers: HeaderParam, @Response() res): Promise<any> {
         let { bucketName, fileName } = headers
         //文件绝对路径，这里并不查询数据库，直接从文件夹获取
         let realPath: string = path.resolve(__dirname, '../', 'store', bucketName, fileName)
@@ -71,15 +87,14 @@ export class FileController {
         return
     }
 
-
     /* 上传文件接口，空间名、文件原名在路径中，其他上传信息：md5、图片处理字符串、标签字符串、文件密钥都与文件一起使用表单上传
        小bug，如果参数中出现了@Response装饰器，那么直接使用return返回不成功，需要使用res.end
     */
     @Post('/upload')
     @UseGuards(UploadParamGuard)
-    async upload( @Body() body): Promise<CommonData&{url:string}> {
+    async upload(@Body() body): Promise<CommonData & { url: string }> {
         let { uploadForm: obj, uploadFile: file } = body
-        let url:string
+        let url: string
         //这里使用trycatch块主要是为了不论抛出神码异常，上传的临时文件都会被删除，最后异常仍旧会被过滤器处理
         try {
             //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
@@ -118,11 +133,11 @@ export class FileController {
 
     /* 访问文件接口，文件路径在url中
        私有空间文件需要token，token与图片处理字符串都在查询字符串中
-       文件存在且token正确，处理后返回，不存在返回错误 
-       这个接口不需要Guard，因为如果缺少参数就找不到路由   
+       文件存在且token正确，处理后返回，不存在返回错误
+       这个接口不需要Guard，因为如果缺少参数就找不到路由
     */
     @Get('/visit/:bucketName/:fileName')
-    async visit( @Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
+    async visit(@Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
         let { bucketName, fileName } = param
         let { imagePostProcessString, token } = query
         //判断文件是否存在
@@ -184,7 +199,7 @@ export class FileController {
             //私有空间
             if (bucket.public_or_private === 'private') {
                 //文件不缓存，因为有token，暂时这样处理，也可以设置一个缓存时间
-                res.setHeader('Cache-Control', ['no-store', 'no-cache'])
+                res.setHeader('Cache-Control', [ 'no-store', 'no-cache' ])
             }
             //文件默认显示在浏览器中，不下载，如果浏览器不支持文件类型，还是会下载
             res.setHeader('Content-Disposition', 'inline')
@@ -193,7 +208,4 @@ export class FileController {
             //其他类型暂不支持
         }
     }
-
-
-
 }

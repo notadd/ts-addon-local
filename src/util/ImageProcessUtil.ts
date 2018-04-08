@@ -1,27 +1,26 @@
-import { ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor, Blur } from '../interface/file/ImageProcessInfo';
-import { Component, Inject, HttpException } from '@nestjs/common';
-import { ImageMetadata } from '../interface/file/ImageMetadata';
-import { Bucket } from '../model/Bucket.entity';
-import { KindUtil } from './KindUtil';
-import { FileUtil } from './FileUtil';
-import { SharpInstance } from 'sharp';
-import { isArray } from 'util';
-import * as sharp from 'sharp';
+import { Component, HttpException, Inject } from '@nestjs/common';
 import * as crypto from 'crypto';
-import * as path from 'path';
 import * as gm from 'gm';
-
+import * as path from 'path';
+import * as sharp from 'sharp';
+import { SharpInstance } from 'sharp';
+import { ImageMetadata } from '../interface/file/ImageMetadata';
+import { Blur, ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor } from '../interface/file/ImageProcessInfo';
+import { Bucket } from '../model/Bucket.entity';
+import { FileUtil } from './FileUtil';
+import { KindUtil } from './KindUtil';
 
 /* 图片处理工具类 */
 @Component()
 export class ImageProcessUtil {
     private readonly gravity: Set<string>
+
     constructor(
         @Inject(KindUtil) private readonly kindUtil: KindUtil,
         @Inject(FileUtil) private readonly fileUtil: FileUtil
     ) {
         //重心集合，在裁剪与水印中使用
-        this.gravity = new Set(['northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast'])
+        this.gravity = new Set([ 'northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast' ])
     }
 
     //获取指定图片、字节缓冲的图片元数据，参数可以为图片路径或者Buffer对象
@@ -70,7 +69,6 @@ export class ImageProcessUtil {
         //返回Buffer对象
         return await this.postProcess(imagePath, bucket, imageProcessInfo)
     }
-
 
     //sharp实例预处理函数，用于上传预处理使用，只支持缩放、裁剪、水印、旋转四个参数
     //这个函数直接输出处理后的buffer，因为其中可能生成临时文件，临时文件删除后sharp实例获取Buffer会出错
@@ -151,15 +149,15 @@ export class ImageProcessUtil {
                 this.output(instance, format ? format : metadata.format, lossless, null, null)
             }
         } catch (err) {
-            if(err instanceof HttpException){
+            if (err instanceof HttpException) {
                 throw err
-            }else{
+            } else {
                 throw new HttpException(err.toString(), 408)
             }
-        } 
+        }
         //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
         //删除旋转临时图片
-        let result:Buffer = await instance.toBuffer()
+        let result: Buffer = await instance.toBuffer()
         if (rotateImagePath) {
             await this.fileUtil.deleteIfExist(rotateImagePath)
         }
@@ -246,17 +244,17 @@ export class ImageProcessUtil {
             if (lossless || quality || progressive) {
                 this.output(instance, format ? format : metadata.format, lossless, quality, progressive)
             }
-            
+
         } catch (err) {
-            if(err instanceof HttpException){
+            if (err instanceof HttpException) {
                 throw err
-            }else{
+            } else {
                 throw new HttpException(err.toString(), 408)
             }
         }
         //这里不使用finally块来清理临时文件，因为删除方法可能抛出异常，这个异常不知道在finally块里面如何处理
         //删除旋转临时图片
-        let result:Buffer = await instance.toBuffer()
+        let result: Buffer = await instance.toBuffer()
         if (rotateImagePath) {
             await this.fileUtil.deleteIfExist(rotateImagePath)
         }
@@ -266,7 +264,6 @@ export class ImageProcessUtil {
         }
         return result
     }
-
 
     resize(instance: SharpInstance, resize: Resize, preWidth: number, preHeight: number): any {
         //获取参数
@@ -621,9 +618,9 @@ export class ImageProcessUtil {
             let shuiyinBuffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
             let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw' + (+new Date()) + '.' + metadata.format)
             let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin' + (+new Date()) + shuiyin_path.substring(shuiyin_path.lastIndexOf('.')))
-            await this.fileUtil.write(temp_path,buffer)
-            await this.fileUtil.write(shuiyin_temp_path,shuiyinBuffer)
-            let ex : HttpException
+            await this.fileUtil.write(temp_path, buffer)
+            await this.fileUtil.write(shuiyin_temp_path, shuiyinBuffer)
+            let ex: HttpException
             await new Promise((resolve, reject) => {
                 gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry('+' + x + '+' + y).dissolve(opacity).write(temp_path, err => {
                     if (err) reject(new HttpException('为图片添加水印出现错误:' + err.toString(), 407))
@@ -652,9 +649,9 @@ export class ImageProcessUtil {
         let temp_path = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '.' + metadata.format)
         let ex: HttpException
         //根据绝对路径保存图片
-        await this.fileUtil.write(temp_path,buffer)
+        await this.fileUtil.write(temp_path, buffer)
         await new Promise((resolve, reject) => {
-            gm(temp_path).rotate('black',rotate).write(temp_path, err => {
+            gm(temp_path).rotate('black', rotate).write(temp_path, err => {
                 if (err) reject(new HttpException('旋转文件图片出现错误:' + err.toString(), 407))
                 resolve()
             })
@@ -687,7 +684,7 @@ export class ImageProcessUtil {
         else throw new Error('锐化参数错误')
     }
 
-    /* 转换图片格式，png格式比jpeg大很多，webp默认内为有损格式，比jpeg小 
+    /* 转换图片格式，png格式比jpeg大很多，webp默认内为有损格式，比jpeg小
        toFormat方法也支持选项，其中质量、渐进、无损等选项可以设置,虽然函数定义中没有无损选项，但实际上可以处理无损参数
        目前质量、无损、渐进等在output中设置，format只支持jpeg、png、webp、tiff等格式，不支持bmp、gif等格式
     */
@@ -748,5 +745,4 @@ export class ImageProcessUtil {
             //不支持对其他类型的无损、质量、渐进处理，但是不报错
         }
     }
-
 }

@@ -1,4 +1,5 @@
-export interface PathParam{
-    bucketName:string
-    fileName:string
+export interface PathParam {
+    bucketName: string
+
+    fileName: string
 }

@@ -5,7 +5,8 @@ import * as fs from 'fs'
 @Component()
 export class FileUtil {
 
-    constructor() { }
+    constructor() {
+    }
 
     async write(path: string, buffer: Buffer): Promise<void> {
         let ex: HttpException
@@ -104,11 +105,11 @@ export class FileUtil {
         }
     }
 
-    exist(path:string):boolean{
+    exist(path: string): boolean {
         return fs.existsSync(path)
     }
 
-    async mkdir(path:string):Promise<void>{
+    async mkdir(path: string): Promise<void> {
         let ex: HttpException
         await new Promise((resolver, reject) => {
             fs.mkdir(path, (err) => {
@@ -124,4 +125,4 @@ export class FileUtil {
             throw ex
         }
     }
-} 
+}

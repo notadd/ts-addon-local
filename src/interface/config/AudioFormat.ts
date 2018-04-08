@@ -1,3 +1,3 @@
-export interface AudioFormat{
-    format:string
+export interface AudioFormat {
+    format: string
 }

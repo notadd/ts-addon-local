@@ -1,4 +1,5 @@
-export interface VideoFormat{
-    format:string
-    resolution:string
+export interface VideoFormat {
+    format: string
+
+    resolution: string
 }

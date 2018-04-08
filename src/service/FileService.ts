@@ -1,26 +1,18 @@
-import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
-import { Component, Inject, forwardRef, HttpException} from '@nestjs/common';
+import { Component, HttpException, Inject } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ImageMetadata } from '../interface/file/ImageMetadata';
-import { ImageProcessUtil } from '../util/ImageProcessUtil';
+import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
 import { UploadFile } from '../interface/file/UploadFile';
 import { UploadForm } from '../interface/file/UploadForm';
-import { PathParam } from '../interface/file/PathParam';
-import { Document } from '../model/Document.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CommonData } from '../interface/Common';
-import { ConfigService } from './ConfigService';
-import { Bucket } from '../model/Bucket.entity';
-import { TokenUtil } from '../util/TokenUtil';
 import { Audio } from '../model/Audio.entity';
-import { Video } from '../model/Video.entity';
-import { Image } from '../model/Image.entity';
-import { KindUtil } from '../util/KindUtil';
+import { Bucket } from '../model/Bucket.entity';
 import { File } from '../model/File.entity';
-import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
-import { isArray } from 'util';
-import * as path from 'path';
-
+import { Image } from '../model/Image.entity';
+import { Video } from '../model/Video.entity';
+import { ImageProcessUtil } from '../util/ImageProcessUtil';
+import { KindUtil } from '../util/KindUtil';
+import { TokenUtil } from '../util/TokenUtil';
 
 /* 文件Service*/
 @Component()
@@ -34,8 +26,8 @@ export class FileService {
         @InjectRepository(Image) private readonly imageRepository: Repository<Image>,
         @InjectRepository(Audio) private readonly audioRepository: Repository<Audio>,
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
-        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) { }
-
+        @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
+    }
 
     async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<string> {
         let { imagePreProcessString, contentSecret, tagsString, md5, bucketName, rawName } = obj
@@ -70,7 +62,7 @@ export class FileService {
             let exist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id })
             //如果处理后得到文件已存在，不保存，正确返回
             if (exist) {
-                return '/visit/'+bucket.name+'/'+exist.name+'.'+exist.type
+                return '/visit/' + bucket.name + '/' + exist.name + '.' + exist.type
             }
             //不存在，保存处理后文件
             let image: Image = new Image()
@@ -92,7 +84,7 @@ export class FileService {
             } catch (err) {
                 throw new HttpException('文件保存到数据库失败:' + err.toString(), 406)
             }
-            return '/visit/'+bucket.name+'/'+image.name+'.'+image.type
+            return '/visit/' + bucket.name + '/' + image.name + '.' + image.type
         } else {
             //暂时不支持其他种类文件
         }

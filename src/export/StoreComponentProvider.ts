@@ -10,7 +10,6 @@ import { FileUtil } from '../util/FileUtil';
 import { KindUtil } from '../util/KindUtil';
 import * as path from 'path';
 
-
 export class StoreComponent {
 
     constructor(
@@ -20,7 +19,8 @@ export class StoreComponent {
         @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
         @Inject('LocalModule.ImageRepository') private readonly imageRepository: Repository<Image>,
         @Inject('LocalModule.BucketRepository') private readonly bucketRepository: Repository<Bucket>
-    ) {}
+    ) {
+    }
 
     async delete(bucketName: string, name: string, type: string): Promise<void> {
         //验证参数
@@ -50,12 +50,12 @@ export class StoreComponent {
         await this.fileUtil.delete(realPath)
     }
 
-    async upload(bucketName: string, rawName: string, base64: string , imagePreProcessInfo:ImagePreProcessInfo): Promise<{ bucketName: string, name: string, type: string }> {
+    async upload(bucketName: string, rawName: string, base64: string, imagePreProcessInfo: ImagePreProcessInfo): Promise<{ bucketName: string, name: string, type: string }> {
         let tempPath: string = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '' + rawName)
         if (!bucketName || !rawName || !base64) {
             throw new HttpException('缺少参数', 400)
         }
-        imagePreProcessInfo = !imagePreProcessInfo?{}:imagePreProcessInfo
+        imagePreProcessInfo = !imagePreProcessInfo ? {} : imagePreProcessInfo
         let bucket: Bucket = await this.bucketRepository.createQueryBuilder('bucket')
             .leftJoinAndSelect('bucket.image_config', 'image_config')
             .where('bucket.name = :name', { name: bucketName })
@@ -70,21 +70,21 @@ export class StoreComponent {
         let kind: string = this.kindUtil.getKind(type)
         try {
             if (kind === 'image') {
-                let imagePostProcessInfo:ImagePostProcessInfo = imagePreProcessInfo
+                let imagePostProcessInfo: ImagePostProcessInfo = imagePreProcessInfo
                 let format = bucket.image_config.format || 'raw'
                 //根据不同的图片保存类型，处理并且存储图片，返回处理后元数据
                 if (format === 'raw') {
                     imagePostProcessInfo.strip = true
-                    imagePostProcessInfo.watermark = false 
+                    imagePostProcessInfo.watermark = false
                 } else if (format === 'webp_damage') {
                     imagePostProcessInfo.format = 'webp'
                     imagePostProcessInfo.strip = true
-                    imagePostProcessInfo.watermark = false 
+                    imagePostProcessInfo.watermark = false
                 } else if (format === 'webp_undamage') {
                     imagePostProcessInfo.format = 'webp'
                     imagePostProcessInfo.lossless = true
                     imagePostProcessInfo.strip = true
-                    imagePostProcessInfo.watermark = false 
+                    imagePostProcessInfo.watermark = false
                 }
                 metadata = await this.imageProcessUtil.processAndStore(tempPath, bucket, imagePostProcessInfo)
                 let image: Image = new Image()
@@ -135,7 +135,7 @@ export class StoreComponent {
             if (!image) {
                 throw new HttpException('指定图片' + name + '.' + type + '不存在', 404)
             }
-            //所有文件调用统一的拼接Url方法 
+            //所有文件调用统一的拼接Url方法
             url += '/' + bucketName + '/' + name + '.' + type
             //存储图片处理信息时
             if (imagePostProcessInfo) {
@@ -162,6 +162,6 @@ export const StoreComponentProvider = {
     useFactory: (kindUtil: KindUtil, fileUtil: FileUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>) => {
         return new StoreComponent(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository)
     },
-    inject: [KindUtil, FileUtil, TokenUtil, ImageProcessUtil, 'ImageRepository', 'BucketRepository']
+    inject: [ KindUtil, FileUtil, TokenUtil, ImageProcessUtil, 'ImageRepository', 'BucketRepository' ]
 
 }

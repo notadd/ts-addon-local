@@ -1,4 +1,5 @@
-export interface HeaderParam{
-    bucketName:string
-    fileName:string
+export interface HeaderParam {
+    bucketName: string
+
+    fileName: string
 }
