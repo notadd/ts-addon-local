@@ -39,6 +39,7 @@
         "typescript": "^2.5.2"
     },
     "devDependencies": {
+        "@notadd/gulp-typescript": "^4.0.2",
         "@types/node": "^8.0.28",
         "@types/sharp": "^0.17.6",
         "gulp": "^3.9.1",
