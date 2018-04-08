@@ -1,0 +1,25 @@
+{
+    "name": "@notadd/addon-local",
+    "version": "2.0.0",
+    "description": "Package Open in Browser for already.",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/notadd/ts-addon-local.git"
+    },
+    "keywords": [
+        "Notadd",
+        "Storage",
+        "Browser"
+    ],
+    "author": "already",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@notadd/injection": "^2.3.23",
+        "sharp": "^0.20.1"
+    },
+    "bugs": {
+        "url": "https://github.com/notadd/ts-addon-local/issues"
+    },
+    "homepage": "https://github.com/notadd/ts-addon-local#readme"
+}
