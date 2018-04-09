@@ -7,4 +7,4 @@
 
 ## 应用安装
 
-[点击查看安装文档](http://localhost:3000/#/v2/zh-cn/appstore?id=%E5%BA%94%E7%94%A8%E5%AE%89%E8%A3%85)
+[点击查看安装文档](https://docs.nestjs.cn/#/v2/zh-cn/appstore?id=%E5%BA%94%E7%94%A8%E5%AE%89%E8%A3%85)
