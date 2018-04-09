@@ -1,3 +1,12 @@
 # Addon Local Storage
 
-基于nestjs的文件本地存储插件，包含图片、音频、视频处理功能
+### [中文说明](README_zh.md)
+
+- [x] Upload based on Form form without going through the server.
+- [x] Unified API, seamlessly switching backends.
+- [x] Support image processing
+- [x] Supports default webp format
+
+## Application Installation
+
+[Click to view the installation documentation](https://docs.nestjs.cn/#/v2/en/appstore?id=install)
