@@ -4,3 +4,7 @@
 - [x] 统一 API，后端可无缝切换。
 - [x] 支持图片处理
 - [x] 支持默认 webp 格式
+
+## 应用安装
+
+[点击查看安装文档](http://localhost:3000/#/v2/zh-cn/appstore?id=%E5%BA%94%E7%94%A8%E5%AE%89%E8%A3%85)
