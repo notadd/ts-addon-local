@@ -175,7 +175,7 @@ export class FileController {
             this.tokenUtil.verify(fullUrl, bucket, token);
         }
         // 解析图片处理字符串为对象
-        let imagePostProcessInfo: ImagePostProcessInfo = {};
+        let imagePostProcessInfo: ImagePostProcessInfo = {} as any;
         if (imagePostProcessString) {
             try {
                 imagePostProcessInfo = JSON.parse(imagePostProcessString);

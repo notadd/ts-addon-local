@@ -9,7 +9,7 @@ export class AbstractFile {
     id: number;
 
     @Column({
-        name: "raw_name",
+        name: "rawName",
         type: "varchar",
         length: 50,
         nullable: false
