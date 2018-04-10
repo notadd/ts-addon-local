@@ -1,4 +1,4 @@
-import { ImagePreProcessInfo } from './ImageProcessInfo'
+import { ImagePreProcessInfo } from "./image.process.info"
 
 export interface UploadProcessBody {
     bucketName: string

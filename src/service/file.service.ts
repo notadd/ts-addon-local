@@ -1,18 +1,18 @@
-import { Component, HttpException, Inject } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ImageMetadata } from '../interface/file/ImageMetadata';
-import { ImagePostProcessInfo, ImagePreProcessInfo } from '../interface/file/ImageProcessInfo';
-import { UploadFile } from '../interface/file/UploadFile';
-import { UploadForm } from '../interface/file/UploadForm';
-import { Audio } from '../model/Audio.entity';
-import { Bucket } from '../model/Bucket.entity';
-import { File } from '../model/File.entity';
-import { Image } from '../model/Image.entity';
-import { Video } from '../model/Video.entity';
-import { ImageProcessUtil } from '../util/ImageProcessUtil';
-import { KindUtil } from '../util/KindUtil';
-import { TokenUtil } from '../util/TokenUtil';
+import { Component, HttpException, Inject } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { ImageMetadata } from "../interface/file/image.metadata";
+import { ImagePostProcessInfo, ImagePreProcessInfo } from "../interface/file/image.process.info";
+import { UploadFile } from "../interface/file/upload.file";
+import { UploadForm } from "../interface/file/upload.form";
+import { Audio } from "../model/audio.entity";
+import { Bucket } from "../model/bucket.entity";
+import { File } from "../model/file.entity";
+import { Image } from "../model/image.entity";
+import { Video } from "../model/video.entity";
+import { ImageProcessUtil } from "../util/image.process.util";
+import { KindUtil } from "../util/kind.util";
+import { TokenUtil } from "../util/token.util";
 
 /* 文件Service*/
 @Component()
@@ -38,12 +38,12 @@ export class FileService {
             }
             if (imagePreProcessString) {
                 imageProcessInfo = JSON.parse(imagePreProcessString)
-                if (bucket.image_config.format === 'webp_damage') {
-                    (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
+                if (bucket.image_config.format === "webp_damage") {
+                    (imageProcessInfo as ImagePostProcessInfo).format = "webp";
                     (imageProcessInfo as ImagePostProcessInfo).lossless = false
-                } else if (bucket.image_config.format === 'webp_undamage') {
+                } else if (bucket.image_config.format === "webp_undamage") {
                     //这样写。后面需要分号
-                    (imageProcessInfo as ImagePostProcessInfo).format = 'webp';
+                    (imageProcessInfo as ImagePostProcessInfo).format = "webp";
                     (imageProcessInfo as ImagePostProcessInfo).lossless = true
                 } else {
                     //这样写。后面需要分号
@@ -52,17 +52,17 @@ export class FileService {
                 }
             }
         } catch (err) {
-            throw new HttpException('JSON解析错误:' + err.toString(), 405)
+            throw new HttpException("JSON解析错误:" + err.toString(), 405)
         }
         //默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
         let metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo)
-        let type: string = rawName.substring(rawName.lastIndexOf('.') + 1)
+        let type: string = rawName.substring(rawName.lastIndexOf(".") + 1)
         let kind: string = this.kindUtil.getKind(type)
-        if (kind === 'image') {
+        if (kind === "image") {
             let exist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id })
             //如果处理后得到文件已存在，不保存，正确返回
             if (exist) {
-                return '/visit/' + bucket.name + '/' + exist.name + '.' + exist.type
+                return "/visit/" + bucket.name + "/" + exist.name + "." + exist.type
             }
             //不存在，保存处理后文件
             let image: Image = new Image()
@@ -82,9 +82,9 @@ export class FileService {
             try {
                 await this.imageRepository.save(image)
             } catch (err) {
-                throw new HttpException('文件保存到数据库失败:' + err.toString(), 406)
+                throw new HttpException("文件保存到数据库失败:" + err.toString(), 406)
             }
-            return '/visit/' + bucket.name + '/' + image.name + '.' + image.type
+            return "/visit/" + bucket.name + "/" + image.name + "." + image.type
         } else {
             //暂时不支持其他种类文件
         }
@@ -99,9 +99,9 @@ export class FileService {
 
         let tokenUtil = this.tokenUtil
         let addUrl = async function (value) {
-            value.url = '/' + bucket.name + '/' + value.name + '.' + value.type
-            if (bucket.public_or_private === 'private') {
-                value.url += '?token=' + await tokenUtil.getToken(data.baseUrl + value.url, bucket)
+            value.url = "/" + bucket.name + "/" + value.name + "." + value.type
+            if (bucket.public_or_private === "private") {
+                value.url += "?token=" + await tokenUtil.getToken(data.baseUrl + value.url, bucket)
             }
         }
         await data.files.forEach(addUrl)

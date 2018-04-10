@@ -1,24 +1,24 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { AbstractFile } from './AbstractFile'
-import { Bucket } from './Bucket.entity'
+import { Column, Entity, Index, JoinColumn, ManyToOne } from "typeorm";
+import { AbstractFile } from "./abstract.file"
+import { Bucket } from "./bucket.entity"
 
 @Entity({
-    name: 'image'
+    name: "image"
 })
 //同一空间下name不能重复，创建唯一性约束
-@Index('name_bucket_id', [ 'name', 'bucketId' ], { unique: true })
+@Index("name_bucket_id", [ "name", "bucketId" ], { unique: true })
 export class Image extends AbstractFile {
 
     @Column({
-        name: 'width',
-        type: 'integer',
+        name: "width",
+        type: "integer",
         nullable: true
     })
     width: number;
 
     @Column({
-        name: 'height',
-        type: 'integer',
+        name: "height",
+        type: "integer",
         nullable: true
     })
     height: number;
