@@ -2,7 +2,7 @@ import { Component, HttpException, Inject } from "@nestjs/common";
 import * as crypto from "crypto";
 import * as gm from "gm";
 import * as path from "path";
-import * as sharp from 'sharp';
+import * as sharp from "sharp";
 import { SharpInstance } from "sharp";
 import { ImageMetadata } from "../interface/file/image.metadata";
 import { Blur, ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor } from "../interface/file/image.process.info";

@@ -208,7 +208,7 @@ export class ConfigResolver {
     async buckets(req: IncomingMessage): Promise<BucketsData> {
         // 查询出所有空间的三个字段，其他字段保密
         const buckets: Array<Bucket> = await this.bucketRepository.createQueryBuilder("bucket")
-            .select(["bucket.id", "bucket.public_or_private", "bucket.name"])
+            .select(["bucket.id", "bucket.publicOrPrivate", "bucket.name"])
             .getMany();
         if (buckets.length !== 2) {
             throw new HttpException("空间配置不存在", 401);

@@ -22,7 +22,7 @@ export class Bucket {
 
     // 公有还是私有空间，值为public、private
     @Column({
-        name: "public_or_private",
+        name: "publicOrPrivate",
         type: "varchar",
         length: 20,
         nullable: false,
