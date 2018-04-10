@@ -55,7 +55,7 @@ export class StoreComponent {
         if (!bucketName || !rawName || !base64) {
             throw new HttpException("缺少参数", 400);
         }
-        imagePreProcessInfo = !imagePreProcessInfo ? {} : imagePreProcessInfo;
+        imagePreProcessInfo = !imagePreProcessInfo ? {} as any : imagePreProcessInfo;
         const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
             .where("bucket.name = :name", { name: bucketName })
@@ -70,7 +70,7 @@ export class StoreComponent {
         const kind: string = this.kindUtil.getKind(type);
         try {
             if (kind === "image") {
-                const imagePostProcessInfo: ImagePostProcessInfo = imagePreProcessInfo;
+                const imagePostProcessInfo: ImagePostProcessInfo = imagePreProcessInfo as any;
                 const format = bucket.imageConfig.format || "raw";
                 // 根据不同的图片保存类型，处理并且存储图片，返回处理后元数据
                 if (format === "raw") {

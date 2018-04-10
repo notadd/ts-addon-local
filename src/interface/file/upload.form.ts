@@ -1,13 +1,13 @@
 export interface UploadForm {
-    imagePreProcessString?: string
+    imagePreProcessString?: string;
 
-    contentSecret?: string
+    contentSecret?: string;
 
-    tagsString?: string
+    tagsString?: string;
 
-    md5: string
+    md5: string;
 
-    bucketName: string
+    bucketName: string;
 
-    rawName: string
+    rawName: string;
 }

@@ -1,3 +1,3 @@
 export interface EnableImageWatermark {
-    enable: boolean
+    enable: boolean;
 }

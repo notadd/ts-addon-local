@@ -29,9 +29,9 @@ export class FileService {
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>) {
     }
 
-    async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<string> {
+    async saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<any> {
         const { imagePreProcessString, contentSecret, tagsString, md5, bucketName, rawName } = obj;
-        let imageProcessInfo: ImagePreProcessInfo, tags: Array<string>;
+        let imageProcessInfo: ImagePreProcessInfo = {} as any, tags: Array<string> = {} as any;
         try {
             if (tagsString) {
                 tags = JSON.parse(tagsString);
@@ -47,15 +47,15 @@ export class FileService {
                     (imageProcessInfo as ImagePostProcessInfo).lossless = true;
                 } else {
                     // 这样写。后面需要分号
-                    (imageProcessInfo as ImagePostProcessInfo).format = undefined;
-                    (imageProcessInfo as ImagePostProcessInfo).lossless = undefined;
+                    (imageProcessInfo as ImagePostProcessInfo).format = undefined as any;
+                    (imageProcessInfo as ImagePostProcessInfo).lossless = undefined as any;
                 }
             }
         } catch (err) {
             throw new HttpException("JSON解析错误:" + err.toString(), 405);
         }
         // 默认情况下，上传文件都会进行处理保存，如果处理后得到的文件名(sha256)已存在，会覆盖源文件
-        const metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo);
+        const metadata: ImageMetadata = await this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo as any);
         const type: string = rawName.substring(rawName.lastIndexOf(".") + 1);
         const kind: string = this.kindUtil.getKind(type);
         if (kind === "image") {
@@ -77,7 +77,7 @@ export class FileService {
                 image.tags = tags;
             }
             if (contentSecret) {
-                image.content_secret = contentSecret;
+                image.contentSecret = contentSecret;
             }
             try {
                 await this.imageRepository.save(image);

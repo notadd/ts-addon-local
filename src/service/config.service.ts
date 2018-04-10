@@ -135,20 +135,20 @@ export class ConfigService {
                 metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], {
                     strip: true,
                     watermark: false
-                });
+                } as any);
             } else if (format === "webp_damage") {
                 metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], {
                     format: "webp",
                     strip: true,
                     watermark: false
-                });
+                } as any);
             } else if (format === "webp_undamage") {
                 metadata = await this.imageProcessUtil.processAndStore(file.path, buckets[i], {
                     format: "webp",
                     lossless: true,
                     strip: true,
                     watermark: false
-                });
+                } as any);
             }
             const image: Image = new Image();
             image.bucket = buckets[i];

@@ -1,3 +1,3 @@
 export interface ImageFormat {
-    format: string
+    format: string;
 }

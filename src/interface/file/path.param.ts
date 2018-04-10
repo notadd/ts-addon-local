@@ -1,5 +1,5 @@
 export interface PathParam {
-    bucketName: string
+    bucketName: string;
 
-    fileName: string
+    fileName: string;
 }
