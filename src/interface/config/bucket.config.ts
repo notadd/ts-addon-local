@@ -1,9 +1,9 @@
 export interface BucketConfig {
-    isPublic: boolean
+    isPublic: boolean;
 
-    name: string
+    name: string;
 
-    token_expire?: number
+    tokenExpire: number;
 
-    token_secret_key?: string
+    tokenSecretKey: string;
 }

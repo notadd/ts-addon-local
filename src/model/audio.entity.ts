@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { AbstractFile } from "./abstract.file"
-import { Bucket } from "./bucket.entity"
+import { AbstractFile } from "./abstract.file";
+import { Bucket } from "./bucket.entity";
 
 @Entity({
     name: "audio"
@@ -8,7 +8,7 @@ import { Bucket } from "./bucket.entity"
 export class Audio extends AbstractFile {
 
     @Column({ nullable: true })
-    bucketId: number
+    bucketId: number;
 
     @ManyToOne(type => Bucket, bucket => bucket.audios, {
         cascadeInsert: false,
