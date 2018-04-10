@@ -1,11 +1,11 @@
 export interface ImageMetadata {
-    name: string
+    name: string;
 
-    format: string
+    format: string;
 
-    width: number
+    width: number;
 
-    height: number
+    height: number;
 
-    size: number
+    size: number;
 }

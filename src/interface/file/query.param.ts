@@ -1,5 +1,5 @@
 export interface QueryParam {
-    imagePostProcessString?: string
+    imagePostProcessString?: string;
 
-    token?: string
+    token?: string;
 }

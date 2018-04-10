@@ -1,7 +1,7 @@
 export interface OneData {
-    code: number
+    code: number;
 
-    message: string
+    message: string;
 
-    url: string
+    url: string;
 }

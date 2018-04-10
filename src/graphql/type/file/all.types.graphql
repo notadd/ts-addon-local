@@ -11,9 +11,9 @@ type File{
     tags:[String]
     type:String
     size:Int
-    content_secret:String
-    create_date:String
-    update_date:String
+    contentSecret:String
+    createDate:String
+    updateDate:String
     url:String
 }
 
@@ -25,8 +25,8 @@ type Image{
     tags:[String]
     type:String
     size:Int
-    create_date:String
-    update_date:String
+    createDate:String
+    updateDate:String
     width:Int
     height:Int
     url:String
@@ -41,8 +41,8 @@ type Audio{
     md5:String
     type:String
     size:Int
-    create_date:String
-    update_date:String
+    createDate:String
+    updateDate:String
     url:String
 }
 
@@ -54,8 +54,8 @@ type Video{
     tags:[String]
     type:String
     size:Int
-    create_date:String
-    update_date:String
+    createDate:String
+    updateDate:String
     url:String
 }
 
@@ -67,8 +67,8 @@ type Document{
     tags:[String]
     type:String
     size:Int
-    create_date:String
-    update_date:String
+    createDate:String
+    updateDate:String
     url:String
 }
 

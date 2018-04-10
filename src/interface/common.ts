@@ -1,5 +1,5 @@
 export interface CommonData {
-    code: number
+    code: number;
 
-    message: string
+    message: string;
 }

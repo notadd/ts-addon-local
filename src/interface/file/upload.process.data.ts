@@ -1,13 +1,13 @@
 export interface UploadProcessData {
-    code: number
+    code: number;
 
-    message: string
+    message: string;
 
-    method: string
+    method: string;
 
-    url: string
+    url: string;
 
-    baseUrl: string
+    baseUrl: string;
 
     form: {
         imagePreProcessString?: string
@@ -16,5 +16,5 @@ export interface UploadProcessData {
         bucketName: string
         rawName: string
         md5: string
-    }
+    };
 }

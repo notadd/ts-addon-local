@@ -1,5 +1,5 @@
 export interface HeaderParam {
-    bucketName: string
+    bucketName: string;
 
-    fileName: string
+    fileName: string;
 }
