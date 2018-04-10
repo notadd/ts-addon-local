@@ -1,29 +1,29 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
-import { Audio } from './Audio.entity'
-import { AudioConfig } from './AudioConfig.entity'
-import { Document } from './Document.entity'
-import { File } from './File.entity'
-import { Image } from './Image.entity'
-import { ImageConfig } from './ImageConfig.entity'
-import { Video } from './Video.entity'
-import { VideoConfig } from './VideoConfig.entity'
+import { Column, Entity, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { Audio } from "./audio.entity"
+import { AudioConfig } from "./audio.config.entity"
+import { Document } from "./document.entity"
+import { File } from "./file.entity"
+import { Image } from "./image.entity"
+import { ImageConfig } from "./image.config.entity"
+import { Video } from "./video.entity"
+import { VideoConfig } from "./video.config.entity"
 
 @Entity({
-    name: 'bucket'
+    name: "bucket"
 })
 export class Bucket {
 
     //主键，需要设置插入，1默认为公有空间配置，2默认为私有空间配置
     @PrimaryColumn({
-        name: 'id',
-        type: 'integer'
+        name: "id",
+        type: "integer"
     })
     id: number;
 
     //公有还是私有空间，值为public、private
     @Column({
-        name: 'public_or_private',
-        type: 'varchar',
+        name: "public_or_private",
+        type: "varchar",
         length: 20,
         nullable: false,
         unique: true
@@ -32,8 +32,8 @@ export class Bucket {
 
     //此空间下所有文件都存储于这个目录里,与虚拟目录无关
     @Column({
-        name: 'name',
-        type: 'varchar',
+        name: "name",
+        type: "varchar",
         length: 20,
         nullable: false
     })
@@ -41,8 +41,8 @@ export class Bucket {
 
     //token密钥
     @Column({
-        name: 'token_secret_key',
-        type: 'varchar',
+        name: "token_secret_key",
+        type: "varchar",
         length: 250,
         nullable: true
     })
@@ -50,8 +50,8 @@ export class Bucket {
 
     //token过期时间，单位秒
     @Column({
-        name: 'token_expire',
-        type: 'integer',
+        name: "token_expire",
+        type: "integer",
         nullable: true
     })
     token_expire: number;

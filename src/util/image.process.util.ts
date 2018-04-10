@@ -1,14 +1,14 @@
-import { Component, HttpException, Inject } from '@nestjs/common';
-import * as crypto from 'crypto';
-import * as gm from 'gm';
-import * as path from 'path';
-import * as sharp from 'sharp';
-import { SharpInstance } from 'sharp';
-import { ImageMetadata } from '../interface/file/ImageMetadata';
-import { Blur, ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor } from '../interface/file/ImageProcessInfo';
-import { Bucket } from '../model/Bucket.entity';
-import { FileUtil } from './FileUtil';
-import { KindUtil } from './KindUtil';
+import { Component, HttpException, Inject } from "@nestjs/common";
+import * as crypto from "crypto";
+import * as gm from "gm";
+import * as path from "path";
+import * as sharp from "sharp";
+import { SharpInstance } from "sharp";
+import { ImageMetadata } from "../interface/file/image.metadata";
+import { Blur, ImagePostProcessInfo, ImagePreProcessInfo, Resize, Tailor } from "../interface/file/image.process.info";
+import { Bucket } from "../model/bucket.entity";
+import { FileUtil } from "./file.util";
+import { KindUtil } from "./kind.util";
 
 /* 图片处理工具类 */
 @Component()
@@ -20,7 +20,7 @@ export class ImageProcessUtil {
         @Inject(FileUtil) private readonly fileUtil: FileUtil
     ) {
         //重心集合，在裁剪与水印中使用
-        this.gravity = new Set([ 'northwest', 'north', 'northeast', 'west', 'center', 'east', 'southwest', 'south', 'southeast' ])
+        this.gravity = new Set([ "northwest", "north", "northeast", "west", "center", "east", "southwest", "south", "southeast" ])
     }
 
     //获取指定图片、字节缓冲的图片元数据，参数可以为图片路径或者Buffer对象
@@ -30,16 +30,16 @@ export class ImageProcessUtil {
         let { format, width, height } = await sharp(pathOrBuffer).metadata()
         let size, name
         //为路径时
-        if (typeof pathOrBuffer === 'string') {
+        if (typeof pathOrBuffer === "string") {
             let buffer = await this.fileUtil.read(pathOrBuffer)
             size = await this.fileUtil.size(pathOrBuffer)
             //计算sha256为图片名称
-            name = crypto.createHash('sha256').update(buffer).digest('hex')
+            name = crypto.createHash("sha256").update(buffer).digest("hex")
         } else {
             //获取BUffer字节大小
             size = Buffer.byteLength(pathOrBuffer)
             //计算sha256为名称
-            name = crypto.createHash('sha256').update(pathOrBuffer).digest('hex')
+            name = crypto.createHash("sha256").update(pathOrBuffer).digest("hex")
         }
         return {
             name,
@@ -58,7 +58,7 @@ export class ImageProcessUtil {
         //获取处理后元数据
         let metadata: ImageMetadata = await this.getMetadata(buffer)
         //处理后图片绝对路径
-        let absolute_path: string = path.resolve(__dirname, '../', 'store', bucket.name, metadata.name + '.' + metadata.format)
+        let absolute_path: string = path.resolve(__dirname, "../", "store", bucket.name, metadata.name + "." + metadata.format)
         await this.fileUtil.write(absolute_path, buffer)
         //返回处理后元数据
         return metadata
@@ -271,108 +271,108 @@ export class ImageProcessUtil {
         //声明resize方法的参数
         let width, height
         //等比缩放
-        if (mode == 'scale') {
+        if (mode == "scale") {
             if (data.scale && Number.isInteger(data.scale) && data.scale >= 1 && data.scale <= 1000) {
                 //等比缩放直接用原宽高乘以比例
                 width = preWidth * data.scale / 100
                 height = preHeight * data.scale / 100
             }
             else {
-                throw new Error('缩放比例错误')
+                throw new Error("缩放比例错误")
             }
         }
         //只缩放宽度
-        else if (mode == 'wscale') {
+        else if (mode == "wscale") {
             if (data.wscale && Number.isInteger(data.wscale) && data.wscale >= 1 && data.wscale <= 1000) {
                 //只缩放宽度，给原宽度乘以比例
                 width = preWidth * data.wscale / 100
                 height = preHeight
             } else {
-                throw new Error('宽度缩放比例错误')
+                throw new Error("宽度缩放比例错误")
             }
         }
         //只缩放高度
-        else if (mode == 'hscale') {
+        else if (mode == "hscale") {
             if (data.hscale && Number.isInteger(data.hscale) && data.hscale >= 1 && data.hscale <= 1000) {
                 //只缩放高度，给高度乘以比例
                 width = preWidth
                 height = preHeight * data.hscale / 100
             } else {
-                throw new Error('高度缩放比例错误')
+                throw new Error("高度缩放比例错误")
             }
         }
         //指定宽高缩放
-        else if (mode == 'both') {
+        else if (mode == "both") {
             if (data.width && Number.isInteger(data.width) && data.height && Number.isInteger(data.height)) {
                 //指定宽高缩放，直接使用参数中宽高
                 width = data.width
                 height = data.height
             } else {
-                throw new Error('宽高参数错误')
+                throw new Error("宽高参数错误")
             }
         }
         //指定宽度等比缩放
-        else if (mode == 'fw') {
+        else if (mode == "fw") {
             if (data.width && Number.isInteger(data.width)) {
                 //指定宽度等比缩放，宽度为参数值
                 width = data.width
                 //高度为原高度乘以宽度缩放比
                 height = preHeight * data.width / preWidth
             } else {
-                throw new Error('宽度参数错误')
+                throw new Error("宽度参数错误")
             }
         }
         //指定高度等比缩放
-        else if (mode == 'fh') {
+        else if (mode == "fh") {
             if (data.height && Number.isInteger(data.height)) {
                 //指定高度等比缩放，高度为参数值
                 height = data.height
                 //宽度为原宽度乘以高度缩放比
                 width = preWidth * data.height / preHeight
             } else {
-                throw new Error('高度参数错误')
+                throw new Error("高度参数错误")
             }
         }
         //指定像素等比缩放
-        else if (mode == 'fp') {
+        else if (mode == "fp") {
             if (data.pixel && Number.isInteger(data.pixel) && data.pixel >= 1 && data.pixel <= 25000000) {
                 //指定像素等比缩放，高度平方乘以宽高比等于像素值
                 height = Math.sqrt(data.pixel * preHeight / preWidth)
                 //宽高乘积为像素值
                 width = data.pixel / height
             } else {
-                throw new Error('像素参数不正确')
+                throw new Error("像素参数不正确")
             }
         }
         //限制宽高最大值，如果宽高都已经小于限制值，那就不变
         //宽高有大于限制值的，按照宽、高中较小缩放比缩放，保证缩放结果宽高都小于限制值
-        else if (mode == 'fwfh') {
+        else if (mode == "fwfh") {
             if (data.width && Number.isInteger(data.width) && data.height && Number.isInteger(data.height)) {
                 //宽高都为参数值，后面要链式使用max函数
                 width = data.width
                 height = data.height
             } else {
-                throw new Error('宽高参数不正确')
+                throw new Error("宽高参数不正确")
             }
         }
         //闲置宽高最小值，如果宽高都已经大于限制值，那就不变
         //宽高有小于限制值的，按照宽、高较大缩放比缩放，保证缩放结果宽高都大于限制值
-        else if (mode == 'fwfh2') {
+        else if (mode == "fwfh2") {
             if (data.width && Number.isInteger(data.width) && data.height && Number.isInteger(data.height)) {
                 width = data.width
                 height = data.height
             } else {
-                throw new Error('宽高参数不正确')
+                throw new Error("宽高参数不正确")
             }
         } else {
-            throw new Error('缩放模式不正确')
+            throw new Error("缩放模式不正确")
         }
         //为sharp实例添加缩放处理,默认宽高不足时不裁剪，只缩放
         instance.resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio()
         //下面要计算缩放后宽高，以及添加限制函数
         //只有fwfh、fwfh2两个模式要特殊处理
         //当限制宽高最大值时
-        if (mode == 'fwfh') {
+        if (mode == "fwfh") {
             instance.max()
             //如果高度大于限制值，宽度小于等于限制值
             if (data.width >= preWidth && data.height < preHeight) {
@@ -403,7 +403,7 @@ export class ImageProcessUtil {
             }
         }
         //限制宽高最小值时
-        else if (mode == 'fwfh2') {
+        else if (mode == "fwfh2") {
             instance.min()
             //当宽度大于等于限制值，二高度小于限制值时
             if (data.width <= preWidth && data.height > preHeight) {
@@ -453,53 +453,53 @@ export class ImageProcessUtil {
         //声明左偏移，顶部偏移，不能为负
         let left, top
         //方位为西北
-        if (gravity === 'northwest') {
+        if (gravity === "northwest") {
             //初始偏移为0、0
             left = 0
             top = 0
         }
         //方位为东北
-        else if (gravity === 'northeast') {
+        else if (gravity === "northeast") {
             //初始偏移,左偏移为原始宽度减去裁剪宽度
             left = preWidth - width
             top = 0
         }
         //方位为西南
-        else if (gravity === 'southwest') {
+        else if (gravity === "southwest") {
             left = 0
             top = preHeight - height
         }
         //方位为东南
-        else if (gravity === 'southeast') {
+        else if (gravity === "southeast") {
             left = preWidth - width
             top = preHeight - height
         }
         //方位为东
-        else if (gravity === 'east') {
+        else if (gravity === "east") {
             left = preWidth - width
             top = preHeight / 2 - height / 2
         }
         //方位为西
-        else if (gravity === 'west') {
+        else if (gravity === "west") {
             left = 0
             top = preHeight / 2 - height / 2
         }
         //方位为南
-        else if (gravity === 'south') {
+        else if (gravity === "south") {
             left = preWidth / 2 - width / 2
             top = preHeight - height
         }
         //方位为北
-        else if (gravity === 'north') {
+        else if (gravity === "north") {
             left = preWidth / 2 - width / 2
             top = 0
         }
         //方位为中心
-        else if (gravity === 'center') {
+        else if (gravity === "center") {
             left = preWidth / 2 - width / 2
             top = preHeight / 2 - height / 2
         } else {
-            throw new Error('裁剪方位不正确')
+            throw new Error("裁剪方位不正确")
         }
         //偏移加上x、y
         left += x
@@ -540,7 +540,7 @@ export class ImageProcessUtil {
         if (watermark === true) enable = true
         else if (watermark === false) enable = false
         else if (watermark == undefined) enable = !!bucket.image_config.watermark_enable
-        else throw new Error('水印参数错误')
+        else throw new Error("水印参数错误")
         if (enable) {
             //获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
             let x = bucket.image_config.watermark_x
@@ -549,7 +549,7 @@ export class ImageProcessUtil {
             //透明度暂时不使用
             let opacity = bucket.image_config.watermark_opacity
             let gravity = bucket.image_config.watermark_gravity
-            let shuiyin_path = path.resolve(__dirname, '../') + bucket.image_config.watermark_save_key
+            let shuiyin_path = path.resolve(__dirname, "../") + bucket.image_config.watermark_save_key
             //水印图片宽高
             let { width, height } = await this.getMetadata(shuiyin_path)
             //计算短边自适应后水印图片宽高
@@ -562,68 +562,68 @@ export class ImageProcessUtil {
             }
             //转化为gm参数
             //方位为西北
-            if (gravity === 'northwest') {
-                gravity = 'NorthWest'
+            if (gravity === "northwest") {
+                gravity = "NorthWest"
             }
             //方位为东北
-            else if (gravity === 'northeast') {
-                gravity = 'NorthEast'
+            else if (gravity === "northeast") {
+                gravity = "NorthEast"
             }
             //方位为西南
-            else if (gravity === 'southwest') {
-                gravity = 'SouthWest'
+            else if (gravity === "southwest") {
+                gravity = "SouthWest"
             }
             //方位为东南
-            else if (gravity === 'southeast') {
-                gravity = 'SouthEast'
+            else if (gravity === "southeast") {
+                gravity = "SouthEast"
             }
             //方位为东
-            else if (gravity === 'east') {
+            else if (gravity === "east") {
                 y = 0
-                gravity = 'East'
+                gravity = "East"
             }
             //方位为西
-            else if (gravity === 'west') {
+            else if (gravity === "west") {
                 y = 0
-                gravity = 'West'
+                gravity = "West"
             }
             //方位为南
-            else if (gravity === 'south') {
+            else if (gravity === "south") {
                 x = 0
-                gravity = 'South'
+                gravity = "South"
             }
             //方位为北
-            else if (gravity === 'north') {
+            else if (gravity === "north") {
                 x = 0
-                gravity = 'North'
+                gravity = "North"
             }
             //方位为中心
-            else if (gravity === 'center') {
+            else if (gravity === "center") {
                 x = 0
                 y = 0
-                gravity = 'Center'
+                gravity = "Center"
             } else {
-                throw new Error('水印方位不正确')
+                throw new Error("水印方位不正确")
             }
             /* //如果偏移为负，不能输出
             if (left < 0 || top < 0) {
-                throw new Error('水印图片超出界限')
+                throw new Error("水印图片超出界限")
             } */
             //水印图片大于原始宽高也不能输出
             if (width > preWidth || height > preHeight) {
-                throw new Error('水印图片过大')
+                throw new Error("水印图片过大")
             }
             //获取临时原图、缩放后水印图片Buffer，生成存储临时路径
             let buffer: Buffer = await instance.toBuffer()
             let shuiyinBuffer: Buffer = await sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer()
-            let temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'raw' + (+new Date()) + '.' + metadata.format)
-            let shuiyin_temp_path = path.resolve(__dirname, '../', 'store', 'temp', 'shuiyin' + (+new Date()) + shuiyin_path.substring(shuiyin_path.lastIndexOf('.')))
+            let temp_path = path.resolve(__dirname, "../", "store", "temp", "raw" + (+new Date()) + "." + metadata.format)
+            let shuiyin_temp_path = path.resolve(__dirname, "../", "store", "temp", "shuiyin" + (+new Date()) + shuiyin_path.substring(shuiyin_path.lastIndexOf(".")))
             await this.fileUtil.write(temp_path, buffer)
             await this.fileUtil.write(shuiyin_temp_path, shuiyinBuffer)
             let ex: HttpException
             await new Promise((resolve, reject) => {
-                gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry('+' + x + '+' + y).dissolve(opacity).write(temp_path, err => {
-                    if (err) reject(new HttpException('为图片添加水印出现错误:' + err.toString(), 407))
+                gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry("+" + x + "+" + y).dissolve(opacity).write(temp_path, err => {
+                    if (err) reject(new HttpException("为图片添加水印出现错误:" + err.toString(), 407))
                     resolve()
                 })
             }).catch(err => {
@@ -643,16 +643,16 @@ export class ImageProcessUtil {
     /* 旋转，sharp只支持90、180、270度，由于sharp的旋转，不会改变宽高，所以90、180度旋转后需要宽高倒置 */
     async rotate(instance: SharpInstance, metadata: ImageMetadata, rotate: number, width: number, height: number): Promise<string> {
         if (!Number.isInteger(rotate)) {
-            throw new Error('旋转角度不正确')
+            throw new Error("旋转角度不正确")
         }
         let buffer: Buffer = await instance.toBuffer()
-        let temp_path = path.resolve(__dirname, '../', 'store', 'temp', (+new Date()) + '.' + metadata.format)
+        let temp_path = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "." + metadata.format)
         let ex: HttpException
         //根据绝对路径保存图片
         await this.fileUtil.write(temp_path, buffer)
         await new Promise((resolve, reject) => {
-            gm(temp_path).rotate('black', rotate).write(temp_path, err => {
-                if (err) reject(new HttpException('旋转文件图片出现错误:' + err.toString(), 407))
+            gm(temp_path).rotate("black", rotate).write(temp_path, err => {
+                if (err) reject(new HttpException("旋转文件图片出现错误:" + err.toString(), 407))
                 resolve()
             })
         }).catch(err => {
@@ -667,7 +667,7 @@ export class ImageProcessUtil {
     /* 高斯模糊，sharp不支持模糊半径，sigma越大越模糊，20已经很模糊了 */
     blur(instance: SharpInstance, blur: Blur) {
         if (!Number.isInteger(blur.sigma)) {
-            throw new Error('模糊标准差错误')
+            throw new Error("模糊标准差错误")
         }
         //sharp不支持模糊半径
         instance.blur(blur.sigma)
@@ -681,7 +681,7 @@ export class ImageProcessUtil {
         else if (sharpen == false) {
 
         }
-        else throw new Error('锐化参数错误')
+        else throw new Error("锐化参数错误")
     }
 
     /* 转换图片格式，png格式比jpeg大很多，webp默认内为有损格式，比jpeg小
@@ -692,7 +692,7 @@ export class ImageProcessUtil {
         if (this.kindUtil.isImage(format)) {
             instance.toFormat(format)
         } else {
-            throw new Error('格式参数错误')
+            throw new Error("格式参数错误")
         }
     }
 
@@ -702,7 +702,7 @@ export class ImageProcessUtil {
         } else if (strip === false) {
             instance.withMetadata()
         } else {
-            throw new Error('去除元信息参数错误')
+            throw new Error("去除元信息参数错误")
         }
     }
 
@@ -712,13 +712,13 @@ export class ImageProcessUtil {
     */
     output(instance: SharpInstance, format: string, lossless: boolean, quality: number, progressive: boolean) {
         if (lossless !== undefined && lossless !== null && lossless !== true && lossless !== false) {
-            throw new Error('无损参数错误')
+            throw new Error("无损参数错误")
         }
         if (quality !== undefined && quality !== null && !Number.isInteger(quality)) {
-            throw new Error('质量参数错误')
+            throw new Error("质量参数错误")
         }
         if (progressive !== undefined && progressive !== null && progressive !== true && progressive !== false) {
-            throw new Error('渐进参数错误')
+            throw new Error("渐进参数错误")
         }
         let options: any = {
             force: true
@@ -727,19 +727,19 @@ export class ImageProcessUtil {
         if (quality !== undefined && quality !== null) options.quality = quality
         if (progressive !== undefined && progressive !== null) options.progressive = progressive
         //jpeg不支持无损，加上了也无所谓
-        if (format === 'jpeg') {
+        if (format === "jpeg") {
             instance.jpeg(options)
         }
         //png不支持质量、无损选项，加上了也不影响
-        else if (format === 'png') {
+        else if (format === "png") {
             instance.png(options)
         }
         //webp则三个都支持
-        else if (format === 'webp') {
+        else if (format === "webp") {
             instance.webp(options)
         }
         //tiff不支持渐进、无损选项，加上也无所谓
-        else if (format === 'tiff') {
+        else if (format === "tiff") {
             instance.tiff(options)
         } else {
             //不支持对其他类型的无损、质量、渐进处理，但是不报错
