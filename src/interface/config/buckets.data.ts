@@ -1,15 +1,15 @@
 export interface BucketsData {
-    code: number
+    code: number;
 
-    message: string
+    message: string;
 
-    buckets: BucketInfo[]
+    buckets: Array<BucketInfo>;
 }
 
 export interface BucketInfo {
-    id: number
+    id: number;
 
-    public_or_private: string
+    publicOrPrivate: string;
 
-    name: string
+    name: string;
 }

@@ -38,10 +38,10 @@ export class FileService {
             }
             if (imagePreProcessString) {
                 imageProcessInfo = JSON.parse(imagePreProcessString)
-                if (bucket.image_config.format === "webp_damage") {
+                if (bucket.imageConfig.format === "webp_damage") {
                     (imageProcessInfo as ImagePostProcessInfo).format = "webp";
                     (imageProcessInfo as ImagePostProcessInfo).lossless = false
-                } else if (bucket.image_config.format === "webp_undamage") {
+                } else if (bucket.imageConfig.format === "webp_undamage") {
                     //这样写。后面需要分号
                     (imageProcessInfo as ImagePostProcessInfo).format = "webp";
                     (imageProcessInfo as ImagePostProcessInfo).lossless = true
@@ -65,7 +65,7 @@ export class FileService {
                 return "/visit/" + bucket.name + "/" + exist.name + "." + exist.type
             }
             //不存在，保存处理后文件
-            let image: Image = new Image()
+            let image: Image = new Image();
             image.bucket = bucket
             image.raw_name = file.name
             image.name = metadata.name
@@ -86,7 +86,7 @@ export class FileService {
             }
             return "/visit/" + bucket.name + "/" + image.name + "." + image.type
         } else {
-            //暂时不支持其他种类文件
+            // 暂时不支持其他种类文件
         }
     }
 
@@ -97,18 +97,18 @@ export class FileService {
         data.videos = await bucket.videos
         data.documents = await bucket.documents
 
-        let tokenUtil = this.tokenUtil
-        let addUrl = async function (value) {
+        const tokenUtil = this.tokenUtil
+        const addUrl = async function (value) {
             value.url = "/" + bucket.name + "/" + value.name + "." + value.type
             if (bucket.public_or_private === "private") {
                 value.url += "?token=" + await tokenUtil.getToken(data.baseUrl + value.url, bucket)
             }
-        }
-        await data.files.forEach(addUrl)
-        await data.images.forEach(addUrl)
-        await data.audios.forEach(addUrl)
-        await data.videos.forEach(addUrl)
-        await data.documents.forEach(addUrl)
-        return
+        };
+        await data.files.forEach(addUrl);
+        await data.images.forEach(addUrl);
+        await data.audios.forEach(addUrl);
+        await data.videos.forEach(addUrl);
+        await data.documents.forEach(addUrl);
+        return;
     }
 }

@@ -14,17 +14,17 @@ export class AbstractFile {
         length: 50,
         nullable: false
     })
-    raw_name: string;
+    rawName: string;
 
     @Column({
         name: "tags",
         type: "simple-array",
         nullable: true,
     })
-    tags: string[];
+    tags: Array<string>;
 
-    //本地存储中，文件名为它的sha256值有64位
-    //为了与云存储统一，也称做name,这里统一空间下name不可以重复
+    // 本地存储中，文件名为它的sha256值有64位
+    // 为了与云存储统一，也称做name,这里统一空间下name不可以重复
     @Column({
         name: "name",
         type: "varchar",
@@ -48,25 +48,25 @@ export class AbstractFile {
     })
     size: number;
 
-    //访问密钥
+    // 访问密钥
     @Column({
         name: "content_secret",
         type: "varchar",
         length: "50",
         nullable: true
     })
-    content_secret: string;
+    contentSecret: string;
 
     @CreateDateColumn({
         name: "create_date",
         type: "date"
     })
-    create_date: Date;
+    createDate: Date;
 
     @UpdateDateColumn({
         name: "update_date",
         type: "date"
     })
-    update_date: Date;
+    updateDate: Date;
 
 }

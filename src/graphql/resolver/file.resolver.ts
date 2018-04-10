@@ -56,7 +56,7 @@ export class FileResolver {
   */
     @Query("downloadProcess")
     async downloadProcess(req: any, body: FileLocationBody): Promise<DownloadProcessData> {
-        let data: DownloadProcessData = {
+        const data: DownloadProcessData = {
             code: 200,
             message: "下载预处理成功",
             method: "get",
@@ -65,31 +65,30 @@ export class FileResolver {
                 fileName: ""
             },
             url: req.protocol + "://" + req.get("host") + "/local/file/download"
-        }
-        //验证参数存在
-        let { bucketName, name, type } = body
+        };
+        // 验证参数存在
+        const { bucketName, name, type } = body;
         if (!bucketName || !name || !type) {
-            throw new HttpException("缺少参数", 400)
+            throw new HttpException("缺少参数", 400);
         }
-        let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
-        //指定空间不存在
+        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
+        // 指定空间不存在
         if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401)
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
-        //根据文件种类获取文件实例
-        let kind: string
-        let file: File | Audio | Video | Image | Document
+        // 根据文件种类获取文件实例
+        let file: File | Audio | Video | Image | Document = {} as any;
         if (this.kindUtil.isImage(type)) {
-            file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id })
+            file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id });
         } else {
-            //其他类型暂不支持
+            // 其他类型暂不支持
         }
         if (!file) {
-            throw new HttpException("指定文件" + name + "不存在", 404)
+            throw new HttpException("指定文件" + name + "不存在", 404);
         }
-        data.headers.bucketName = bucket.name
-        data.headers.fileName = file.name + "." + file.type
-        return data
+        data.headers.bucketName = bucket.name;
+        data.headers.fileName = file.name + "." + file.type;
+        return data;
     }
 
     /*文件表单上传预处理接口
@@ -107,7 +106,7 @@ export class FileResolver {
     */
     @Mutation("uploadProcess")
     async uploadProcess(req: any, body: UploadProcessBody): Promise<UploadProcessData> {
-        let data: UploadProcessData = {
+        const data: UploadProcessData = {
             code: 200,
             message: "",
             method: "post",
@@ -117,31 +116,31 @@ export class FileResolver {
                 md5: "",
                 rawName: "",
                 bucketName: "",
-                tagsString: null,
-                contentSecret: null,
-                imagePreProcessString: null,
+                tagsString: undefined,
+                contentSecret: undefined,
+                imagePreProcessString: undefined,
             }
-        }
-        //可以根据md5对文件内容进行校验
-        let { bucketName, md5, contentName, contentSecret, tags, imagePreProcessInfo } = body
+        };
+        // 可以根据md5对文件内容进行校验
+        const { bucketName, md5, contentName, contentSecret, tags, imagePreProcessInfo } = body;
         if (!bucketName || !contentName) {
-            throw new HttpException("缺少参数", 400)
+            throw new HttpException("缺少参数", 400);
         }
-        let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401)
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
-        data.form.md5 = md5
-        data.form.rawName = contentName
-        data.form.bucketName = bucket.name
-        data.form.contentSecret = contentSecret
+        data.form.md5 = md5;
+        data.form.rawName = contentName;
+        data.form.bucketName = bucket.name;
+        data.form.contentSecret = contentSecret;
         try {
-            data.form.tagsString = JSON.stringify(tags)
-            data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo)
+            data.form.tagsString = JSON.stringify(tags);
+            data.form.imagePreProcessString = JSON.stringify(imagePreProcessInfo);
         } catch (err) {
-            throw new HttpException("JSON解析错误" + err.toString(), 409)
+            throw new HttpException("JSON解析错误" + err.toString(), 409);
         }
-        return data
+        return data;
     }
 
     /* 获取访问单个文件url方法 ，从后台获取
@@ -155,51 +154,51 @@ export class FileResolver {
     */
     @Query("one")
     async getOne(req: any, body: OneBody): Promise<OneData> {
-        let data: OneData = {
+        const data: OneData = {
             code: 200,
             message: "获取文件url成功",
             url: req.protocol + "://" + req.get("host") + "/local/file/visit"
-        }
-        //验证参数存在，图片后处理信息可选
-        let { bucketName, name, type, imagePostProcessInfo } = body
+        };
+        // 验证参数存在，图片后处理信息可选
+        const { bucketName, name, type, imagePostProcessInfo } = body;
         if (!bucketName || !name || !type) {
-            throw new HttpException("缺少参数", 400)
+            throw new HttpException("缺少参数", 400);
         }
-        let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
-            .leftJoinAndSelect("bucket.image_config", "image_config")
-            .leftJoinAndSelect("bucket.audio_config", "audio_config")
-            .leftJoinAndSelect("bucket.video_config", "video_config")
+        const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+            .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
+            .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
+            .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
             .where("bucket.name = :name", { name: bucketName })
-            .getOne()
+            .getOne();
         if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401)
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
-        //根据文件种类处理
-        let kind = this.kindUtil.getKind(type)
+        // 根据文件种类处理
+        const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
+            const image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
-                throw new HttpException("指定图片" + name + "." + type + "不存在", 404)
+                throw new HttpException("指定图片" + name + "." + type + "不存在", 404);
             }
-            //所有文件调用统一的拼接Url方法
-            data.url += "/" + bucketName + "/" + name + "." + type
-            //存储图片处理信息时
+            // 所有文件调用统一的拼接Url方法
+            data.url += "/" + bucketName + "/" + name + "." + type;
+            // 存储图片处理信息时
             if (imagePostProcessInfo) {
-                //拼接图片处理的查询字符串
-                data.url += "?imagePostProcessString=" + JSON.stringify(imagePostProcessInfo)
-                //私有空间要拼接token，token使用它之前的完整路径计算
-                if (bucket.public_or_private === "private") {
-                    data.url += "&token=" + this.tokenUtil.getToken(data.url, bucket)
+                // 拼接图片处理的查询字符串
+                data.url += "?imagePostProcessString=" + JSON.stringify(imagePostProcessInfo);
+                // 私有空间要拼接token，token使用它之前的完整路径计算
+                if (bucket.publicOrPrivate === "private") {
+                    data.url += "&token=" + this.tokenUtil.getToken(data.url, bucket);
                 }
             } else {
-                if (bucket.public_or_private === "private") {
-                    data.url += "?token=" + this.tokenUtil.getToken(data.url, bucket)
+                if (bucket.publicOrPrivate === "private") {
+                    data.url += "?token=" + this.tokenUtil.getToken(data.url, bucket);
                 }
             }
         } else {
-            //暂不支持
+            // 暂不支持
         }
-        return data
+        return data;
     }
 
     /* 获取指定空间下文件信息以及相关访问url
@@ -215,7 +214,7 @@ export class FileResolver {
     */
     @Query("all")
     async files(req: any, body: AllBody): Promise<AllData> {
-        let data: AllData = {
+        const data: AllData = {
             code: 200,
             message: "获取空间下所有文件成功",
             baseUrl: req.protocol + "://" + req.get("host") + "/local/file/visit",
@@ -224,17 +223,17 @@ export class FileResolver {
             audios: [],
             videos: [],
             documents: []
-        }
-        let { bucketName } = body
+        };
+        const { bucketName } = body;
         if (!bucketName) {
-            throw new HttpException("缺少参数", 400)
+            throw new HttpException("缺少参数", 400);
         }
-        let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401)
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
-        await this.fileService.getAll(data, bucket)
-        return data
+        await this.fileService.getAll(data, bucket);
+        return data;
     }
 
     /* 文件删除接口
@@ -247,32 +246,32 @@ export class FileResolver {
     */
     @Mutation("deleteFile")
     async deleteFile(req: IncomingMessage, body: FileLocationBody): Promise<CommonData> {
-        //验证参数
-        let { bucketName, type, name } = body
+        // 验证参数
+        const { bucketName, type, name } = body;
         if (!bucketName || !name || !type) {
-            throw new HttpException("缺少参数", 400)
+            throw new HttpException("缺少参数", 400);
         }
-        let bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName })
+        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401)
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
-        //根据文件种类，查找、删除数据库
-        let kind = this.kindUtil.getKind(type)
+        // 根据文件种类，查找、删除数据库
+        const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            let image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id })
+            const image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
-                throw new HttpException("文件" + name + "不存在于数据库中", 404)
+                throw new HttpException("文件" + name + "不存在于数据库中", 404);
             }
-            await this.imageRepository.delete({ name, bucketId: bucket.id })
+            await this.imageRepository.delete({ name, bucketId: bucket.id });
         } else {
-            //其他类型暂不支持
+            // 其他类型暂不支持
         }
-        //删除目录下存储文件
-        let realPath = path.resolve(__dirname, "../../", "store", bucketName, name + "." + type)
+        // 删除目录下存储文件
+        const realPath = path.resolve(__dirname, "../../", "store", bucketName, name + "." + type);
         if (!this.fileUtil.exist(realPath)) {
-            throw new HttpException("要删除的文件不存在", 404)
+            throw new HttpException("要删除的文件不存在", 404);
         }
-        await this.fileUtil.delete(realPath)
-        return { code: 200, message: "删除成功" }
+        await this.fileUtil.delete(realPath);
+        return { code: 200, message: "删除成功" };
     }
 }

@@ -67,24 +67,24 @@ export class FileController {
     @Get("/download")
     @UseGuards(DownloadParamGuard)
     async download(@Headers() headers: HeaderParam, @Response() res): Promise<any> {
-        let { bucketName, fileName } = headers
-        //文件绝对路径，这里并不查询数据库，直接从文件夹获取
-        let realPath: string = path.resolve(__dirname, "../", "store", bucketName, fileName)
-        //文件不存在，返回404
+        const { bucketName, fileName } = headers;
+        // 文件绝对路径，这里并不查询数据库，直接从文件夹获取
+        const realPath: string = path.resolve(__dirname, "../", "store", bucketName, fileName);
+        // 文件不存在，返回404
         if (!this.fileUtil.exist(realPath)) {
-            throw new HttpException("请求下载的文件不存在", 404)
+            throw new HttpException("请求下载的文件不存在", 404);
         }
-        //下载文件的buffer，不进行处理，返回原始文件
-        let buffer: Buffer = await this.fileUtil.read(realPath)
-        //文件类型响应头
-        res.setHeader("Content-Type", mime.getType(fileName))
-        //文件大小响应头
-        res.setHeader("Content-Length", Buffer.byteLength(buffer))
-        //下载响应头，不管浏览器支持不支持显示文件mime，都会直接弹出下载
-        res.setHeader("Content-Disposition", "attachment; filename=" + fileName)
-        //发送文件buffer
-        res.end(buffer)
-        return
+        // 下载文件的buffer，不进行处理，返回原始文件
+        const buffer: Buffer = await this.fileUtil.read(realPath);
+        // 文件类型响应头
+        res.setHeader("Content-Type", mime.getType(fileName));
+        // 文件大小响应头
+        res.setHeader("Content-Length", Buffer.byteLength(buffer));
+        // 下载响应头，不管浏览器支持不支持显示文件mime，都会直接弹出下载
+        res.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        // 发送文件buffer
+        res.end(buffer);
+        return;
     }
 
     /* 上传文件接口，空间名、文件原名在路径中，其他上传信息：md5、图片处理字符串、标签字符串、文件密钥都与文件一起使用表单上传
@@ -93,42 +93,42 @@ export class FileController {
     @Post("/upload")
     @UseGuards(UploadParamGuard)
     async upload(@Body() body): Promise<CommonData & { url: string }> {
-        let { uploadForm: obj, uploadFile: file } = body
-        let url: string
-        //这里使用trycatch块主要是为了不论抛出神码异常，上传的临时文件都会被删除，最后异常仍旧会被过滤器处理
+        const { uploadForm: obj, uploadFile: file } = body;
+        let url: string;
+        // 这里使用trycatch块主要是为了不论抛出神码异常，上传的临时文件都会被删除，最后异常仍旧会被过滤器处理
         try {
-            //这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
-            let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
-                .leftJoinAndSelect("bucket.image_config", "image_config")
-                .leftJoinAndSelect("bucket.audio_config", "audio_config")
-                .leftJoinAndSelect("bucket.video_config", "video_config")
+            // 这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
+            const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+                .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
+                .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
+                .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
                 .where("bucket.name = :name", { name: obj.bucketName })
-                .getOne()
+                .getOne();
             if (!bucket) {
-                throw new HttpException("指定空间" + obj.bucketName + "不存在", 401)
+                throw new HttpException("指定空间" + obj.bucketName + "不存在", 401);
             }
-            //上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
+            // 上传文件的文件名必须与路径中文件名相同，路径中文件名是上传预处理时就确定好的
             if (file.name !== obj.rawName) {
-                throw new HttpException("上传文件名" + file.name + "与请求头中文件名" + obj.fileName + "不符", 411)
+                throw new HttpException("上传文件名" + file.name + "与请求头中文件名" + obj.fileName + "不符", 411);
             }
-            let { imagePreProcessString, contentSecret, tagsString, md5 } = obj
-            //对上传文件进行md5校验
-            let buffer: Buffer = await this.fileUtil.read(file.path)
+            const { imagePreProcessString, contentSecret, tagsString, md5 } = obj;
+            // 对上传文件进行md5校验
+            const buffer: Buffer = await this.fileUtil.read(file.path);
             if (!(crypto.createHash("md5").update(buffer).digest("hex") === md5)) {
-                throw new HttpException("文件md5校验失败", 411)
+                throw new HttpException("文件md5校验失败", 411);
             }
-            //保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
-            url = await this.fileService.saveUploadFile(bucket, file, obj)
+            // 保存上传文件，对文件进行处理后保存在store目录下，将文件信息保存到数据库中
+            url = await this.fileService.saveUploadFile(bucket, file, obj);
         } catch (err) {
-            throw err
+            throw err;
         } finally {
-            await this.fileUtil.delete(file.path)
+            await this.fileUtil.delete(file.path);
         }
         return {
             code: 200,
             message: "上传文件成功",
             url
-        }
+        };
     }
 
     /* 访问文件接口，文件路径在url中
@@ -138,74 +138,74 @@ export class FileController {
     */
     @Get("/visit/:bucketName/:fileName")
     async visit(@Param() param: PathParam, @Query() query: QueryParam, @Response() res, @Request() req): Promise<any> {
-        let { bucketName, fileName } = param
-        let { imagePostProcessString, token } = query
-        //判断文件是否存在
-        let realPath: string = path.resolve(__dirname, "../", "store", bucketName, fileName)
+        const { bucketName, fileName } = param;
+        const { imagePostProcessString, token } = query;
+        // 判断文件是否存在
+        const realPath: string = path.resolve(__dirname, "../", "store", bucketName, fileName);
         if (!this.fileUtil.exist(realPath)) {
-            throw new HttpException("指定文件不存在", 404)
+            throw new HttpException("指定文件不存在", 404);
         }
-        //判断空间是否存在，由于要判断公有、私有空间，这里需要查询出空间
-        let bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
-            .leftJoinAndSelect("bucket.image_config", "image_config")
-            .leftJoinAndSelect("bucket.audio_config", "audio_config")
-            .leftJoinAndSelect("bucket.video_config", "video_config")
+        // 判断空间是否存在，由于要判断公有、私有空间，这里需要查询出空间
+        const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+            .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
+            .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
+            .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
             .where("bucket.name = :name", { name: bucketName })
-            .getOne()
+            .getOne();
         if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401)
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
-        //私有空间需要验证token
-        if (bucket.public_or_private === "private") {
-            //token不存在
+        // 私有空间需要验证token
+        if (bucket.publicOrPrivate === "private") {
+            // token不存在
             if (!token) {
-                throw new HttpException("访问私有空间文件需要token", 412)
+                throw new HttpException("访问私有空间文件需要token", 412);
             }
-            //请求的全路径，包含协议、域名、端口、查询字符串，需要URL解码
-            let fullUrl: string = decodeURI(req.protocol + "://" + req.get("host") + req.originalUrl)
-            //获取计算token时使用的url
+            // 请求的全路径，包含协议、域名、端口、查询字符串，需要URL解码
+            let fullUrl: string = decodeURI(req.protocol + "://" + req.get("host") + req.originalUrl);
+            // 获取计算token时使用的url
             if (imagePostProcessString) {
-                //存储图片处理字符串时需要包含它
-                fullUrl = fullUrl.substring(0, fullUrl.lastIndexOf("&token="))
+                // 存储图片处理字符串时需要包含它
+                fullUrl = fullUrl.substring(0, fullUrl.lastIndexOf("&token="));
             } else {
-                //不存在图片处理字符串时，包含？之前的路径
-                fullUrl = fullUrl.substring(0, fullUrl.lastIndexOf("?token="))
+                // 不存在图片处理字符串时，包含？之前的路径
+                fullUrl = fullUrl.substring(0, fullUrl.lastIndexOf("?token="));
             }
-            //根据空间配置、url验证token
-            this.tokenUtil.verify(fullUrl, bucket, token)
+            // 根据空间配置、url验证token
+            this.tokenUtil.verify(fullUrl, bucket, token);
         }
-        //解析图片处理字符串为对象
-        let imagePostProcessInfo: ImagePostProcessInfo
+        // 解析图片处理字符串为对象
+        let imagePostProcessInfo: ImagePostProcessInfo = {};
         if (imagePostProcessString) {
             try {
-                imagePostProcessInfo = JSON.parse(imagePostProcessString)
+                imagePostProcessInfo = JSON.parse(imagePostProcessString);
             } catch (err) {
-                throw new HttpException("JSON解析错误:" + err.toString(), 409)
+                throw new HttpException("JSON解析错误:" + err.toString(), 409);
             }
 
         }
-        //获取文件种类
-        let type: string = fileName.substring(fileName.lastIndexOf(".") + 1)
-        let kind: string = this.kindUtil.getKind(type)
+        // 获取文件种类
+        const type: string = fileName.substring(fileName.lastIndexOf(".") + 1);
+        const kind: string = this.kindUtil.getKind(type);
         if (kind === "image") {
-            //图片需要使用处理工具进行处理之后返回，得到处理之后的buffer
-            let buffer: Buffer = await this.imageProcessUtil.processAndOutput(bucket, realPath, imagePostProcessInfo)
-            //获取处理后图片元数据，主要为获取其类型，因为经过处理图片类型可能已经改变
-            let metadata: ImageMetadata = await this.imageProcessUtil.getMetadata(buffer)
-            //设置文件类型头信息
-            res.setHeader("Content-Type", mime.getType(metadata.format))
-            //不设置内容长度，会出现错误err_content_mismatch
-            //res.setHeader("Content-Length", Buffer.byteLength(buffer))
-            //私有空间
-            if (bucket.public_or_private === "private") {
-                //文件不缓存，因为有token，暂时这样处理，也可以设置一个缓存时间
-                res.setHeader("Cache-Control", [ "no-store", "no-cache" ])
+            // 图片需要使用处理工具进行处理之后返回，得到处理之后的buffer
+            const buffer: Buffer = await this.imageProcessUtil.processAndOutput(bucket, realPath, imagePostProcessInfo);
+            // 获取处理后图片元数据，主要为获取其类型，因为经过处理图片类型可能已经改变
+            const metadata: ImageMetadata = await this.imageProcessUtil.getMetadata(buffer);
+            // 设置文件类型头信息
+            res.setHeader("Content-Type", mime.getType(metadata.format));
+            // 不设置内容长度，会出现错误err_content_mismatch
+            // res.setHeader("Content-Length", Buffer.byteLength(buffer))
+            // 私有空间
+            if (bucket.publicOrPrivate === "private") {
+                // 文件不缓存，因为有token，暂时这样处理，也可以设置一个缓存时间
+                res.setHeader("Cache-Control", [ "no-store", "no-cache" ]);
             }
-            //文件默认显示在浏览器中，不下载，如果浏览器不支持文件类型，还是会下载
-            res.setHeader("Content-Disposition", "inline")
-            res.end(buffer)
+            // 文件默认显示在浏览器中，不下载，如果浏览器不支持文件类型，还是会下载
+            res.setHeader("Content-Disposition", "inline");
+            res.end(buffer);
         } else {
-            //其他类型暂不支持
+            // 其他类型暂不支持
         }
     }
 }

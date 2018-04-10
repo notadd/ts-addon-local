@@ -3,8 +3,8 @@ type Mutation{
     bucket(
         isPublic:Boolean,
         name:String,
-        token_expire:Int,
-        token_secret_key:String):ConfigData
+        tokenExpire:Int,
+        tokenSecretKey:String):ConfigData
 }
 
 #config return data
