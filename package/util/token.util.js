@@ -15,23 +15,23 @@ let TokenUtil = class TokenUtil {
     constructor() {
     }
     getToken(url, bucket) {
-        if (bucket.public_or_private === "public") {
+        if (bucket.publicOrPrivate === "public") {
             throw new Error("公有空间不需要token");
         }
-        let expire = Math.floor((+new Date()) / 1000) + bucket.token_expire;
-        let str = url + expire + bucket.token_secret_key;
-        let md5 = crypto.createHash("md5").update(str).digest("hex");
+        const expire = Math.floor((+new Date()) / 1000) + bucket.tokenExpire;
+        const str = url + expire + bucket.tokenSecretKey;
+        const md5 = crypto.createHash("md5").update(str).digest("hex");
         return md5 + expire;
     }
     verify(url, bucket, token) {
-        let expire = parseInt(token.substring(32));
-        let md5 = token.substring(0, 32);
-        let str = url + expire + bucket.token_secret_key;
-        let generateMd5 = crypto.createHash("md5").update(str).digest("hex");
+        const expire = parseInt(token.substring(32));
+        const md5 = token.substring(0, 32);
+        const str = url + expire + bucket.tokenSecretKey;
+        const generateMd5 = crypto.createHash("md5").update(str).digest("hex");
         if (md5 !== generateMd5) {
             throw new common_1.HttpException("token验证错误", 413);
         }
-        let now = Math.floor(+new Date() / 1000);
+        const now = Math.floor(+new Date() / 1000);
         if (now > expire) {
             throw new common_1.HttpException("token超时", 414);
         }

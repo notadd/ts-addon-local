@@ -19,6 +19,6 @@ export declare class FileService {
     private readonly videoRepository;
     private readonly bucketRepository;
     constructor(kindUtil: KindUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, fileRepository: Repository<File>, imageRepository: Repository<Image>, audioRepository: Repository<Audio>, videoRepository: Repository<Video>, bucketRepository: Repository<Bucket>);
-    saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<string>;
+    saveUploadFile(bucket: Bucket, file: UploadFile, obj: UploadForm): Promise<any>;
     getAll(data: any, bucket: Bucket): Promise<void>;
 }

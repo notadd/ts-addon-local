@@ -50,12 +50,12 @@ let FileController = class FileController {
     }
     download(headers, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { bucketName, fileName } = headers;
-            let realPath = path.resolve(__dirname, "../", "store", bucketName, fileName);
+            const { bucketName, fileName } = headers;
+            const realPath = path.resolve(__dirname, "../", "store", bucketName, fileName);
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("请求下载的文件不存在", 404);
             }
-            let buffer = yield this.fileUtil.read(realPath);
+            const buffer = yield this.fileUtil.read(realPath);
             res.setHeader("Content-Type", mime.getType(fileName));
             res.setHeader("Content-Length", Buffer.byteLength(buffer));
             res.setHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -65,13 +65,13 @@ let FileController = class FileController {
     }
     upload(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { uploadForm: obj, uploadFile: file } = body;
+            const { uploadForm: obj, uploadFile: file } = body;
             let url;
             try {
-                let bucket = yield this.bucketRepository.createQueryBuilder("bucket")
-                    .leftJoinAndSelect("bucket.image_config", "image_config")
-                    .leftJoinAndSelect("bucket.audio_config", "audio_config")
-                    .leftJoinAndSelect("bucket.video_config", "video_config")
+                const bucket = yield this.bucketRepository.createQueryBuilder("bucket")
+                    .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
+                    .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
+                    .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
                     .where("bucket.name = :name", { name: obj.bucketName })
                     .getOne();
                 if (!bucket) {
@@ -80,8 +80,8 @@ let FileController = class FileController {
                 if (file.name !== obj.rawName) {
                     throw new common_1.HttpException("上传文件名" + file.name + "与请求头中文件名" + obj.fileName + "不符", 411);
                 }
-                let { imagePreProcessString, contentSecret, tagsString, md5 } = obj;
-                let buffer = yield this.fileUtil.read(file.path);
+                const { imagePreProcessString, contentSecret, tagsString, md5 } = obj;
+                const buffer = yield this.fileUtil.read(file.path);
                 if (!(crypto.createHash("md5").update(buffer).digest("hex") === md5)) {
                     throw new common_1.HttpException("文件md5校验失败", 411);
                 }
@@ -102,22 +102,22 @@ let FileController = class FileController {
     }
     visit(param, query, res, req) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { bucketName, fileName } = param;
-            let { imagePostProcessString, token } = query;
-            let realPath = path.resolve(__dirname, "../", "store", bucketName, fileName);
+            const { bucketName, fileName } = param;
+            const { imagePostProcessString, token } = query;
+            const realPath = path.resolve(__dirname, "../", "store", bucketName, fileName);
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("指定文件不存在", 404);
             }
-            let bucket = yield this.bucketRepository.createQueryBuilder("bucket")
-                .leftJoinAndSelect("bucket.image_config", "image_config")
-                .leftJoinAndSelect("bucket.audio_config", "audio_config")
-                .leftJoinAndSelect("bucket.video_config", "video_config")
+            const bucket = yield this.bucketRepository.createQueryBuilder("bucket")
+                .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
+                .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
+                .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
                 .where("bucket.name = :name", { name: bucketName })
                 .getOne();
             if (!bucket) {
                 throw new common_1.HttpException("指定空间" + bucketName + "不存在", 401);
             }
-            if (bucket.public_or_private === "private") {
+            if (bucket.publicOrPrivate === "private") {
                 if (!token) {
                     throw new common_1.HttpException("访问私有空间文件需要token", 412);
                 }
@@ -130,7 +130,7 @@ let FileController = class FileController {
                 }
                 this.tokenUtil.verify(fullUrl, bucket, token);
             }
-            let imagePostProcessInfo;
+            let imagePostProcessInfo = {};
             if (imagePostProcessString) {
                 try {
                     imagePostProcessInfo = JSON.parse(imagePostProcessString);
@@ -139,13 +139,13 @@ let FileController = class FileController {
                     throw new common_1.HttpException("JSON解析错误:" + err.toString(), 409);
                 }
             }
-            let type = fileName.substring(fileName.lastIndexOf(".") + 1);
-            let kind = this.kindUtil.getKind(type);
+            const type = fileName.substring(fileName.lastIndexOf(".") + 1);
+            const kind = this.kindUtil.getKind(type);
             if (kind === "image") {
-                let buffer = yield this.imageProcessUtil.processAndOutput(bucket, realPath, imagePostProcessInfo);
-                let metadata = yield this.imageProcessUtil.getMetadata(buffer);
+                const buffer = yield this.imageProcessUtil.processAndOutput(bucket, realPath, imagePostProcessInfo);
+                const metadata = yield this.imageProcessUtil.getMetadata(buffer);
                 res.setHeader("Content-Type", mime.getType(metadata.format));
-                if (bucket.public_or_private === "private") {
+                if (bucket.publicOrPrivate === "private") {
                     res.setHeader("Cache-Control", ["no-store", "no-cache"]);
                 }
                 res.setHeader("Content-Disposition", "inline");

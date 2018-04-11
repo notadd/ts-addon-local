@@ -24,7 +24,7 @@ let FileUtil = class FileUtil {
     }
     write(path, buffer) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ex;
+            let ex = "";
             yield new Promise((resolver, reject) => {
                 fs.writeFile(path, buffer, (err) => {
                     if (err) {
@@ -42,7 +42,7 @@ let FileUtil = class FileUtil {
     }
     read(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ex, result;
+            let ex = "", result = new Buffer(0);
             yield new Promise((resolver, reject) => {
                 fs.readFile(path, (err, buffer) => {
                     if (err) {
@@ -62,7 +62,7 @@ let FileUtil = class FileUtil {
     }
     delete(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ex;
+            let ex = "";
             yield new Promise((resolver, reject) => {
                 fs.unlink(path, (err) => {
                     if (err) {
@@ -81,7 +81,7 @@ let FileUtil = class FileUtil {
     deleteIfExist(path) {
         return __awaiter(this, void 0, void 0, function* () {
             if (fs.existsSync(path)) {
-                let ex;
+                let ex = "";
                 yield new Promise((resolver, reject) => {
                     fs.unlink(path, (err) => {
                         if (err) {
@@ -101,7 +101,7 @@ let FileUtil = class FileUtil {
     size(path) {
         return __awaiter(this, void 0, void 0, function* () {
             if (fs.existsSync(path)) {
-                let ex;
+                let ex = "";
                 let size;
                 yield new Promise((resolver, reject) => {
                     fs.stat(path, (err, stats) => {
@@ -120,7 +120,7 @@ let FileUtil = class FileUtil {
                 return size;
             }
             else {
-                return null;
+                return undefined;
             }
         });
     }
@@ -129,7 +129,7 @@ let FileUtil = class FileUtil {
     }
     mkdir(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ex;
+            let ex = "";
             yield new Promise((resolver, reject) => {
                 fs.mkdir(path, (err) => {
                     if (err) {

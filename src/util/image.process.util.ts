@@ -619,7 +619,7 @@ export class ImageProcessUtil {
             const shuiyinTempPath = path.resolve(__dirname, "../", "store", "temp", "shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
             await this.fileUtil.write(tempPath, buffer);
             await this.fileUtil.write(shuiyinTempPath, shuiyinBuffer);
-            let ex: HttpException;
+            let ex: any = "";
             await new Promise((resolve, reject) => {
                 gm(tempPath).composite(shuiyinTempPath).gravity(gravity).geometry("+" + x + "+" + y).dissolve(opacity).write(tempPath, err => {
                     if (err) reject(new HttpException("为图片添加水印出现错误:" + err.toString(), 407));
@@ -635,7 +635,7 @@ export class ImageProcessUtil {
             await this.fileUtil.delete(shuiyinTempPath);
             return tempPath;
         } else {
-            return undefineds as any;
+            return undefined as any;
         }
     }
 
@@ -646,7 +646,7 @@ export class ImageProcessUtil {
         }
         const buffer: Buffer = await instance.toBuffer();
         const tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "." + metadata.format);
-        let ex: HttpException;
+        let ex: any = "";
         // 根据绝对路径保存图片
         await this.fileUtil.write(tempPath, buffer);
         await new Promise((resolve, reject) => {

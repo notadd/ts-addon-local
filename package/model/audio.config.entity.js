@@ -29,13 +29,13 @@ __decorate([
     __metadata("design:type", String)
 ], AudioConfig.prototype, "format", void 0);
 __decorate([
-    typeorm_1.OneToOne(type => bucket_entity_1.Bucket, bucket => bucket.audio_config),
+    typeorm_1.OneToOne(type => bucket_entity_1.Bucket, bucket => bucket.audioConfig),
     typeorm_1.JoinColumn(),
     __metadata("design:type", bucket_entity_1.Bucket)
 ], AudioConfig.prototype, "bucket", void 0);
 AudioConfig = __decorate([
     typeorm_1.Entity({
-        name: "audio_config"
+        name: "audioConfig"
     })
 ], AudioConfig);
 exports.AudioConfig = AudioConfig;

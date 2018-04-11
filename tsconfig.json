@@ -12,11 +12,12 @@
         "removeComments": true,
         "strict": true,
         "strictPropertyInitialization": false,
-        "target": "ES2015"
+        "target": "ES2015",
+        "outDir": "package"
     },
     "include": [
-        "*.ts",
-        "**/*.ts"
+        "./src/*.ts",
+        "./src/**/*.ts"
     ],
     "exclude": [
         "./**/*.spec.ts"

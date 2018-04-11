@@ -36,26 +36,28 @@ let ConfigResolver = class ConfigResolver {
         this.kindUtil = kindUtil;
         this.configService = configService;
         this.bucketRepository = bucketRepository;
-        this.image_format = new Set(["raw", "webp_damage", "webp_undamage"]);
-        this.audio_format = new Set(["raw", "mp3", "aac"]);
-        this.video_format = new Set(["raw", "vp9", "h264", "h265"]);
-        this.video_resolution = new Set(["raw", "p1080", "p720", "p480"]);
+        this._imageFormat = new Set(["raw", "webp_damage", "webp_undamage"]);
+        this._audioFormat = new Set(["raw", "mp3", "aac"]);
+        this._videoFormat = new Set(["raw", "vp9", "h264", "h265"]);
+        this._videoResolution = new Set(["raw", "p1080", "p720", "p480"]);
         this.gravity = new Set(["northwest", "north", "northeast", "west", "center", "east", "southwest", "south", "southeast"]);
     }
     bucket(req, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { isPublic, name, token_expire, token_secret_key } = body;
+            const { isPublic, name, tokenExpire, tokenSecretKey } = body;
             if (isPublic === undefined || isPublic === null || !name) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
             if (isPublic !== true && isPublic !== false) {
                 throw new common_1.HttpException("isPublic参数不正确", 400);
             }
-            if (!isPublic && (!token_expire || !token_secret_key)) {
-                throw new common_1.HttpException("缺少参数", 400);
-            }
-            if (!isPublic && (token_expire < 0 || token_expire > 1800)) {
-                throw new common_1.HttpException("token超时不正确", 400);
+            if (!isPublic) {
+                if (!tokenExpire || !tokenSecretKey) {
+                    throw new common_1.HttpException("缺少参数", 400);
+                }
+                else if (tokenExpire < 0 || tokenExpire > 1800) {
+                    throw new common_1.HttpException("token超时不正确", 400);
+                }
             }
             yield this.configService.saveBucketConfig(body);
             return { code: 200, message: "空间配置保存成功" };
@@ -63,11 +65,11 @@ let ConfigResolver = class ConfigResolver {
     }
     imageFormat(req, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let format = body.format;
-            if (format == undefined || format.length == 0) {
+            const format = body.format;
+            if (format === undefined || format.length === 0) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
-            if (!this.image_format.has(format)) {
+            if (!this._imageFormat.has(format)) {
                 throw new common_1.HttpException("保存格式不正确", 400);
             }
             yield this.configService.saveImageFormat(body);
@@ -76,7 +78,7 @@ let ConfigResolver = class ConfigResolver {
     }
     enableImageWatermark(req, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let enable = body.enable;
+            const enable = body.enable;
             if (enable === null || enable === undefined) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
@@ -89,9 +91,9 @@ let ConfigResolver = class ConfigResolver {
     }
     imageWatermark(req, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let temp_path;
+            let tempPath = "";
             try {
-                let { name, gravity, opacity, x, y, ws } = body;
+                const { name, gravity, opacity, x, y, ws } = body;
                 if (!name || !body.base64 || !gravity || (opacity !== 0 && !opacity) || (x !== 0 && !x) || (y !== 0 && !y) || (ws !== 0 && !ws)) {
                     throw new common_1.HttpException("缺少参数", 400);
                 }
@@ -123,12 +125,12 @@ let ConfigResolver = class ConfigResolver {
                 }
                 else {
                 }
-                temp_path = __dirname + "/" + name;
-                yield this.fileUtil.write(temp_path, Buffer.from(body.base64, "base64"));
+                tempPath = __dirname + "/" + name;
+                yield this.fileUtil.write(tempPath, Buffer.from(body.base64, "base64"));
                 delete body.base64;
-                let file = {
-                    name: name,
-                    path: temp_path
+                const file = {
+                    name,
+                    path: tempPath
                 };
                 if (!this.kindUtil.isImage(file.name.substr(file.name.lastIndexOf(".") + 1))) {
                     throw new common_1.HttpException("不允许的水印图片类型", 400);
@@ -139,8 +141,8 @@ let ConfigResolver = class ConfigResolver {
                 throw err;
             }
             finally {
-                if (temp_path) {
-                    yield this.fileUtil.deleteIfExist(temp_path);
+                if (tempPath) {
+                    yield this.fileUtil.deleteIfExist(tempPath);
                 }
             }
             return { code: 200, message: "图片水印配置成功" };
@@ -148,11 +150,11 @@ let ConfigResolver = class ConfigResolver {
     }
     audioFormat(req, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let format = body.format;
+            const format = body.format;
             if (!format) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
-            if (format != "raw" && format != "mp3" && format != "aac") {
+            if (format !== "raw" && format !== "mp3" && format !== "aac") {
                 throw new common_1.HttpException("音频保存格式不正确", 400);
             }
             yield this.configService.saveAudioFormat(body);
@@ -161,14 +163,14 @@ let ConfigResolver = class ConfigResolver {
     }
     videoFormat(req, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { format, resolution } = body;
+            const { format, resolution } = body;
             if (!format || !resolution) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
-            if (format != "raw" && format != "vp9" && format != "h264" && format != "h265") {
+            if (format !== "raw" && format !== "vp9" && format !== "h264" && format !== "h265") {
                 throw new common_1.HttpException("编码格式不正确", 400);
             }
-            if (resolution != "raw" && resolution != "p1080" && resolution != "p720" && resolution != "p480") {
+            if (resolution !== "raw" && resolution !== "p1080" && resolution !== "p720" && resolution !== "p480") {
                 throw new common_1.HttpException("分辨率格式不正确", 400);
             }
             yield this.configService.saveVideoFormat(body);
@@ -177,8 +179,8 @@ let ConfigResolver = class ConfigResolver {
     }
     buckets(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            let buckets = yield this.bucketRepository.createQueryBuilder("bucket")
-                .select(["bucket.id", "bucket.public_or_private", "bucket.name"])
+            const buckets = yield this.bucketRepository.createQueryBuilder("bucket")
+                .select(["bucket.id", "bucket.publicOrPrivate", "bucket.name"])
                 .getMany();
             if (buckets.length !== 2) {
                 throw new common_1.HttpException("空间配置不存在", 401);

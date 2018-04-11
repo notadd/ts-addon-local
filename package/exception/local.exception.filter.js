@@ -7,20 +7,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const common_2 = require("@nestjs/common");
 let LocalExceptionFilter = class LocalExceptionFilter {
     catch(exception, response) {
-        let status = exception.getStatus();
-        let message = exception.getResponse();
+        const status = exception.getStatus();
+        const message = exception.getResponse();
         response
             .status(status)
             .json({
             code: status,
-            message: message
+            message
         });
     }
 };
 LocalExceptionFilter = __decorate([
-    common_1.Catch(common_2.HttpException)
+    common_1.Catch(common_1.HttpException)
 ], LocalExceptionFilter);
 exports.LocalExceptionFilter = LocalExceptionFilter;

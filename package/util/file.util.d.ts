@@ -5,7 +5,7 @@ export declare class FileUtil {
     read(path: string): Promise<Buffer>;
     delete(path: string): Promise<void>;
     deleteIfExist(path: string): Promise<void>;
-    size(path: string): Promise<number>;
+    size(path: string): Promise<any>;
     exist(path: string): boolean;
     mkdir(path: string): Promise<void>;
 }

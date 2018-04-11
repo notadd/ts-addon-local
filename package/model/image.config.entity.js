@@ -30,69 +30,69 @@ __decorate([
 ], ImageConfig.prototype, "format", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_enable",
+        name: "watermarkEnable",
         type: "smallint",
         nullable: true
     }),
     __metadata("design:type", Number)
-], ImageConfig.prototype, "watermark_enable", void 0);
+], ImageConfig.prototype, "watermarkEnable", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_save_key",
+        name: "watermarkSaveKey",
         type: "varchar",
         length: 200,
         nullable: true
     }),
     __metadata("design:type", String)
-], ImageConfig.prototype, "watermark_save_key", void 0);
+], ImageConfig.prototype, "watermarkSaveKey", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_gravity",
+        name: "watermarkGravity",
         type: "varchar",
         nullable: true
     }),
     __metadata("design:type", String)
-], ImageConfig.prototype, "watermark_gravity", void 0);
+], ImageConfig.prototype, "watermarkGravity", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_x",
+        name: "watermarkX",
         type: "integer",
         nullable: true
     }),
     __metadata("design:type", Number)
-], ImageConfig.prototype, "watermark_x", void 0);
+], ImageConfig.prototype, "watermarkX", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_y",
+        name: "watermarkY",
         type: "integer",
         nullable: true
     }),
     __metadata("design:type", Number)
-], ImageConfig.prototype, "watermark_y", void 0);
+], ImageConfig.prototype, "watermarkY", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_opacity",
+        name: "watermarkOpacity",
         type: "integer",
         nullable: true
     }),
     __metadata("design:type", Number)
-], ImageConfig.prototype, "watermark_opacity", void 0);
+], ImageConfig.prototype, "watermarkOpacity", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "watermark_ws",
+        name: "watermarkWs",
         type: "integer",
         nullable: true
     }),
     __metadata("design:type", Number)
-], ImageConfig.prototype, "watermark_ws", void 0);
+], ImageConfig.prototype, "watermarkWs", void 0);
 __decorate([
-    typeorm_1.OneToOne(type => bucket_entity_1.Bucket, bucket => bucket.image_config),
+    typeorm_1.OneToOne(type => bucket_entity_1.Bucket, bucket => bucket.imageConfig),
     typeorm_1.JoinColumn(),
     __metadata("design:type", bucket_entity_1.Bucket)
 ], ImageConfig.prototype, "bucket", void 0);
 ImageConfig = __decorate([
     typeorm_1.Entity({
-        name: "image_config"
+        name: "imageConfig"
     })
 ], ImageConfig);
 exports.ImageConfig = ImageConfig;

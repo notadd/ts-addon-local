@@ -31,7 +31,7 @@ export class ConfigService {
     }
 
     async saveBucketConfig(body: BucketConfig): Promise<void> {
-        let exist: Bucket;
+        let exist: Bucket|undefined;
         const newBucket: any = {
             name: body.name,
         };
@@ -158,7 +158,7 @@ export class ConfigService {
             image.width = metadata.width;
             image.height = metadata.height;
             image.size = metadata.size;
-            const isExist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: buckets[i].id });
+            const isExist: Image|undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: buckets[i].id });
             // 只有指定路径图片不存在时才会保存
             if (!isExist) {
                 try {

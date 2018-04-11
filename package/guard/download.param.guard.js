@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 let DownloadParamGuard = class DownloadParamGuard {
     canActivate(req, context) {
-        let { bucketName, fileName } = req.headers;
+        const { bucketName, fileName } = req.headers;
         if (!bucketName) {
             throw new common_1.HttpException("缺少参数bucketName", 400);
         }

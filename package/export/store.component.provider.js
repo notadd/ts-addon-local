@@ -42,13 +42,13 @@ let StoreComponent = class StoreComponent {
             if (!bucketName || !name || !type) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
-            let bucket = yield this.bucketRepository.findOne({ name: bucketName });
+            const bucket = yield this.bucketRepository.findOne({ name: bucketName });
             if (!bucket) {
                 throw new common_1.HttpException("指定空间" + bucketName + "不存在", 401);
             }
-            let kind = this.kindUtil.getKind(type);
+            const kind = this.kindUtil.getKind(type);
             if (kind === "image") {
-                let image = yield this.imageRepository.findOne({ name, bucketId: bucket.id });
+                const image = yield this.imageRepository.findOne({ name, bucketId: bucket.id });
                 if (!image) {
                     throw new common_1.HttpException("文件" + name + "不存在于数据库中", 404);
                 }
@@ -56,7 +56,7 @@ let StoreComponent = class StoreComponent {
             }
             else {
             }
-            let realPath = path.resolve(__dirname, "../", "store", bucketName, name + "." + type);
+            const realPath = path.resolve(__dirname, "../", "store", bucketName, name + "." + type);
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("要删除的文件不存在", 404);
             }
@@ -65,26 +65,26 @@ let StoreComponent = class StoreComponent {
     }
     upload(bucketName, rawName, base64, imagePreProcessInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            let tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "" + rawName);
+            const tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "" + rawName);
             if (!bucketName || !rawName || !base64) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
             imagePreProcessInfo = !imagePreProcessInfo ? {} : imagePreProcessInfo;
-            let bucket = yield this.bucketRepository.createQueryBuilder("bucket")
-                .leftJoinAndSelect("bucket.image_config", "image_config")
+            const bucket = yield this.bucketRepository.createQueryBuilder("bucket")
+                .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
                 .where("bucket.name = :name", { name: bucketName })
                 .getOne();
             if (!bucket) {
                 throw new common_1.HttpException("指定空间" + bucketName + "不存在", 401);
             }
             yield this.fileUtil.write(tempPath, Buffer.from(base64, "base64"));
-            let metadata;
-            let type = rawName.substring(rawName.lastIndexOf(".") + 1);
-            let kind = this.kindUtil.getKind(type);
+            let metadata = {};
+            const type = rawName.substring(rawName.lastIndexOf(".") + 1);
+            const kind = this.kindUtil.getKind(type);
             try {
                 if (kind === "image") {
-                    let imagePostProcessInfo = imagePreProcessInfo;
-                    let format = bucket.image_config.format || "raw";
+                    const imagePostProcessInfo = imagePreProcessInfo;
+                    const format = bucket.imageConfig.format || "raw";
                     if (format === "raw") {
                         imagePostProcessInfo.strip = true;
                         imagePostProcessInfo.watermark = false;
@@ -101,15 +101,15 @@ let StoreComponent = class StoreComponent {
                         imagePostProcessInfo.watermark = false;
                     }
                     metadata = yield this.imageProcessUtil.processAndStore(tempPath, bucket, imagePostProcessInfo);
-                    let image = new image_entity_1.Image();
+                    const image = new image_entity_1.Image();
                     image.bucket = bucket;
-                    image.raw_name = rawName;
+                    image.rawName = rawName;
                     image.name = metadata.name;
                     image.type = metadata.format;
                     image.width = metadata.width;
                     image.height = metadata.height;
                     image.size = metadata.size;
-                    let isExist = yield this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
+                    const isExist = yield this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
                     if (!isExist) {
                         try {
                             yield this.imageRepository.save(image);
@@ -137,26 +137,26 @@ let StoreComponent = class StoreComponent {
             if (!bucketName || !name || !type || !req || !req.protocol || !req.get("host")) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
-            let bucket = yield this.bucketRepository.findOne({ name: bucketName });
+            const bucket = yield this.bucketRepository.findOne({ name: bucketName });
             if (!bucket) {
                 throw new common_1.HttpException("指定空间" + bucketName + "不存在", 401);
             }
             let url = req.protocol + "://" + req.get("host") + "/local/file/visit";
-            let kind = this.kindUtil.getKind(type);
+            const kind = this.kindUtil.getKind(type);
             if (kind === "image") {
-                let image = yield this.imageRepository.findOne({ name, bucketId: bucket.id });
+                const image = yield this.imageRepository.findOne({ name, bucketId: bucket.id });
                 if (!image) {
                     throw new common_1.HttpException("指定图片" + name + "." + type + "不存在", 404);
                 }
                 url += "/" + bucketName + "/" + name + "." + type;
                 if (imagePostProcessInfo) {
                     url += "?imagePostProcessString=" + JSON.stringify(imagePostProcessInfo);
-                    if (bucket.public_or_private === "private") {
+                    if (bucket.publicOrPrivate === "private") {
                         url += "&token=" + this.tokenUtil.getToken(url, bucket);
                     }
                 }
                 else {
-                    if (bucket.public_or_private === "private") {
+                    if (bucket.publicOrPrivate === "private") {
                         url += "?token=" + this.tokenUtil.getToken(url, bucket);
                     }
                 }
