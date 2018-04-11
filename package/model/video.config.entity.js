@@ -37,13 +37,13 @@ __decorate([
     __metadata("design:type", String)
 ], VideoConfig.prototype, "resolution", void 0);
 __decorate([
-    typeorm_1.OneToOne(type => bucket_entity_1.Bucket, bucket => bucket.video_config),
+    typeorm_1.OneToOne(type => bucket_entity_1.Bucket, bucket => bucket.videoConfig),
     typeorm_1.JoinColumn(),
     __metadata("design:type", bucket_entity_1.Bucket)
 ], VideoConfig.prototype, "bucket", void 0);
 VideoConfig = __decorate([
     typeorm_1.Entity({
-        name: "video_config"
+        name: "videoConfig"
     })
 ], VideoConfig);
 exports.VideoConfig = VideoConfig;

@@ -4,6 +4,6 @@ export interface UploadProcessBody {
     md5: string;
     contentName: string;
     contentSecret?: string;
-    tags?: string[];
+    tags?: Array<string>;
     imagePreProcessInfo?: ImagePreProcessInfo;
 }

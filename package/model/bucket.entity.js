@@ -29,14 +29,14 @@ __decorate([
 ], Bucket.prototype, "id", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "public_or_private",
+        name: "publicOrPrivate",
         type: "varchar",
         length: 20,
         nullable: false,
         unique: true
     }),
     __metadata("design:type", String)
-], Bucket.prototype, "public_or_private", void 0);
+], Bucket.prototype, "publicOrPrivate", void 0);
 __decorate([
     typeorm_1.Column({
         name: "name",
@@ -48,21 +48,21 @@ __decorate([
 ], Bucket.prototype, "name", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "token_secret_key",
+        name: "tokenSecretKey",
         type: "varchar",
         length: 250,
         nullable: true
     }),
     __metadata("design:type", String)
-], Bucket.prototype, "token_secret_key", void 0);
+], Bucket.prototype, "tokenSecretKey", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "token_expire",
+        name: "tokenExpire",
         type: "integer",
         nullable: true
     }),
     __metadata("design:type", Number)
-], Bucket.prototype, "token_expire", void 0);
+], Bucket.prototype, "tokenExpire", void 0);
 __decorate([
     typeorm_1.OneToOne(type => image_config_entity_1.ImageConfig, imageConfig => imageConfig.bucket, {
         cascadeInsert: true,
@@ -71,7 +71,7 @@ __decorate([
         lazy: false
     }),
     __metadata("design:type", image_config_entity_1.ImageConfig)
-], Bucket.prototype, "image_config", void 0);
+], Bucket.prototype, "imageConfig", void 0);
 __decorate([
     typeorm_1.OneToOne(type => audio_config_entity_1.AudioConfig, audioConfig => audioConfig.bucket, {
         cascadeInsert: true,
@@ -80,7 +80,7 @@ __decorate([
         lazy: false
     }),
     __metadata("design:type", audio_config_entity_1.AudioConfig)
-], Bucket.prototype, "audio_config", void 0);
+], Bucket.prototype, "audioConfig", void 0);
 __decorate([
     typeorm_1.OneToOne(type => video_config_entity_1.VideoConfig, videoConfig => videoConfig.bucket, {
         cascadeInsert: true,
@@ -89,7 +89,7 @@ __decorate([
         lazy: false
     }),
     __metadata("design:type", video_config_entity_1.VideoConfig)
-], Bucket.prototype, "video_config", void 0);
+], Bucket.prototype, "videoConfig", void 0);
 __decorate([
     typeorm_1.OneToMany(type => file_entity_1.File, file => file.bucket, {
         cascadeInsert: true,

@@ -44,19 +44,19 @@ let FileService = class FileService {
     }
     saveUploadFile(bucket, file, obj) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { imagePreProcessString, contentSecret, tagsString, md5, bucketName, rawName } = obj;
-            let imageProcessInfo, tags;
+            const { imagePreProcessString, contentSecret, tagsString, md5, bucketName, rawName } = obj;
+            let imageProcessInfo = {}, tags = {};
             try {
                 if (tagsString) {
                     tags = JSON.parse(tagsString);
                 }
                 if (imagePreProcessString) {
                     imageProcessInfo = JSON.parse(imagePreProcessString);
-                    if (bucket.image_config.format === "webp_damage") {
+                    if (bucket.imageConfig.format === "webp_damage") {
                         imageProcessInfo.format = "webp";
                         imageProcessInfo.lossless = false;
                     }
-                    else if (bucket.image_config.format === "webp_undamage") {
+                    else if (bucket.imageConfig.format === "webp_undamage") {
                         imageProcessInfo.format = "webp";
                         imageProcessInfo.lossless = true;
                     }
@@ -69,17 +69,17 @@ let FileService = class FileService {
             catch (err) {
                 throw new common_1.HttpException("JSON解析错误:" + err.toString(), 405);
             }
-            let metadata = yield this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo);
-            let type = rawName.substring(rawName.lastIndexOf(".") + 1);
-            let kind = this.kindUtil.getKind(type);
+            const metadata = yield this.imageProcessUtil.processAndStore(file.path, bucket, imageProcessInfo);
+            const type = rawName.substring(rawName.lastIndexOf(".") + 1);
+            const kind = this.kindUtil.getKind(type);
             if (kind === "image") {
-                let exist = yield this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
+                const exist = yield this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
                 if (exist) {
                     return "/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
                 }
-                let image = new image_entity_1.Image();
+                const image = new image_entity_1.Image();
                 image.bucket = bucket;
-                image.raw_name = file.name;
+                image.rawName = file.name;
                 image.name = metadata.name;
                 image.size = metadata.size;
                 image.type = metadata.format;
@@ -89,7 +89,7 @@ let FileService = class FileService {
                     image.tags = tags;
                 }
                 if (contentSecret) {
-                    image.content_secret = contentSecret;
+                    image.contentSecret = contentSecret;
                 }
                 try {
                     yield this.imageRepository.save(image);
@@ -110,15 +110,13 @@ let FileService = class FileService {
             data.audios = yield bucket.audios;
             data.videos = yield bucket.videos;
             data.documents = yield bucket.documents;
-            let tokenUtil = this.tokenUtil;
-            let addUrl = function (value) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    value.url = "/" + bucket.name + "/" + value.name + "." + value.type;
-                    if (bucket.public_or_private === "private") {
-                        value.url += "?token=" + (yield tokenUtil.getToken(data.baseUrl + value.url, bucket));
-                    }
-                });
-            };
+            const tokenUtil = this.tokenUtil;
+            const addUrl = (value) => __awaiter(this, void 0, void 0, function* () {
+                value.url = "/" + bucket.name + "/" + value.name + "." + value.type;
+                if (bucket.publicOrPrivate === "private") {
+                    value.url += "?token=" + (yield tokenUtil.getToken(data.baseUrl + value.url, bucket));
+                }
+            });
             yield data.files.forEach(addUrl);
             yield data.images.forEach(addUrl);
             yield data.audios.forEach(addUrl);

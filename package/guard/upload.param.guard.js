@@ -19,11 +19,11 @@ const formidable = require("formidable");
 let UploadParamGuard = class UploadParamGuard {
     canActivate(req, context) {
         return __awaiter(this, void 0, void 0, function* () {
-            let file, obj;
-            let ex;
+            let file = {}, obj = {};
+            let ex = "";
             yield new Promise((resolve, reject) => {
-                let form = new formidable.IncomingForm();
-                form.parse(req, function (err, fields, files) {
+                const form = new formidable.IncomingForm();
+                form.parse(req, (err, fields, files) => {
                     if (err) {
                         reject(new common_1.HttpException("上传文件请求解析错误:" + err.toString(), 402));
                     }

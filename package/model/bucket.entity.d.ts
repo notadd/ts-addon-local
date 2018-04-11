@@ -8,16 +8,16 @@ import { Video } from "./video.entity";
 import { VideoConfig } from "./video.config.entity";
 export declare class Bucket {
     id: number;
-    public_or_private: string;
+    publicOrPrivate: string;
     name: string;
-    token_secret_key: string;
-    token_expire: number;
-    image_config: ImageConfig;
-    audio_config: AudioConfig;
-    video_config: VideoConfig;
-    files?: Promise<File[]>;
-    images?: Promise<Image[]>;
-    audios?: Promise<Audio[]>;
-    videos?: Promise<Video[]>;
-    documents?: Promise<Document[]>;
+    tokenSecretKey: string;
+    tokenExpire: number;
+    imageConfig: ImageConfig;
+    audioConfig: AudioConfig;
+    videoConfig: VideoConfig;
+    files?: Promise<Array<File>>;
+    images?: Promise<Array<Image>>;
+    audios?: Promise<Array<Audio>>;
+    videos?: Promise<Array<Video>>;
+    documents?: Promise<Array<Document>>;
 }

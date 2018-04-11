@@ -9,10 +9,10 @@ export class UploadParamGuard implements CanActivate {
     async canActivate(req, context: ExecutionContext): Promise<boolean> {
         // 解析from-data请求，获取上传表单中文件、其他字段
         let file: UploadFile = {} as any, obj: UploadForm = {} as any;
-        let ex: HttpException;
+        let ex: any = "";
         await new Promise((resolve, reject) => {
             const form = new formidable.IncomingForm();
-            form.parse(req, function (err, fields, files) {
+            form.parse(req, (err, fields, files) => {
                 if (err) {
                     reject(new HttpException("上传文件请求解析错误:" + err.toString(), 402));
                 }

@@ -59,7 +59,7 @@ export class FileService {
         const type: string = rawName.substring(rawName.lastIndexOf(".") + 1);
         const kind: string = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const exist: Image = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
+            const exist: Image|undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
             // 如果处理后得到文件已存在，不保存，正确返回
             if (exist) {
                 return "/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
@@ -98,7 +98,7 @@ export class FileService {
         data.documents = await bucket.documents;
 
         const tokenUtil = this.tokenUtil;
-        const addUrl = async function (value) {
+        const addUrl = async (value) => {
             value.url = "/" + bucket.name + "/" + value.name + "." + value.type;
             if (bucket.publicOrPrivate === "private") {
                 value.url += "?token=" + await tokenUtil.getToken(data.baseUrl + value.url, bucket);

@@ -9,7 +9,7 @@ export class FileUtil {
     }
 
     async write(path: string, buffer: Buffer): Promise<void> {
-        let ex: HttpException;
+        let ex: any = "";
         await new Promise((resolver, reject) => {
             fs.writeFile(path, buffer, (err) => {
                 if (err) {
@@ -26,7 +26,7 @@ export class FileUtil {
     }
 
     async read(path: string): Promise<Buffer> {
-        let ex: HttpException, result: Buffer = new Buffer(0);
+        let ex: any = "", result: Buffer = new Buffer(0);
         await new Promise((resolver, reject) => {
             fs.readFile(path, (err, buffer) => {
                 if (err) {
@@ -45,7 +45,7 @@ export class FileUtil {
     }
 
     async delete(path: string): Promise<void> {
-        let ex: HttpException;
+        let ex: any = "";
         await new Promise((resolver, reject) => {
             fs.unlink(path, (err) => {
                 if (err) {
@@ -63,7 +63,7 @@ export class FileUtil {
 
     async deleteIfExist(path: string): Promise<void> {
         if (fs.existsSync(path)) {
-            let ex: HttpException;
+            let ex: any = "";
             await new Promise((resolver, reject) => {
                 fs.unlink(path, (err) => {
                     if (err) {
@@ -83,7 +83,7 @@ export class FileUtil {
     // 获取文件状态，一般只有一个size能言用
     async size(path: string): Promise<any> {
         if (fs.existsSync(path)) {
-            let ex: HttpException;
+            let ex: any = "";
             let size;
             await new Promise((resolver, reject) => {
                 fs.stat(path, (err, stats) => {
@@ -110,7 +110,7 @@ export class FileUtil {
     }
 
     async mkdir(path: string): Promise<void> {
-        let ex: HttpException;
+        let ex: any = "";
         await new Promise((resolver, reject) => {
             fs.mkdir(path, (err) => {
                 if (err) {

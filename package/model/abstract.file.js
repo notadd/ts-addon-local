@@ -21,13 +21,13 @@ __decorate([
 ], AbstractFile.prototype, "id", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "raw_name",
+        name: "rawName",
         type: "varchar",
         length: 50,
         nullable: false
     }),
     __metadata("design:type", String)
-], AbstractFile.prototype, "raw_name", void 0);
+], AbstractFile.prototype, "rawName", void 0);
 __decorate([
     typeorm_1.Column({
         name: "tags",
@@ -64,25 +64,25 @@ __decorate([
 ], AbstractFile.prototype, "size", void 0);
 __decorate([
     typeorm_1.Column({
-        name: "content_secret",
+        name: "contentSecret",
         type: "varchar",
         length: "50",
         nullable: true
     }),
     __metadata("design:type", String)
-], AbstractFile.prototype, "content_secret", void 0);
+], AbstractFile.prototype, "contentSecret", void 0);
 __decorate([
     typeorm_1.CreateDateColumn({
-        name: "create_date",
+        name: "createDate",
         type: "date"
     }),
     __metadata("design:type", Date)
-], AbstractFile.prototype, "create_date", void 0);
+], AbstractFile.prototype, "createDate", void 0);
 __decorate([
     typeorm_1.UpdateDateColumn({
-        name: "update_date",
+        name: "updateDate",
         type: "date"
     }),
     __metadata("design:type", Date)
-], AbstractFile.prototype, "update_date", void 0);
+], AbstractFile.prototype, "updateDate", void 0);
 exports.AbstractFile = AbstractFile;

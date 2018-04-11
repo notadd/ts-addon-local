@@ -98,7 +98,7 @@ export class FileController {
         // 这里使用trycatch块主要是为了不论抛出神码异常，上传的临时文件都会被删除，最后异常仍旧会被过滤器处理
         try {
             // 这里需要将图片、音频、视频配置关联查找出来，后面保存文件预处理要使用
-            const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+            const bucket: any = await this.bucketRepository.createQueryBuilder("bucket")
                 .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
                 .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
                 .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
@@ -146,7 +146,7 @@ export class FileController {
             throw new HttpException("指定文件不存在", 404);
         }
         // 判断空间是否存在，由于要判断公有、私有空间，这里需要查询出空间
-        const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+        const bucket: any = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
             .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
             .leftJoinAndSelect("bucket.videoConfig", "videoConfig")

@@ -35,10 +35,10 @@ let ImageProcessUtil = class ImageProcessUtil {
     }
     getMetadata(pathOrBuffer) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { format, width, height } = yield sharp(pathOrBuffer).metadata();
+            const { format, width, height } = yield sharp(pathOrBuffer).metadata();
             let size, name;
             if (typeof pathOrBuffer === "string") {
-                let buffer = yield this.fileUtil.read(pathOrBuffer);
+                const buffer = yield this.fileUtil.read(pathOrBuffer);
                 size = yield this.fileUtil.size(pathOrBuffer);
                 name = crypto.createHash("sha256").update(buffer).digest("hex");
             }
@@ -57,33 +57,33 @@ let ImageProcessUtil = class ImageProcessUtil {
     }
     processAndStore(imagePath, bucket, imageProcessInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            let buffer = yield this.preProcess(imagePath, bucket, imageProcessInfo);
-            let metadata = yield this.getMetadata(buffer);
-            let absolute_path = path.resolve(__dirname, "../", "store", bucket.name, metadata.name + "." + metadata.format);
-            yield this.fileUtil.write(absolute_path, buffer);
+            const buffer = yield this.preProcess(imagePath, bucket, imageProcessInfo);
+            const metadata = yield this.getMetadata(buffer);
+            const absolutePath = path.resolve(__dirname, "../", "store", bucket.name, metadata.name + "." + metadata.format);
+            yield this.fileUtil.write(absolutePath, buffer);
             return metadata;
         });
     }
     processAndOutput(bucket, imagePath, imageProcessInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.postProcess(imagePath, bucket, imageProcessInfo);
+            return this.postProcess(imagePath, bucket, imageProcessInfo);
         });
     }
     preProcess(imagePath, bucket, imageProcessInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             let instance = sharp(imagePath);
-            let rotateImagePath, watermarkImagePath;
+            let rotateImagePath = "", watermarkImagePath = "";
             if (!imageProcessInfo) {
-                return yield instance.toBuffer();
+                return instance.toBuffer();
             }
-            let { resize, tailor, watermark, rotate, format, lossless } = imageProcessInfo;
-            let metadata = yield this.getMetadata(imagePath);
+            const { resize, tailor, watermark, rotate, format, lossless } = imageProcessInfo;
+            const metadata = yield this.getMetadata(imagePath);
             try {
                 let width2, height2;
                 if (tailor && tailor.isBefore) {
-                    let result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
+                    const result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
                     if (resize) {
-                        let result2 = this.resize(instance, resize, result1.width, result1.height);
+                        const result2 = this.resize(instance, resize, result1.width, result1.height);
                         width2 = result2.width;
                         height2 = result2.height;
                     }
@@ -92,20 +92,20 @@ let ImageProcessUtil = class ImageProcessUtil {
                 }
                 else if (tailor && !tailor.isBefore) {
                     if (resize) {
-                        let result1 = this.resize(instance, resize, metadata.width, metadata.height);
-                        let result2 = this.tailor(instance, tailor, result1.width, result1.height);
+                        const result1 = this.resize(instance, resize, metadata.width, metadata.height);
+                        const result2 = this.tailor(instance, tailor, result1.width, result1.height);
                         width2 = result2.width;
                         height2 = result2.height;
                     }
                     else {
-                        let result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
+                        const result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
                         width2 = result1.width;
                         height2 = result1.height;
                     }
                 }
                 else {
                     if (resize) {
-                        let result1 = this.resize(instance, resize, metadata.width, metadata.height);
+                        const result1 = this.resize(instance, resize, metadata.width, metadata.height);
                         width2 = result1.width;
                         height2 = result1.height;
                     }
@@ -125,7 +125,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 if (format)
                     this.format(instance, format);
                 if (lossless) {
-                    this.output(instance, format ? format : metadata.format, lossless, null, null);
+                    this.output(instance, format ? format : metadata.format, lossless, 100, true);
                 }
             }
             catch (err) {
@@ -136,7 +136,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                     throw new common_1.HttpException(err.toString(), 408);
                 }
             }
-            let result = yield instance.toBuffer();
+            const result = yield instance.toBuffer();
             if (rotateImagePath) {
                 yield this.fileUtil.deleteIfExist(rotateImagePath);
             }
@@ -149,18 +149,18 @@ let ImageProcessUtil = class ImageProcessUtil {
     postProcess(imagePath, bucket, imageProcessInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             let instance = sharp(imagePath);
-            let rotateImagePath, watermarkImagePath;
+            let rotateImagePath = "", watermarkImagePath = "";
             if (!imageProcessInfo) {
-                return yield instance.toBuffer();
+                return instance.toBuffer();
             }
-            let { resize, tailor, watermark, rotate, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo;
-            let metadata = yield this.getMetadata(imagePath);
+            const { resize, tailor, watermark, rotate, blur, sharpen, format, lossless, strip, quality, progressive } = imageProcessInfo;
+            const metadata = yield this.getMetadata(imagePath);
             try {
                 let width2, height2;
                 if (tailor && tailor.isBefore) {
-                    let result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
+                    const result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
                     if (resize) {
-                        let result2 = this.resize(instance, resize, result1.width, result1.height);
+                        const result2 = this.resize(instance, resize, result1.width, result1.height);
                         width2 = result2.width;
                         height2 = result2.height;
                     }
@@ -169,20 +169,20 @@ let ImageProcessUtil = class ImageProcessUtil {
                 }
                 else if (tailor && !tailor.isBefore) {
                     if (resize) {
-                        let result1 = this.resize(instance, resize, metadata.width, metadata.height);
-                        let result2 = this.tailor(instance, tailor, result1.width, result1.height);
+                        const result1 = this.resize(instance, resize, metadata.width, metadata.height);
+                        const result2 = this.tailor(instance, tailor, result1.width, result1.height);
                         width2 = result2.width;
                         height2 = result2.height;
                     }
                     else {
-                        let result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
+                        const result1 = this.tailor(instance, tailor, metadata.width, metadata.height);
                         width2 = result1.width;
                         height2 = result1.height;
                     }
                 }
                 else {
                     if (resize) {
-                        let result1 = this.resize(instance, resize, metadata.width, metadata.height);
+                        const result1 = this.resize(instance, resize, metadata.width, metadata.height);
                         width2 = result1.width;
                         height2 = result1.height;
                     }
@@ -219,7 +219,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                     throw new common_1.HttpException(err.toString(), 408);
                 }
             }
-            let result = yield instance.toBuffer();
+            const result = yield instance.toBuffer();
             if (rotateImagePath) {
                 yield this.fileUtil.deleteIfExist(rotateImagePath);
             }
@@ -230,9 +230,9 @@ let ImageProcessUtil = class ImageProcessUtil {
         });
     }
     resize(instance, resize, preWidth, preHeight) {
-        let { mode, data } = resize;
+        const { mode, data } = resize;
         let width, height;
-        if (mode == "scale") {
+        if (mode === "scale") {
             if (data.scale && Number.isInteger(data.scale) && data.scale >= 1 && data.scale <= 1000) {
                 width = preWidth * data.scale / 100;
                 height = preHeight * data.scale / 100;
@@ -241,7 +241,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("缩放比例错误");
             }
         }
-        else if (mode == "wscale") {
+        else if (mode === "wscale") {
             if (data.wscale && Number.isInteger(data.wscale) && data.wscale >= 1 && data.wscale <= 1000) {
                 width = preWidth * data.wscale / 100;
                 height = preHeight;
@@ -250,7 +250,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("宽度缩放比例错误");
             }
         }
-        else if (mode == "hscale") {
+        else if (mode === "hscale") {
             if (data.hscale && Number.isInteger(data.hscale) && data.hscale >= 1 && data.hscale <= 1000) {
                 width = preWidth;
                 height = preHeight * data.hscale / 100;
@@ -259,7 +259,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("高度缩放比例错误");
             }
         }
-        else if (mode == "both") {
+        else if (mode === "both") {
             if (data.width && Number.isInteger(data.width) && data.height && Number.isInteger(data.height)) {
                 width = data.width;
                 height = data.height;
@@ -268,7 +268,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("宽高参数错误");
             }
         }
-        else if (mode == "fw") {
+        else if (mode === "fw") {
             if (data.width && Number.isInteger(data.width)) {
                 width = data.width;
                 height = preHeight * data.width / preWidth;
@@ -277,7 +277,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("宽度参数错误");
             }
         }
-        else if (mode == "fh") {
+        else if (mode === "fh") {
             if (data.height && Number.isInteger(data.height)) {
                 height = data.height;
                 width = preWidth * data.height / preHeight;
@@ -286,7 +286,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("高度参数错误");
             }
         }
-        else if (mode == "fp") {
+        else if (mode === "fp") {
             if (data.pixel && Number.isInteger(data.pixel) && data.pixel >= 1 && data.pixel <= 25000000) {
                 height = Math.sqrt(data.pixel * preHeight / preWidth);
                 width = data.pixel / height;
@@ -295,7 +295,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("像素参数不正确");
             }
         }
-        else if (mode == "fwfh") {
+        else if (mode === "fwfh") {
             if (data.width && Number.isInteger(data.width) && data.height && Number.isInteger(data.height)) {
                 width = data.width;
                 height = data.height;
@@ -304,7 +304,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("宽高参数不正确");
             }
         }
-        else if (mode == "fwfh2") {
+        else if (mode === "fwfh2") {
             if (data.width && Number.isInteger(data.width) && data.height && Number.isInteger(data.height)) {
                 width = data.width;
                 height = data.height;
@@ -317,7 +317,7 @@ let ImageProcessUtil = class ImageProcessUtil {
             throw new Error("缩放模式不正确");
         }
         instance.resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio();
-        if (mode == "fwfh") {
+        if (mode === "fwfh") {
             instance.max();
             if (data.width >= preWidth && data.height < preHeight) {
                 height = data.height;
@@ -328,9 +328,9 @@ let ImageProcessUtil = class ImageProcessUtil {
                 height = preHeight * data.width / preWidth;
             }
             else if (data.width < preWidth && data.height < preHeight) {
-                let wscale = data.width / preWidth;
-                let hscale = data.height / preHeight;
-                let scale = wscale < hscale ? wscale : hscale;
+                const wscale = data.width / preWidth;
+                const hscale = data.height / preHeight;
+                const scale = wscale < hscale ? wscale : hscale;
                 width = preWidth * scale;
                 height = preHeight * scale;
             }
@@ -339,7 +339,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 height = preHeight;
             }
         }
-        else if (mode == "fwfh2") {
+        else if (mode === "fwfh2") {
             instance.min();
             if (data.width <= preWidth && data.height > preHeight) {
                 height = data.height;
@@ -350,9 +350,9 @@ let ImageProcessUtil = class ImageProcessUtil {
                 height = preHeight * data.width / preWidth;
             }
             else if (data.width > preWidth && data.height > preHeight) {
-                let wscale = data.width / preWidth;
-                let hscale = data.height / preHeight;
-                let scale = wscale > hscale ? wscale : hscale;
+                const wscale = data.width / preWidth;
+                const hscale = data.height / preHeight;
+                const scale = wscale > hscale ? wscale : hscale;
                 width = preWidth * scale;
                 height = preHeight * scale;
             }
@@ -364,7 +364,7 @@ let ImageProcessUtil = class ImageProcessUtil {
         return { width, height };
     }
     tailor(instance, tailor, preWidth, preHeight) {
-        let { x, y, gravity } = tailor;
+        const { x, y, gravity } = tailor;
         let width = tailor.width;
         let height = tailor.height;
         let left, top;
@@ -438,18 +438,18 @@ let ImageProcessUtil = class ImageProcessUtil {
                 enable = true;
             else if (watermark === false)
                 enable = false;
-            else if (watermark == undefined)
-                enable = !!bucket.image_config.watermark_enable;
+            else if (watermark === undefined)
+                enable = !!bucket.imageConfig.watermarkEnable;
             else
                 throw new Error("水印参数错误");
             if (enable) {
-                let x = bucket.image_config.watermark_x;
-                let y = bucket.image_config.watermark_y;
-                let ws = bucket.image_config.watermark_ws;
-                let opacity = bucket.image_config.watermark_opacity;
-                let gravity = bucket.image_config.watermark_gravity;
-                let shuiyin_path = path.resolve(__dirname, "../") + bucket.image_config.watermark_save_key;
-                let { width, height } = yield this.getMetadata(shuiyin_path);
+                let x = bucket.imageConfig.watermarkX;
+                let y = bucket.imageConfig.watermarkY;
+                const ws = bucket.imageConfig.watermarkWs;
+                const opacity = bucket.imageConfig.watermarkOpacity;
+                let gravity = bucket.imageConfig.watermarkGravity;
+                const shuiyinPath = path.resolve(__dirname, "../") + bucket.imageConfig.watermarkSaveKey;
+                let { width, height } = yield this.getMetadata(shuiyinPath);
                 if (preWidth < preHeight) {
                     height = height * preWidth * ws / (100 * width);
                     width = preWidth * ws / 100;
@@ -497,15 +497,15 @@ let ImageProcessUtil = class ImageProcessUtil {
                 if (width > preWidth || height > preHeight) {
                     throw new Error("水印图片过大");
                 }
-                let buffer = yield instance.toBuffer();
-                let shuiyinBuffer = yield sharp(shuiyin_path).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer();
-                let temp_path = path.resolve(__dirname, "../", "store", "temp", "raw" + (+new Date()) + "." + metadata.format);
-                let shuiyin_temp_path = path.resolve(__dirname, "../", "store", "temp", "shuiyin" + (+new Date()) + shuiyin_path.substring(shuiyin_path.lastIndexOf(".")));
-                yield this.fileUtil.write(temp_path, buffer);
-                yield this.fileUtil.write(shuiyin_temp_path, shuiyinBuffer);
-                let ex;
+                const buffer = yield instance.toBuffer();
+                const shuiyinBuffer = yield sharp(shuiyinPath).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer();
+                const tempPath = path.resolve(__dirname, "../", "store", "temp", "raw" + (+new Date()) + "." + metadata.format);
+                const shuiyinTempPath = path.resolve(__dirname, "../", "store", "temp", "shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
+                yield this.fileUtil.write(tempPath, buffer);
+                yield this.fileUtil.write(shuiyinTempPath, shuiyinBuffer);
+                let ex = "";
                 yield new Promise((resolve, reject) => {
-                    gm(temp_path).composite(shuiyin_temp_path).gravity(gravity).geometry("+" + x + "+" + y).dissolve(opacity).write(temp_path, err => {
+                    gm(tempPath).composite(shuiyinTempPath).gravity(gravity).geometry("+" + x + "+" + y).dissolve(opacity).write(tempPath, err => {
                         if (err)
                             reject(new common_1.HttpException("为图片添加水印出现错误:" + err.toString(), 407));
                         resolve();
@@ -516,12 +516,12 @@ let ImageProcessUtil = class ImageProcessUtil {
                 if (ex) {
                     throw ex;
                 }
-                let a = true;
-                yield this.fileUtil.delete(shuiyin_temp_path);
-                return temp_path;
+                const a = true;
+                yield this.fileUtil.delete(shuiyinTempPath);
+                return tempPath;
             }
             else {
-                return null;
+                return undefined;
             }
         });
     }
@@ -530,12 +530,12 @@ let ImageProcessUtil = class ImageProcessUtil {
             if (!Number.isInteger(rotate)) {
                 throw new Error("旋转角度不正确");
             }
-            let buffer = yield instance.toBuffer();
-            let temp_path = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "." + metadata.format);
-            let ex;
-            yield this.fileUtil.write(temp_path, buffer);
+            const buffer = yield instance.toBuffer();
+            const tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "." + metadata.format);
+            let ex = "";
+            yield this.fileUtil.write(tempPath, buffer);
             yield new Promise((resolve, reject) => {
-                gm(temp_path).rotate("black", rotate).write(temp_path, err => {
+                gm(tempPath).rotate("black", rotate).write(tempPath, err => {
                     if (err)
                         reject(new common_1.HttpException("旋转文件图片出现错误:" + err.toString(), 407));
                     resolve();
@@ -546,7 +546,7 @@ let ImageProcessUtil = class ImageProcessUtil {
             if (ex) {
                 throw ex;
             }
-            return temp_path;
+            return tempPath;
         });
     }
     blur(instance, blur) {
@@ -559,7 +559,7 @@ let ImageProcessUtil = class ImageProcessUtil {
         if (sharpen === true) {
             instance.sharpen();
         }
-        else if (sharpen == false) {
+        else if (sharpen === false) {
         }
         else
             throw new Error("锐化参数错误");
@@ -592,7 +592,7 @@ let ImageProcessUtil = class ImageProcessUtil {
         if (progressive !== undefined && progressive !== null && progressive !== true && progressive !== false) {
             throw new Error("渐进参数错误");
         }
-        let options = {
+        const options = {
             force: true
         };
         if (lossless !== undefined && lossless !== null)

@@ -2,12 +2,12 @@ import { Bucket } from "./bucket.entity";
 export declare class ImageConfig {
     id: number;
     format: string;
-    watermark_enable: number;
-    watermark_save_key: string;
-    watermark_gravity: string;
-    watermark_x: number;
-    watermark_y: number;
-    watermark_opacity: number;
-    watermark_ws: number;
+    watermarkEnable: number;
+    watermarkSaveKey: string;
+    watermarkGravity: string;
+    watermarkX: number;
+    watermarkY: number;
+    watermarkOpacity: number;
+    watermarkWs: number;
     bucket?: Bucket;
 }

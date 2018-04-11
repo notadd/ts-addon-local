@@ -19,10 +19,10 @@ export declare class ConfigResolver {
     private readonly configService;
     private readonly bucketRepository;
     private readonly gravity;
-    private readonly image_format;
-    private readonly audio_format;
-    private readonly video_format;
-    private readonly video_resolution;
+    private readonly _imageFormat;
+    private readonly _audioFormat;
+    private readonly _videoFormat;
+    private readonly _videoResolution;
     constructor(fileUtil: FileUtil, kindUtil: KindUtil, configService: ConfigService, bucketRepository: Repository<Bucket>);
     bucket(req: IncomingMessage, body: BucketConfig): Promise<CommonData>;
     imageFormat(req: IncomingMessage, body: ImageFormat): Promise<CommonData>;

@@ -1,10 +1,10 @@
 export interface ResizeData {
-    scale?: number;
-    wscale?: number;
-    hscale?: number;
-    width?: number;
-    height?: number;
-    pixel?: number;
+    scale: number;
+    wscale: number;
+    hscale: number;
+    width: number;
+    height: number;
+    pixel: number;
 }
 export interface Resize {
     mode: string;
@@ -23,21 +23,21 @@ export interface Blur {
     sigma: number;
 }
 export interface ImagePreProcessInfo {
-    resize?: Resize;
-    tailor?: Tailor;
-    watermark?: boolean;
-    rotate?: number;
+    resize: Resize;
+    tailor: Tailor;
+    watermark: boolean;
+    rotate: number;
 }
 export interface ImagePostProcessInfo {
-    resize?: Resize;
-    tailor?: Tailor;
-    watermark?: boolean;
-    rotate?: number;
-    blur?: Blur;
-    sharpen?: boolean;
-    format?: string;
-    lossless?: boolean;
-    quality?: number;
-    progressive?: boolean;
-    strip?: boolean;
+    resize: Resize;
+    tailor: Tailor;
+    watermark: boolean;
+    rotate: number;
+    blur: Blur;
+    sharpen: boolean;
+    format: string;
+    lossless: boolean;
+    quality: number;
+    progressive: boolean;
+    strip: boolean;
 }

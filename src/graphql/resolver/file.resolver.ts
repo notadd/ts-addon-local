@@ -71,13 +71,13 @@ export class FileResolver {
         if (!bucketName || !name || !type) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: any = await this.bucketRepository.findOne({ name: bucketName });
         // 指定空间不存在
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
         // 根据文件种类获取文件实例
-        let file: File | Audio | Video | Image | Document = {} as any;
+        let file: any = {} as any;
         if (this.kindUtil.isImage(type)) {
             file = await this.imageRepository.findOne({ name, type, bucketId: bucket.id });
         } else {
@@ -126,7 +126,7 @@ export class FileResolver {
         if (!bucketName || !contentName) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
@@ -164,7 +164,7 @@ export class FileResolver {
         if (!bucketName || !name || !type) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket = await this.bucketRepository.createQueryBuilder("bucket")
+        const bucket: Bucket|undefined = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
             .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
             .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
@@ -176,7 +176,7 @@ export class FileResolver {
         // 根据文件种类处理
         const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id });
+            const image: Image|undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
                 throw new HttpException("指定图片" + name + "." + type + "不存在", 404);
             }
@@ -228,7 +228,7 @@ export class FileResolver {
         if (!bucketName) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
@@ -251,14 +251,14 @@ export class FileResolver {
         if (!bucketName || !name || !type) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
         // 根据文件种类，查找、删除数据库
         const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const image: Image = await this.imageRepository.findOne({ name, bucketId: bucket.id });
+            const image: Image|undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
                 throw new HttpException("文件" + name + "不存在于数据库中", 404);
             }
