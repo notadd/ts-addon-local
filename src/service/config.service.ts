@@ -1,20 +1,22 @@
-import { Component, HttpException, Inject } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import * as  path from "path";
-import { Repository } from "typeorm";
-import { AudioFormat } from "../interface/config/audio.format";
-import { BucketConfig } from "../interface/config/bucket.config";
 import { EnableImageWatermark } from "../interface/config/enable.image.watermark";
+import { Component, HttpException, Inject } from "@nestjs/common";
+import { BucketConfig } from "../interface/config/bucket.config";
+import { ImageMetadata } from "../interface/file/image.metadata";
+import { AudioFormat } from "../interface/config/audio.format";
 import { ImageFormat } from "../interface/config/image.format";
 import { VideoFormat } from "../interface/config/video.format";
-import { ImageMetadata } from "../interface/file/image.metadata";
+import { ImageProcessUtil } from "../util/image.process.util";
 import { AudioConfig } from "../model/audio.config.entity";
-import { Bucket } from "../model/bucket.entity";
-import { Image } from "../model/image.entity";
 import { ImageConfig } from "../model/image.config.entity";
 import { VideoConfig } from "../model/video.config.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Bucket } from "../model/bucket.entity";
+import { Image } from "../model/image.entity";
 import { FileUtil } from "../util/file.util";
-import { ImageProcessUtil } from "../util/image.process.util";
+import { Repository } from "typeorm";
+import * as  path from "path";
+import * as fs from "fs";
+
 
 @Component()
 export class ConfigService {
@@ -31,14 +33,17 @@ export class ConfigService {
     }
 
     async saveBucketConfig(body: BucketConfig): Promise<void> {
-        let exist: Bucket|undefined;
+        let exist: Bucket | undefined;
         const newBucket: any = {
             name: body.name,
         };
-        const directoryPath = path.resolve(__dirname, "../", "store", body.name);
+        /* 空间目录 */
+        let directoryPath = "";
         if (body.isPublic) {
             exist = await this.bucketRepository.findOneById(1);
+            directoryPath = path.resolve(process.cwd(), "public");
         } else {
+            directoryPath = path.resolve(process.cwd(), "storages");
             exist = await this.bucketRepository.findOneById(2);
             newBucket.tokenExpire = Number.parseInt(body.tokenExpire as any);
             newBucket.tokenSecretKey = body.tokenSecretKey;
@@ -85,7 +90,7 @@ export class ConfigService {
         }
     }
 
-    async saveImageFormat(body: ImageFormat): Promise<void> {
+    async saveImageFormat(body: ImageFormat): Promise < void > {
         let { format } = body;
         format = format.toLowerCase();
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["imageConfig"] });
@@ -101,7 +106,7 @@ export class ConfigService {
         }
     }
 
-    async saveEnableImageWatermark(body: EnableImageWatermark): Promise<void> {
+    async saveEnableImageWatermark(body: EnableImageWatermark): Promise < void > {
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["imageConfig"] });
         if (buckets.length !== 2) {
             throw new HttpException("空间配置不存在", 401);
@@ -121,7 +126,7 @@ export class ConfigService {
         }
     }
 
-    async saveImageWatermark(file: any, obj: any): Promise<void> {
+    async saveImageWatermark(file: any, obj: any): Promise < void > {
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["imageConfig"] });
         if (buckets.length !== 2) {
             throw new HttpException("空间配置不存在", 401);
@@ -158,7 +163,7 @@ export class ConfigService {
             image.width = metadata.width;
             image.height = metadata.height;
             image.size = metadata.size;
-            const isExist: Image|undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: buckets[i].id });
+            const isExist: Image | undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: buckets[i].id });
             // 只有指定路径图片不存在时才会保存
             if (!isExist) {
                 try {
@@ -189,7 +194,7 @@ export class ConfigService {
         await this.fileUtil.delete(file.path);
     }
 
-    async saveAudioFormat(body: AudioFormat): Promise<any> {
+    async saveAudioFormat(body: AudioFormat): Promise < any > {
         let { format } = body;
         format = format.toLowerCase();
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["audioConfig"] });
@@ -205,7 +210,7 @@ export class ConfigService {
         }
     }
 
-    async saveVideoFormat(body: VideoFormat): Promise<any> {
+    async saveVideoFormat(body: VideoFormat): Promise < any > {
         let { format, resolution } = body;
         format = format.toLowerCase();
         resolution = resolution.toLowerCase();
