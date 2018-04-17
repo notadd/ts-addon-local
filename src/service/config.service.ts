@@ -38,12 +38,10 @@ export class ConfigService {
             name: body.name,
         };
         /* 空间目录 */
-        let directoryPath = "";
+        const directoryPath: string = path.resolve(process.cwd(), "storages", "local", body.name);
         if (body.isPublic) {
             exist = await this.bucketRepository.findOneById(1);
-            directoryPath = path.resolve(process.cwd(), "public");
         } else {
-            directoryPath = path.resolve(process.cwd(), "storages");
             exist = await this.bucketRepository.findOneById(2);
             newBucket.tokenExpire = Number.parseInt(body.tokenExpire as any);
             newBucket.tokenSecretKey = body.tokenSecretKey;
@@ -90,7 +88,7 @@ export class ConfigService {
         }
     }
 
-    async saveImageFormat(body: ImageFormat): Promise < void > {
+    async saveImageFormat(body: ImageFormat): Promise<void> {
         let { format } = body;
         format = format.toLowerCase();
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["imageConfig"] });
@@ -106,7 +104,7 @@ export class ConfigService {
         }
     }
 
-    async saveEnableImageWatermark(body: EnableImageWatermark): Promise < void > {
+    async saveEnableImageWatermark(body: EnableImageWatermark): Promise<void> {
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["imageConfig"] });
         if (buckets.length !== 2) {
             throw new HttpException("空间配置不存在", 401);
@@ -126,7 +124,7 @@ export class ConfigService {
         }
     }
 
-    async saveImageWatermark(file: any, obj: any): Promise < void > {
+    async saveImageWatermark(file: any, obj: any): Promise<void> {
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["imageConfig"] });
         if (buckets.length !== 2) {
             throw new HttpException("空间配置不存在", 401);
@@ -194,7 +192,7 @@ export class ConfigService {
         await this.fileUtil.delete(file.path);
     }
 
-    async saveAudioFormat(body: AudioFormat): Promise < any > {
+    async saveAudioFormat(body: AudioFormat): Promise<any> {
         let { format } = body;
         format = format.toLowerCase();
         const buckets: Array<Bucket> = await this.bucketRepository.find({ relations: ["audioConfig"] });
@@ -210,7 +208,7 @@ export class ConfigService {
         }
     }
 
-    async saveVideoFormat(body: VideoFormat): Promise < any > {
+    async saveVideoFormat(body: VideoFormat): Promise<any> {
         let { format, resolution } = body;
         format = format.toLowerCase();
         resolution = resolution.toLowerCase();
