@@ -10,21 +10,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const allowExtension = require("../allowExtension.json");
+const allow_extension_1 = require("./allow.extension");
 let KindUtil = class KindUtil {
     constructor() {
     }
     getKind(type) {
-        if (allowExtension.image.includes(type)) {
+        if (allow_extension_1.AllowedExtensions.image.indexOf(type) !== -1) {
             return "image";
         }
-        else if (allowExtension.audio.includes(type)) {
+        else if (allow_extension_1.AllowedExtensions.audio.indexOf(type) !== -1) {
             return "audio";
         }
-        else if (allowExtension.video.includes(type)) {
+        else if (allow_extension_1.AllowedExtensions.video.indexOf(type) !== -1) {
             return "video";
         }
-        else if (allowExtension.document.includes(type)) {
+        else if (allow_extension_1.AllowedExtensions.document.indexOf(type) !== -1) {
             return "document";
         }
         else {
@@ -32,7 +32,7 @@ let KindUtil = class KindUtil {
         }
     }
     isImage(type) {
-        return allowExtension.image.includes(type);
+        return allow_extension_1.AllowedExtensions.image.indexOf(type) !== -1;
     }
 };
 KindUtil = __decorate([

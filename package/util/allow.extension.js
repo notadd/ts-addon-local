@@ -1,5 +1,7 @@
-{
-    "image": [
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AllowedExtensions = {
+    image: [
         "jpg",
         "jpeg",
         "png",
@@ -15,9 +17,9 @@
         "ai",
         "raw",
         "apng",
-        "tiff"
+        "tiff",
     ],
-    "audio": [
+    audio: [
         "m4a",
         "cda",
         "wav",
@@ -28,9 +30,9 @@
         "amr",
         "ape",
         "flac",
-        "aac"
+        "aac",
     ],
-    "video": [
+    video: [
         "avi",
         "mov",
         "asf",
@@ -45,9 +47,9 @@
         "webm",
         "qsv",
         "xv",
-        "vob"
+        "vob",
     ],
-    "document": [
+    document: [
         "txt",
         "doc",
         "docs",
@@ -63,6 +65,6 @@
         "htm",
         "html",
         "rtf",
-        "docm"
-    ]
-}
+        "docm",
+    ],
+};
