@@ -12,6 +12,7 @@ export class AbstractFile {
 
     @Column({
         nullable: true,
+        type: "simple-array",
     })
     tags: Array<string>;
 
