@@ -1,16 +1,16 @@
-import { Repository } from "typeorm";
-import { AudioFormat } from "../interface/config/audio.format";
-import { BucketConfig } from "../interface/config/bucket.config";
 import { EnableImageWatermark } from "../interface/config/enable.image.watermark";
+import { BucketConfig } from "../interface/config/bucket.config";
+import { AudioFormat } from "../interface/config/audio.format";
 import { ImageFormat } from "../interface/config/image.format";
 import { VideoFormat } from "../interface/config/video.format";
+import { ImageProcessUtil } from "../util/image.process.util";
 import { AudioConfig } from "../model/audio.config.entity";
-import { Bucket } from "../model/bucket.entity";
-import { Image } from "../model/image.entity";
 import { ImageConfig } from "../model/image.config.entity";
 import { VideoConfig } from "../model/video.config.entity";
+import { Bucket } from "../model/bucket.entity";
+import { Image } from "../model/image.entity";
 import { FileUtil } from "../util/file.util";
-import { ImageProcessUtil } from "../util/image.process.util";
+import { Repository } from "typeorm";
 export declare class ConfigService {
     private readonly fileUtil;
     private readonly imageProcessUtil;
@@ -19,6 +19,7 @@ export declare class ConfigService {
     private readonly imageConfigRepository;
     private readonly audioConfigRepository;
     private readonly videoConfigRepository;
+    private readonly baseDirectory;
     constructor(fileUtil: FileUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>, imageConfigRepository: Repository<ImageConfig>, audioConfigRepository: Repository<AudioConfig>, videoConfigRepository: Repository<VideoConfig>);
     saveBucketConfig(body: BucketConfig): Promise<void>;
     saveImageFormat(body: ImageFormat): Promise<void>;

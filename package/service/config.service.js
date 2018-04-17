@@ -21,16 +21,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const path = require("path");
-const typeorm_2 = require("typeorm");
+const image_process_util_1 = require("../util/image.process.util");
 const audio_config_entity_1 = require("../model/audio.config.entity");
-const bucket_entity_1 = require("../model/bucket.entity");
-const image_entity_1 = require("../model/image.entity");
 const image_config_entity_1 = require("../model/image.config.entity");
 const video_config_entity_1 = require("../model/video.config.entity");
+const typeorm_1 = require("@nestjs/typeorm");
+const bucket_entity_1 = require("../model/bucket.entity");
+const image_entity_1 = require("../model/image.entity");
 const file_util_1 = require("../util/file.util");
-const image_process_util_1 = require("../util/image.process.util");
+const typeorm_2 = require("typeorm");
+const path = require("path");
 let ConfigService = class ConfigService {
     constructor(fileUtil, imageProcessUtil, imageRepository, bucketRepository, imageConfigRepository, audioConfigRepository, videoConfigRepository) {
         this.fileUtil = fileUtil;
@@ -40,6 +40,7 @@ let ConfigService = class ConfigService {
         this.imageConfigRepository = imageConfigRepository;
         this.audioConfigRepository = audioConfigRepository;
         this.videoConfigRepository = videoConfigRepository;
+        this.baseDirectory = path.resolve(process.cwd(), "storages", "local");
     }
     saveBucketConfig(body) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,7 +48,7 @@ let ConfigService = class ConfigService {
             const newBucket = {
                 name: body.name,
             };
-            const directoryPath = path.resolve(__dirname, "../", "store", body.name);
+            const directoryPath = this.baseDirectory + "/" + body.name;
             if (body.isPublic) {
                 exist = yield this.bucketRepository.findOneById(1);
             }
@@ -185,13 +186,13 @@ let ConfigService = class ConfigService {
                         yield this.imageRepository.save(image);
                     }
                     catch (err) {
-                        yield this.fileUtil.delete(path.resolve(__dirname, "../", "store", buckets[i].name, image.name + "." + image.type));
+                        yield this.fileUtil.delete(this.baseDirectory + "/" + buckets[i].name + "/" + image.name + "." + image.type);
                         throw new common_1.HttpException("水印图片保存失败" + err.toString(), 410);
                     }
                 }
                 try {
                     yield this.imageConfigRepository.updateById(buckets[i].imageConfig.id, {
-                        watermarkSaveKey: "/store/" + buckets[i].name + "/" + image.name + "." + image.type,
+                        watermarkSaveKey: "/storages/local/" + buckets[i].name + "/" + image.name + "." + image.type,
                         watermarkGravity: obj.gravity,
                         watermarkOpacity: obj.opacity,
                         watermarkWs: obj.ws,

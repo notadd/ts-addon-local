@@ -10,6 +10,7 @@ export declare class ImageProcessUtil {
     private readonly kindUtil;
     private readonly fileUtil;
     private readonly gravity;
+    private readonly baseDirectory;
     constructor(kindUtil: KindUtil, fileUtil: FileUtil);
     getMetadata(pathOrBuffer: string | Buffer): Promise<ImageMetadata>;
     processAndStore(imagePath: string, bucket: Bucket, imageProcessInfo: ImagePostProcessInfo | ImagePreProcessInfo): Promise<ImageMetadata>;

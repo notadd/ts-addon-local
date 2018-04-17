@@ -30,6 +30,7 @@ const bucket_entity_1 = require("../../model/bucket.entity");
 const kind_util_1 = require("../../util/kind.util");
 const file_util_1 = require("../../util/file.util");
 const typeorm_2 = require("typeorm");
+const path = require("path");
 let ConfigResolver = class ConfigResolver {
     constructor(fileUtil, kindUtil, configService, bucketRepository) {
         this.fileUtil = fileUtil;
@@ -125,7 +126,7 @@ let ConfigResolver = class ConfigResolver {
                 }
                 else {
                 }
-                tempPath = __dirname + "/" + name;
+                tempPath = path.resolve(process.cwd(), "storages", "local", "temp", name);
                 yield this.fileUtil.write(tempPath, Buffer.from(body.base64, "base64"));
                 delete body.base64;
                 const file = {

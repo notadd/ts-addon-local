@@ -75,7 +75,7 @@ let FileService = class FileService {
             if (kind === "image") {
                 const exist = yield this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
                 if (exist) {
-                    return "/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
+                    return "/local/file/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
                 }
                 const image = new image_entity_1.Image();
                 image.bucket = bucket;
@@ -97,7 +97,7 @@ let FileService = class FileService {
                 catch (err) {
                     throw new common_1.HttpException("文件保存到数据库失败:" + err.toString(), 406);
                 }
-                return "/visit/" + bucket.name + "/" + image.name + "." + image.type;
+                return "/local/file/visit/" + bucket.name + "/" + image.name + "." + image.type;
             }
             else {
             }

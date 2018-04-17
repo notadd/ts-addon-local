@@ -31,6 +31,7 @@ let ImageProcessUtil = class ImageProcessUtil {
     constructor(kindUtil, fileUtil) {
         this.kindUtil = kindUtil;
         this.fileUtil = fileUtil;
+        this.baseDirectory = path.resolve(process.cwd(), "storages", "local");
         this.gravity = new Set(["northwest", "north", "northeast", "west", "center", "east", "southwest", "south", "southeast"]);
     }
     getMetadata(pathOrBuffer) {
@@ -59,7 +60,7 @@ let ImageProcessUtil = class ImageProcessUtil {
         return __awaiter(this, void 0, void 0, function* () {
             const buffer = yield this.preProcess(imagePath, bucket, imageProcessInfo);
             const metadata = yield this.getMetadata(buffer);
-            const absolutePath = path.resolve(__dirname, "../", "store", bucket.name, metadata.name + "." + metadata.format);
+            const absolutePath = this.baseDirectory + "/" + bucket.name + "/" + metadata.name + "." + metadata.format;
             yield this.fileUtil.write(absolutePath, buffer);
             return metadata;
         });
@@ -448,7 +449,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 const ws = bucket.imageConfig.watermarkWs;
                 const opacity = bucket.imageConfig.watermarkOpacity;
                 let gravity = bucket.imageConfig.watermarkGravity;
-                const shuiyinPath = path.resolve(__dirname, "../") + bucket.imageConfig.watermarkSaveKey;
+                const shuiyinPath = process.cwd() + bucket.imageConfig.watermarkSaveKey;
                 let { width, height } = yield this.getMetadata(shuiyinPath);
                 if (preWidth < preHeight) {
                     height = height * preWidth * ws / (100 * width);
@@ -499,8 +500,8 @@ let ImageProcessUtil = class ImageProcessUtil {
                 }
                 const buffer = yield instance.toBuffer();
                 const shuiyinBuffer = yield sharp(shuiyinPath).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer();
-                const tempPath = path.resolve(__dirname, "../", "store", "temp", "raw" + (+new Date()) + "." + metadata.format);
-                const shuiyinTempPath = path.resolve(__dirname, "../", "store", "temp", "shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
+                const tempPath = this.baseDirectory + "/temp/raw" + (+new Date()) + "." + metadata.format;
+                const shuiyinTempPath = this.baseDirectory + "/temp/shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf("."));
                 yield this.fileUtil.write(tempPath, buffer);
                 yield this.fileUtil.write(shuiyinTempPath, shuiyinBuffer);
                 let ex = "";
@@ -531,7 +532,7 @@ let ImageProcessUtil = class ImageProcessUtil {
                 throw new Error("旋转角度不正确");
             }
             const buffer = yield instance.toBuffer();
-            const tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "." + metadata.format);
+            const tempPath = this.baseDirectory + "/temp/rotate" + (+new Date()) + "." + metadata.format;
             let ex = "";
             yield this.fileUtil.write(tempPath, buffer);
             yield new Promise((resolve, reject) => {

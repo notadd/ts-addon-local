@@ -47,11 +47,12 @@ let FileController = class FileController {
         this.fileRepository = fileRepository;
         this.imageRepository = imageRepository;
         this.bucketRepository = bucketRepository;
+        this.baseDirectory = path.resolve(process.cwd(), "storages", "local");
     }
     download(headers, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { bucketName, fileName } = headers;
-            const realPath = path.resolve(__dirname, "../", "store", bucketName, fileName);
+            const realPath = this.baseDirectory + "/" + bucketName + "/" + fileName;
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("请求下载的文件不存在", 404);
             }
@@ -104,7 +105,7 @@ let FileController = class FileController {
         return __awaiter(this, void 0, void 0, function* () {
             const { bucketName, fileName } = param;
             const { imagePostProcessString, token } = query;
-            const realPath = path.resolve(__dirname, "../", "store", bucketName, fileName);
+            const realPath = this.baseDirectory + "/" + bucketName + "/" + fileName;
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("指定文件不存在", 404);
             }

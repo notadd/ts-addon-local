@@ -20,6 +20,7 @@ export declare class FileController {
     private readonly fileRepository;
     private readonly imageRepository;
     private readonly bucketRepository;
+    private readonly baseDirectory;
     constructor(fileUtil: FileUtil, kindUtil: KindUtil, tokenUtil: TokenUtil, fileService: FileService, imageProcessUtil: ImageProcessUtil, fileRepository: Repository<File>, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>);
     download(headers: HeaderParam, res: any): Promise<any>;
     upload(body: any): Promise<CommonData & {
