@@ -21,6 +21,8 @@ import * as fs from "fs";
 @Component()
 export class ConfigService {
 
+    private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
+
     constructor(
         @Inject(FileUtil) private readonly fileUtil: FileUtil,
         @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
@@ -38,7 +40,7 @@ export class ConfigService {
             name: body.name,
         };
         /* 空间目录 */
-        const directoryPath: string = path.resolve(process.cwd(), "storages", "local", body.name);
+        const directoryPath: string = this.baseDirectory + "/" + body.name;
         if (body.isPublic) {
             exist = await this.bucketRepository.findOneById(1);
         } else {
@@ -168,7 +170,7 @@ export class ConfigService {
                     await this.imageRepository.save(image);
                 } catch (err) {
                     // 保存图片出现错误，要删除存储图片
-                    await this.fileUtil.delete(path.resolve(__dirname, "../", "store", buckets[i].name, image.name + "." + image.type));
+                    await this.fileUtil.delete(this.baseDirectory + "/" + buckets[i].name + "/" + image.name + "." + image.type);
                     throw new HttpException("水印图片保存失败" + err.toString(), 410);
                 }
             }
@@ -177,7 +179,7 @@ export class ConfigService {
             try {
                 await this.imageConfigRepository.updateById(buckets[i].imageConfig.id, {
                     // 水印路径为相对路径
-                    watermarkSaveKey: "/store/" + buckets[i].name + "/" + image.name + "." + image.type,
+                    watermarkSaveKey: "/storages/local/" + buckets[i].name + "/" + image.name + "." + image.type,
                     watermarkGravity: obj.gravity,
                     watermarkOpacity: obj.opacity,
                     watermarkWs: obj.ws,

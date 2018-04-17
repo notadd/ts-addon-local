@@ -12,14 +12,16 @@ import { KindUtil } from "./kind.util";
 /* 图片处理工具类 */
 @Component()
 export class ImageProcessUtil {
+
     private readonly gravity: Set<string>;
+    private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
 
     constructor(
         @Inject(KindUtil) private readonly kindUtil: KindUtil,
         @Inject(FileUtil) private readonly fileUtil: FileUtil
     ) {
         // 重心集合，在裁剪与水印中使用
-        this.gravity = new Set([ "northwest", "north", "northeast", "west", "center", "east", "southwest", "south", "southeast" ]);
+        this.gravity = new Set(["northwest", "north", "northeast", "west", "center", "east", "southwest", "south", "southeast"]);
     }
 
     // 获取指定图片、字节缓冲的图片元数据，参数可以为图片路径或者Buffer对象
@@ -57,7 +59,7 @@ export class ImageProcessUtil {
         // 获取处理后元数据
         const metadata: ImageMetadata = await this.getMetadata(buffer);
         // 处理后图片绝对路径
-        const absolutePath: string = path.resolve(__dirname, "../", "store", bucket.name, metadata.name + "." + metadata.format);
+        const absolutePath: string = this.baseDirectory + "/" + bucket.name + "/" + metadata.name + "." + metadata.format);
         await this.fileUtil.write(absolutePath, buffer);
         // 返回处理后元数据
         return metadata;
@@ -548,7 +550,7 @@ export class ImageProcessUtil {
             // 透明度暂时不使用
             const opacity = bucket.imageConfig.watermarkOpacity;
             let gravity = bucket.imageConfig.watermarkGravity;
-            const shuiyinPath = path.resolve(__dirname, "../") + bucket.imageConfig.watermarkSaveKey;
+            const shuiyinPath = process.cwd() + bucket.imageConfig.watermarkSaveKey;
             // 水印图片宽高
             let { width, height } = await this.getMetadata(shuiyinPath);
             // 计算短边自适应后水印图片宽高
@@ -615,8 +617,8 @@ export class ImageProcessUtil {
             // 获取临时原图、缩放后水印图片Buffer，生成存储临时路径
             const buffer: Buffer = await instance.toBuffer();
             const shuiyinBuffer: Buffer = await sharp(shuiyinPath).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer();
-            const tempPath = path.resolve(__dirname, "../", "store", "temp", "raw" + (+new Date()) + "." + metadata.format);
-            const shuiyinTempPath = path.resolve(__dirname, "../", "store", "temp", "shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
+            const tempPath = this.baseDirectory + "/temp/raw" + (+new Date()) + "." + metadata.format;
+            const shuiyinTempPath = this.baseDirectory + "/temp/shuiyin"  + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
             await this.fileUtil.write(tempPath, buffer);
             await this.fileUtil.write(shuiyinTempPath, shuiyinBuffer);
             let ex: any = "";
@@ -645,7 +647,7 @@ export class ImageProcessUtil {
             throw new Error("旋转角度不正确");
         }
         const buffer: Buffer = await instance.toBuffer();
-        const tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "." + metadata.format);
+        const tempPath = this.baseDirectory + "/temp/rotate" + (+new Date()) + "." + metadata.format;
         let ex: any = "";
         // 根据绝对路径保存图片
         await this.fileUtil.write(tempPath, buffer);

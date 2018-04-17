@@ -18,6 +18,7 @@ import { Bucket } from "../../model/bucket.entity";
 import { KindUtil } from "../../util/kind.util";
 import { FileUtil } from "../../util/file.util";
 import { Repository } from "typeorm";
+import * as path from "path";
 
 /* 本地存储配置的resolver */
 @Resolver("Config")
@@ -142,8 +143,8 @@ export class ConfigResolver {
             } else {
                 // 暂定短边自适应比例可以大于100
             }
-            // 保存图片的base64编码为文件，保存目录为当前目录下
-            tempPath = __dirname + "/" + name;
+            // 保存图片的base64编码为文件，保存目录为临时目录下
+            tempPath = path.resolve(process.cwd(), "storages", "local", "temp", name);
             await this.fileUtil.write(tempPath, Buffer.from(body.base64, "base64"));
             // 删除base64字符串，太大了
             delete body.base64;
