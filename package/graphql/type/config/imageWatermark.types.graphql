@@ -5,13 +5,13 @@ type Mutation{
 
 #the enum of orientation
 enum Gravity {
-  northwest
-  north
-  northeast
-  west
-  center
-  east
-  southwest
-  south
-  southeast
+    northwest
+    north
+    northeast
+    west
+    center
+    east
+    southwest
+    south
+    southeast
 }

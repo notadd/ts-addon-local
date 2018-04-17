@@ -66,7 +66,6 @@ input Blur{
     sigma:Int
 }
 
-
 #image pretreatment info , used by uploading image 
 input ImagePreProcessInfo{
     #resize info 
