@@ -42,6 +42,10 @@ import * as mime from "mime";
 @Controller("local/file")
 @UseFilters(new LocalExceptionFilter())
 export class FileController {
+
+
+    private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
+
     /**
      * @param { FileUtil } fileUtil
      * @param { KindUtil } kindUtil
@@ -69,7 +73,7 @@ export class FileController {
     async download(@Headers() headers: HeaderParam, @Response() res): Promise<any> {
         const { bucketName, fileName } = headers;
         // 文件绝对路径，这里并不查询数据库，直接从文件夹获取
-        const realPath: string = path.resolve(__dirname, "../", "store", bucketName, fileName);
+        const realPath: string = this.baseDirectory + "/" + bucketName + "/" + fileName;
         // 文件不存在，返回404
         if (!this.fileUtil.exist(realPath)) {
             throw new HttpException("请求下载的文件不存在", 404);
@@ -141,7 +145,7 @@ export class FileController {
         const { bucketName, fileName } = param;
         const { imagePostProcessString, token } = query;
         // 判断文件是否存在
-        const realPath: string = path.resolve(__dirname, "../", "store", bucketName, fileName);
+        const realPath: string = this.baseDirectory + "/" + bucketName + "/" + fileName;
         if (!this.fileUtil.exist(realPath)) {
             throw new HttpException("指定文件不存在", 404);
         }

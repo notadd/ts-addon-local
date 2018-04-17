@@ -618,7 +618,7 @@ export class ImageProcessUtil {
             const buffer: Buffer = await instance.toBuffer();
             const shuiyinBuffer: Buffer = await sharp(shuiyinPath).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer();
             const tempPath = this.baseDirectory + "/temp/raw" + (+new Date()) + "." + metadata.format;
-            const shuiyinTempPath = this.baseDirectory + "/temp/shuiyin"  + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
+            const shuiyinTempPath = this.baseDirectory + "/temp/shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
             await this.fileUtil.write(tempPath, buffer);
             await this.fileUtil.write(shuiyinTempPath, shuiyinBuffer);
             let ex: any = "";

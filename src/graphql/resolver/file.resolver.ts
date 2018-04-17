@@ -157,7 +157,7 @@ export class FileResolver {
         const data: OneData = {
             code: 200,
             message: "获取文件url成功",
-            url: req.protocol + "://" + req.get("host")
+            url: req.protocol + "://" + req.get("host") + "/local/file/visit"
         };
         // 验证参数存在，图片后处理信息可选
         const { bucketName, name, type, imagePostProcessInfo } = body;

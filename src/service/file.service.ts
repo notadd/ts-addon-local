@@ -62,7 +62,7 @@ export class FileService {
             const exist: Image|undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
             // 如果处理后得到文件已存在，不保存，正确返回
             if (exist) {
-                return "/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
+                return "/local/file/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
             }
             // 不存在，保存处理后文件
             const image: Image = new Image();
@@ -84,7 +84,7 @@ export class FileService {
             } catch (err) {
                 throw new HttpException("文件保存到数据库失败:" + err.toString(), 406);
             }
-            return "/visit/" + bucket.name + "/" + image.name + "." + image.type;
+            return "/local/file/visit/" + bucket.name + "/" + image.name + "." + image.type;
         } else {
             // 暂时不支持其他种类文件
         }
@@ -96,7 +96,6 @@ export class FileService {
         data.audios = await bucket.audios;
         data.videos = await bucket.videos;
         data.documents = await bucket.documents;
-
         const tokenUtil = this.tokenUtil;
         const addUrl = async (value) => {
             value.url = "/" + bucket.name + "/" + value.name + "." + value.type;
