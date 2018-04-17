@@ -28,7 +28,7 @@ export class ConfigResolver {
     // 图片水印方位的集合，九宫格
     private readonly gravity: Set<string>;
 
-    private readonly _imageFormat: Set<string> = new Set(["raw", "webp_damage", "webp_undamage"]);
+    private readonly _imageFormat: Set<string>;
 
     private readonly _audioFormat: Set<string>;
 
@@ -42,6 +42,7 @@ export class ConfigResolver {
         @Inject(ConfigService) private readonly configService: ConfigService,
         @InjectRepository(Bucket) private readonly bucketRepository: Repository<Bucket>
     ) {
+        this._imageFormat = new Set(["raw", "webp_damage", "webp_undamage"]);
         this._audioFormat = new Set(["raw", "mp3", "aac"]);
         this._videoFormat = new Set(["raw", "vp9", "h264", "h265"]);
         this._videoResolution = new Set(["raw", "p1080", "p720", "p480"]);
