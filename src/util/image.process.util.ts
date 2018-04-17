@@ -59,7 +59,7 @@ export class ImageProcessUtil {
         // 获取处理后元数据
         const metadata: ImageMetadata = await this.getMetadata(buffer);
         // 处理后图片绝对路径
-        const absolutePath: string = this.baseDirectory + "/" + bucket.name + "/" + metadata.name + "." + metadata.format);
+        const absolutePath: string = this.baseDirectory + "/" + bucket.name + "/" + metadata.name + "." + metadata.format;
         await this.fileUtil.write(absolutePath, buffer);
         // 返回处理后元数据
         return metadata;
@@ -618,7 +618,7 @@ export class ImageProcessUtil {
             const buffer: Buffer = await instance.toBuffer();
             const shuiyinBuffer: Buffer = await sharp(shuiyinPath).resize(Math.floor(width), Math.floor(height)).ignoreAspectRatio().toBuffer();
             const tempPath = this.baseDirectory + "/temp/raw" + (+new Date()) + "." + metadata.format;
-            const shuiyinTempPath = this.baseDirectory + "/temp/shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf(".")));
+            const shuiyinTempPath = this.baseDirectory + "/temp/shuiyin" + (+new Date()) + shuiyinPath.substring(shuiyinPath.lastIndexOf("."));
             await this.fileUtil.write(tempPath, buffer);
             await this.fileUtil.write(shuiyinTempPath, shuiyinBuffer);
             let ex: any = "";
