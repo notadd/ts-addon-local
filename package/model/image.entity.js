@@ -50,3 +50,5 @@ Image = __decorate([
     typeorm_1.Index("name_bucket_id", ["name", "bucketId"], { unique: true })
 ], Image);
 exports.Image = Image;
+
+//# sourceMappingURL=image.entity.js.map

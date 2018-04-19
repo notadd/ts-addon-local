@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/file/all.body.ts"],"names":[],"mappings":"","file":"all.body.js","sourcesContent":["export interface AllBody {\n    bucketName: string;\n}\n"]}

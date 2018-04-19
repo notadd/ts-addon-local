@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/config/bucket.config.ts"],"names":[],"mappings":"","file":"bucket.config.js","sourcesContent":["export interface BucketConfig {\n    isPublic: boolean;\n\n    name: string;\n\n    tokenExpire: number;\n\n    tokenSecretKey: string;\n}\n"]}

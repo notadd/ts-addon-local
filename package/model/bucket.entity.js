@@ -125,3 +125,5 @@ Bucket = __decorate([
     })
 ], Bucket);
 exports.Bucket = Bucket;
+
+//# sourceMappingURL=bucket.entity.js.map

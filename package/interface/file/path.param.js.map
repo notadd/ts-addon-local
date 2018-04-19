@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/file/path.param.ts"],"names":[],"mappings":"","file":"path.param.js","sourcesContent":["export interface PathParam {\n    bucketName: string;\n\n    fileName: string;\n}\n"]}

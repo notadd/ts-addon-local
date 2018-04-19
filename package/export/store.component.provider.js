@@ -189,3 +189,5 @@ exports.StoreComponentProvider = {
     },
     inject: [kind_util_1.KindUtil, file_util_1.FileUtil, token_util_1.TokenUtil, image_process_util_1.ImageProcessUtil, "ImageRepository", "BucketRepository"]
 };
+
+//# sourceMappingURL=store.component.provider.js.map

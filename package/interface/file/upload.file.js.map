@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/file/upload.file.ts"],"names":[],"mappings":"","file":"upload.file.js","sourcesContent":["export interface UploadFile {\n    name: string;\n\n    path: string;\n\n    size?: number;\n}\n"]}

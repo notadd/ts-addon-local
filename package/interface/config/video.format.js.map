@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/config/video.format.ts"],"names":[],"mappings":"","file":"video.format.js","sourcesContent":["export interface VideoFormat {\n    format: string;\n\n    resolution: string;\n}\n"]}

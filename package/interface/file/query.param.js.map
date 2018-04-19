@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/file/query.param.ts"],"names":[],"mappings":"","file":"query.param.js","sourcesContent":["export interface QueryParam {\n    imagePostProcessString?: string;\n\n    token?: string;\n}\n"]}

@@ -42,3 +42,5 @@ TokenUtil = __decorate([
     __metadata("design:paramtypes", [])
 ], TokenUtil);
 exports.TokenUtil = TokenUtil;
+
+//# sourceMappingURL=token.util.js.map

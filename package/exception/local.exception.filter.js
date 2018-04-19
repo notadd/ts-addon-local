@@ -23,3 +23,5 @@ LocalExceptionFilter = __decorate([
     common_1.Catch(common_1.HttpException)
 ], LocalExceptionFilter);
 exports.LocalExceptionFilter = LocalExceptionFilter;
+
+//# sourceMappingURL=local.exception.filter.js.map

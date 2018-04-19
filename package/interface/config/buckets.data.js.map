@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/config/buckets.data.ts"],"names":[],"mappings":"","file":"buckets.data.js","sourcesContent":["export interface BucketsData {\n    code: number;\n\n    message: string;\n\n    buckets: Array<BucketInfo>;\n}\n\nexport interface BucketInfo {\n    id: number;\n\n    publicOrPrivate: string;\n\n    name: string;\n}\n"]}

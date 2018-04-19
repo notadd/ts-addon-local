@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/file/upload.form.ts"],"names":[],"mappings":"","file":"upload.form.js","sourcesContent":["export interface UploadForm {\n    imagePreProcessString?: string;\n\n    contentSecret?: string;\n\n    tagsString?: string;\n\n    md5: string;\n\n    bucketName: string;\n\n    rawName: string;\n}\n"]}

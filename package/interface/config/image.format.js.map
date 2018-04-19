@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/config/image.format.ts"],"names":[],"mappings":"","file":"image.format.js","sourcesContent":["export interface ImageFormat {\n    format: string;\n}\n"]}

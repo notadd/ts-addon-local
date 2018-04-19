@@ -68,3 +68,5 @@ exports.AllowedExtensions = {
         "docm",
     ],
 };
+
+//# sourceMappingURL=allow.extension.js.map

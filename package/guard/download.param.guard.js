@@ -23,3 +23,5 @@ DownloadParamGuard = __decorate([
     common_1.Guard()
 ], DownloadParamGuard);
 exports.DownloadParamGuard = DownloadParamGuard;
+
+//# sourceMappingURL=download.param.guard.js.map

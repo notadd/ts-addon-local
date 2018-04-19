@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/interface/file/image.metadata.ts"],"names":[],"mappings":"","file":"image.metadata.js","sourcesContent":["export interface ImageMetadata {\n    name: string;\n\n    format: string;\n\n    width: number;\n\n    height: number;\n\n    size: number;\n}\n"]}

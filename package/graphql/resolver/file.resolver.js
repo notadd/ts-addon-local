@@ -263,3 +263,5 @@ FileResolver = __decorate([
         typeorm_1.Repository])
 ], FileResolver);
 exports.FileResolver = FileResolver;
+
+//# sourceMappingURL=file.resolver.js.map
