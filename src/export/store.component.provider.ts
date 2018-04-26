@@ -104,7 +104,7 @@ export class StoreComponent {
                         await this.imageRepository.save(image);
                     } catch (err) {
                         // 保存图片出现错误，要删除存储图片
-                        await this.fileUtil.delete(this.baseDirectory + "/" + bucket.name + "/" + image.name + "." + image.type);)
+                        await this.fileUtil.delete(this.baseDirectory + "/" + bucket.name + "/" + image.name + "." + image.type);
                         throw new HttpException("上传图片保存失败" + err.toString(), 410);
                     }
                 }
