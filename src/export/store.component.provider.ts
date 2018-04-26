@@ -12,6 +12,8 @@ import * as path from "path";
 
 export class StoreComponent {
 
+    private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
+
     constructor(
         @Inject(KindUtil) private readonly kindUtil: KindUtil,
         @Inject(FileUtil) private readonly fileUtil: FileUtil,
@@ -27,14 +29,14 @@ export class StoreComponent {
         if (!bucketName || !name || !type) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket | undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
         // 根据文件种类，查找、删除数据库
         const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const image: Image|undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
+            const image: Image | undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
                 throw new HttpException("文件" + name + "不存在于数据库中", 404);
             }
@@ -43,7 +45,7 @@ export class StoreComponent {
             // 其他类型暂不支持
         }
         // 删除目录下存储文件
-        const realPath = path.resolve(__dirname, "../", "store", bucketName, name + "." + type);
+        const realPath = this.baseDirectory + "/" + bucketName + "/" + name + "." + type;
         if (!this.fileUtil.exist(realPath)) {
             throw new HttpException("要删除的文件不存在", 404);
         }
@@ -51,7 +53,7 @@ export class StoreComponent {
     }
 
     async upload(bucketName: string, rawName: string, base64: string, imagePreProcessInfo: ImagePreProcessInfo): Promise<{ bucketName: string, name: string, type: string }> {
-        const tempPath: string = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "" + rawName);
+        const tempPath: string = this.baseDirectory + "/temp" + ((+new Date()) + "") + rawName;
         if (!bucketName || !rawName || !base64) {
             throw new HttpException("缺少参数", 400);
         }
@@ -95,14 +97,14 @@ export class StoreComponent {
                 image.width = metadata.width;
                 image.height = metadata.height;
                 image.size = metadata.size;
-                const isExist: Image|undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
+                const isExist: Image | undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
                 // 只有指定路径图片不存在时才会保存
                 if (!isExist) {
                     try {
                         await this.imageRepository.save(image);
                     } catch (err) {
                         // 保存图片出现错误，要删除存储图片
-                        await this.fileUtil.delete(path.resolve(__dirname, "../", "store", bucket.name, image.name + "." + image.type));
+                        await this.fileUtil.delete(this.baseDirectory + "/" + bucket.name + "/" + image.name + "." + image.type);)
                         throw new HttpException("上传图片保存失败" + err.toString(), 410);
                     }
                 }
@@ -123,7 +125,7 @@ export class StoreComponent {
         if (!bucketName || !name || !type || !req || !req.protocol || !req.get("host")) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket | undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
@@ -131,7 +133,7 @@ export class StoreComponent {
         // 根据文件种类，查找、删除数据库
         const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const image: Image|undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
+            const image: Image | undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
                 throw new HttpException("指定图片" + name + "." + type + "不存在", 404);
             }
@@ -162,6 +164,6 @@ export const StoreComponentProvider = {
     useFactory: (kindUtil: KindUtil, fileUtil: FileUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>) => {
         return new StoreComponent(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository);
     },
-    inject: [ KindUtil, FileUtil, TokenUtil, ImageProcessUtil, "ImageRepository", "BucketRepository" ]
+    inject: [KindUtil, FileUtil, TokenUtil, ImageProcessUtil, "ImageRepository", "BucketRepository"]
 
 };
