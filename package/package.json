@@ -1,6 +1,6 @@
 {
     "name": "@notadd/addon-local",
-    "version": "2.0.9",
+    "version": "2.0.10",
     "description": "Package Open in Browser for already.",
     "main": "index.js",
     "repository": {
