@@ -50,8 +50,9 @@ let UploadParamGuard = class UploadParamGuard {
             }).catch(err => {
                 ex = err;
             });
-            if (ex)
+            if (ex) {
                 throw ex;
+            }
             req.body.uploadFile = file;
             req.body.uploadForm = obj;
             return true;

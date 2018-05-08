@@ -13,6 +13,7 @@ export declare class StoreComponent {
     private readonly imageProcessUtil;
     private readonly imageRepository;
     private readonly bucketRepository;
+    private readonly baseDirectory;
     constructor(kindUtil: KindUtil, fileUtil: FileUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>);
     delete(bucketName: string, name: string, type: string): Promise<void>;
     upload(bucketName: string, rawName: string, base64: string, imagePreProcessInfo: ImagePreProcessInfo): Promise<{

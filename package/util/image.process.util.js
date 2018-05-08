@@ -123,8 +123,9 @@ let ImageProcessUtil = class ImageProcessUtil {
                     rotateImagePath = yield this.rotate(instance, metadata, rotate, width2, height2);
                     instance = sharp(rotateImagePath);
                 }
-                if (format)
+                if (format) {
                     this.format(instance, format);
+                }
                 if (lossless) {
                     this.output(instance, format ? format : metadata.format, lossless, 100, true);
                 }
@@ -200,14 +201,18 @@ let ImageProcessUtil = class ImageProcessUtil {
                     rotateImagePath = yield this.rotate(instance, metadata, rotate, width2, height2);
                     instance = sharp(rotateImagePath);
                 }
-                if (blur)
+                if (blur) {
                     this.blur(instance, blur);
-                if (sharpen)
+                }
+                if (sharpen) {
                     this.sharpen(instance, sharpen);
-                if (format)
+                }
+                if (format) {
                     this.format(instance, format);
-                if (strip)
+                }
+                if (strip) {
                     this.strip(instance, strip);
+                }
                 if (lossless || quality || progressive) {
                     this.output(instance, format ? format : metadata.format, lossless, quality, progressive);
                 }
@@ -435,14 +440,18 @@ let ImageProcessUtil = class ImageProcessUtil {
     watermark(bucket, instance, metadata, watermark, preWidth, preHeight) {
         return __awaiter(this, void 0, void 0, function* () {
             let enable;
-            if (watermark === true)
+            if (watermark === true) {
                 enable = true;
-            else if (watermark === false)
+            }
+            else if (watermark === false) {
                 enable = false;
-            else if (watermark === undefined)
+            }
+            else if (watermark === undefined) {
                 enable = !!bucket.imageConfig.watermarkEnable;
-            else
+            }
+            else {
                 throw new Error("水印参数错误");
+            }
             if (enable) {
                 let x = bucket.imageConfig.watermarkX;
                 let y = bucket.imageConfig.watermarkY;
@@ -507,8 +516,9 @@ let ImageProcessUtil = class ImageProcessUtil {
                 let ex = "";
                 yield new Promise((resolve, reject) => {
                     gm(tempPath).composite(shuiyinTempPath).gravity(gravity).geometry("+" + x + "+" + y).dissolve(opacity).write(tempPath, err => {
-                        if (err)
+                        if (err) {
                             reject(new common_1.HttpException("为图片添加水印出现错误:" + err.toString(), 407));
+                        }
                         resolve();
                     });
                 }).catch(err => {
@@ -537,8 +547,9 @@ let ImageProcessUtil = class ImageProcessUtil {
             yield this.fileUtil.write(tempPath, buffer);
             yield new Promise((resolve, reject) => {
                 gm(tempPath).rotate("black", rotate).write(tempPath, err => {
-                    if (err)
+                    if (err) {
                         reject(new common_1.HttpException("旋转文件图片出现错误:" + err.toString(), 407));
+                    }
                     resolve();
                 });
             }).catch(err => {
@@ -562,8 +573,9 @@ let ImageProcessUtil = class ImageProcessUtil {
         }
         else if (sharpen === false) {
         }
-        else
+        else {
             throw new Error("锐化参数错误");
+        }
     }
     format(instance, format) {
         if (this.kindUtil.isImage(format)) {
@@ -596,12 +608,15 @@ let ImageProcessUtil = class ImageProcessUtil {
         const options = {
             force: true
         };
-        if (lossless !== undefined && lossless !== null)
+        if (lossless !== undefined && lossless !== null) {
             options.lossless = lossless;
-        if (quality !== undefined && quality !== null)
+        }
+        if (quality !== undefined && quality !== null) {
             options.quality = quality;
-        if (progressive !== undefined && progressive !== null)
+        }
+        if (progressive !== undefined && progressive !== null) {
             options.progressive = progressive;
+        }
         if (format === "jpeg") {
             instance.jpeg(options);
         }

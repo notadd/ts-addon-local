@@ -36,6 +36,7 @@ let StoreComponent = class StoreComponent {
         this.imageProcessUtil = imageProcessUtil;
         this.imageRepository = imageRepository;
         this.bucketRepository = bucketRepository;
+        this.baseDirectory = path.resolve(process.cwd(), "storages", "local");
     }
     delete(bucketName, name, type) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -56,7 +57,7 @@ let StoreComponent = class StoreComponent {
             }
             else {
             }
-            const realPath = path.resolve(__dirname, "../", "store", bucketName, name + "." + type);
+            const realPath = this.baseDirectory + "/" + bucketName + "/" + name + "." + type;
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("要删除的文件不存在", 404);
             }
@@ -65,7 +66,7 @@ let StoreComponent = class StoreComponent {
     }
     upload(bucketName, rawName, base64, imagePreProcessInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tempPath = path.resolve(__dirname, "../", "store", "temp", (+new Date()) + "" + rawName);
+            const tempPath = this.baseDirectory + "/temp" + ((+new Date()) + "") + rawName;
             if (!bucketName || !rawName || !base64) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
@@ -115,7 +116,7 @@ let StoreComponent = class StoreComponent {
                             yield this.imageRepository.save(image);
                         }
                         catch (err) {
-                            yield this.fileUtil.delete(path.resolve(__dirname, "../", "store", bucket.name, image.name + "." + image.type));
+                            yield this.fileUtil.delete(this.baseDirectory + "/" + bucket.name + "/" + image.name + "." + image.type);
                             throw new common_1.HttpException("上传图片保存失败" + err.toString(), 410);
                         }
                     }

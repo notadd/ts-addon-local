@@ -145,7 +145,7 @@ export class ImageProcessUtil {
                 // 重新获取Sharp实例
                 instance = sharp(rotateImagePath);
             }
-            if (format) this.format(instance, format);
+            if (format) { this.format(instance, format); }
             if (lossless) {
                 this.output(instance, format ? format : metadata.format, lossless, 100, true);
             }
@@ -238,10 +238,10 @@ export class ImageProcessUtil {
                 rotateImagePath = await this.rotate(instance, metadata, rotate, width2, height2);
                 instance = sharp(rotateImagePath);
             }
-            if (blur) this.blur(instance, blur);
-            if (sharpen) this.sharpen(instance, sharpen);
-            if (format) this.format(instance, format);
-            if (strip) this.strip(instance, strip);
+            if (blur) { this.blur(instance, blur); }
+            if (sharpen) { this.sharpen(instance, sharpen); }
+            if (format) { this.format(instance, format); }
+            if (strip) { this.strip(instance, strip); }
             if (lossless || quality || progressive) {
                 this.output(instance, format ? format : metadata.format, lossless as any, quality as any, progressive as any);
             }
@@ -538,10 +538,10 @@ export class ImageProcessUtil {
     // 且水印图片宽高都不能超过原图，超过不能输出，如果水印图片宽高加上相应偏移超过了超过了原图宽高，则偏移会自动调整
     async watermark(bucket: Bucket, instance: sharp.SharpInstance, metadata: ImageMetadata, watermark: boolean, preWidth: number, preHeight: number): Promise<string> {
         let enable: boolean;
-        if (watermark === true) enable = true;
-        else if (watermark === false) enable = false;
-        else if (watermark === undefined) enable = !!bucket.imageConfig.watermarkEnable;
-        else throw new Error("水印参数错误");
+        if (watermark === true) { enable = true; }
+        else if (watermark === false) { enable = false; }
+        else if (watermark === undefined) { enable = !!bucket.imageConfig.watermarkEnable; }
+        else { throw new Error("水印参数错误"); }
         if (enable) {
             // 获取参数，根据这些参数计算最后的左偏移、顶偏移、宽高
             let x = bucket.imageConfig.watermarkX;
@@ -624,7 +624,7 @@ export class ImageProcessUtil {
             let ex: any = "";
             await new Promise((resolve, reject) => {
                 gm(tempPath).composite(shuiyinTempPath).gravity(gravity).geometry("+" + x + "+" + y).dissolve(opacity).write(tempPath, err => {
-                    if (err) reject(new HttpException("为图片添加水印出现错误:" + err.toString(), 407));
+                    if (err) { reject(new HttpException("为图片添加水印出现错误:" + err.toString(), 407)); }
                     resolve();
                 });
             }).catch(err => {
@@ -653,7 +653,7 @@ export class ImageProcessUtil {
         await this.fileUtil.write(tempPath, buffer);
         await new Promise((resolve, reject) => {
             gm(tempPath).rotate("black", rotate).write(tempPath, err => {
-                if (err) reject(new HttpException("旋转文件图片出现错误:" + err.toString(), 407));
+                if (err) { reject(new HttpException("旋转文件图片出现错误:" + err.toString(), 407)); }
                 resolve();
             });
         }).catch(err => {
@@ -682,7 +682,7 @@ export class ImageProcessUtil {
         else if (sharpen === false) {
 
         }
-        else throw new Error("锐化参数错误");
+        else { throw new Error("锐化参数错误"); }
     }
 
     /* 转换图片格式，png格式比jpeg大很多，webp默认内为有损格式，比jpeg小
@@ -724,9 +724,9 @@ export class ImageProcessUtil {
         const options: any = {
             force: true
         };
-        if (lossless !== undefined && lossless !== null) options.lossless = lossless;
-        if (quality !== undefined && quality !== null) options.quality = quality;
-        if (progressive !== undefined && progressive !== null) options.progressive = progressive;
+        if (lossless !== undefined && lossless !== null) { options.lossless = lossless; }
+        if (quality !== undefined && quality !== null) { options.quality = quality; }
+        if (progressive !== undefined && progressive !== null) { options.progressive = progressive; }
         // jpeg不支持无损，加上了也无所谓
         if (format === "jpeg") {
             instance.jpeg(options);

@@ -43,7 +43,6 @@ import * as mime from "mime";
 @UseFilters(new LocalExceptionFilter())
 export class FileController {
 
-
     private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
 
     /**

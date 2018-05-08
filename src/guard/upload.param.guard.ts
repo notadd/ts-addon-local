@@ -39,7 +39,7 @@ export class UploadParamGuard implements CanActivate {
         }).catch(err => {
             ex = err;
         });
-        if (ex) throw ex;
+        if (ex) { throw ex; }
         req.body.uploadFile = file;
         req.body.uploadForm = obj;
         return true;
