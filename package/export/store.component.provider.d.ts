@@ -23,6 +23,7 @@ export declare class StoreComponent {
     }>;
     getUrl(req: any, bucketName: string, name: string, type: string, imagePostProcessInfo: ImagePostProcessInfo): Promise<string>;
 }
+export declare const StoreComponentToken = "StoreComponentToken";
 export declare const StoreComponentProvider: {
     provide: string;
     useFactory: (kindUtil: KindUtil, fileUtil: FileUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>) => StoreComponent;

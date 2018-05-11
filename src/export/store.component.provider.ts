@@ -1,4 +1,5 @@
 import { ImagePostProcessInfo, ImagePreProcessInfo } from "../interface/file/image.process.info";
+import { getRepositoryToken } from "@nestjs/typeorm/typeorm.utils";
 import { HttpException, Component, Inject } from "@nestjs/common";
 import { ImageMetadata } from "../interface/file/image.metadata";
 import { ImageProcessUtil } from "../util/image.process.util";
@@ -159,11 +160,13 @@ export class StoreComponent {
     }
 }
 
+export const StoreComponentToken = "StoreComponentToken";
+
 export const StoreComponentProvider = {
-    provide: "StoreComponentToken",
+    provide: StoreComponentToken,
     useFactory: (kindUtil: KindUtil, fileUtil: FileUtil, tokenUtil: TokenUtil, imageProcessUtil: ImageProcessUtil, imageRepository: Repository<Image>, bucketRepository: Repository<Bucket>) => {
         return new StoreComponent(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository);
     },
-    inject: [KindUtil, FileUtil, TokenUtil, ImageProcessUtil, "ImageRepository", "BucketRepository"]
+    inject: [KindUtil, FileUtil, TokenUtil, ImageProcessUtil, getRepositoryToken(Image), getRepositoryToken(Bucket)]
 
 };

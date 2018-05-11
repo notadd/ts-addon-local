@@ -20,9 +20,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const typeorm_utils_1 = require("@nestjs/typeorm/typeorm.utils");
 const common_1 = require("@nestjs/common");
 const image_process_util_1 = require("../util/image.process.util");
 const typeorm_1 = require("typeorm");
+const bucket_entity_1 = require("../model/bucket.entity");
 const image_entity_1 = require("../model/image.entity");
 const token_util_1 = require("../util/token.util");
 const file_util_1 = require("../util/file.util");
@@ -183,12 +185,13 @@ StoreComponent = __decorate([
         typeorm_1.Repository])
 ], StoreComponent);
 exports.StoreComponent = StoreComponent;
+exports.StoreComponentToken = "StoreComponentToken";
 exports.StoreComponentProvider = {
-    provide: "StoreComponentToken",
+    provide: exports.StoreComponentToken,
     useFactory: (kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository) => {
         return new StoreComponent(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository);
     },
-    inject: [kind_util_1.KindUtil, file_util_1.FileUtil, token_util_1.TokenUtil, image_process_util_1.ImageProcessUtil, "ImageRepository", "BucketRepository"]
+    inject: [kind_util_1.KindUtil, file_util_1.FileUtil, token_util_1.TokenUtil, image_process_util_1.ImageProcessUtil, typeorm_utils_1.getRepositoryToken(image_entity_1.Image), typeorm_utils_1.getRepositoryToken(bucket_entity_1.Bucket)]
 };
 
 //# sourceMappingURL=store.component.provider.js.map
