@@ -5,7 +5,7 @@ import { graphiqlExpress, graphqlExpress } from "apollo-server-express";
 import { LocalModule } from "../src/local.module";
 
 @Module({
-    modules: [ GraphQLModule, LocalModule, TypeOrmModule.forRoot({
+    modules: [GraphQLModule, LocalModule, TypeOrmModule.forRoot({
         name: "local",
         type: "postgres",
         host: "localhost",
@@ -16,9 +16,9 @@ import { LocalModule } from "../src/local.module";
         synchronize: true,
         dropSchema: true,
         logger: "simple-console",
-        logging: "all",
-        entities: [ "../**/*.entity.ts" ]
-    }) ]
+        logging: false,
+        entities: ["./**/*.entity.ts"]
+    })]
 })
 export class ApplicationModule implements NestModule {
 
@@ -26,7 +26,7 @@ export class ApplicationModule implements NestModule {
     }
 
     configure(consumer: MiddlewaresConsumer) {
-        const typeDefs = this.graphQLFactory.mergeTypesByPaths("./src/**/*.types.graphql");
+        const typeDefs = this.graphQLFactory.mergeTypesByPaths("./**/*.types.graphql");
         const schema = this.graphQLFactory.createSchema({ typeDefs });
         consumer
             .apply(graphiqlExpress({ endpointURL: "/graphql" }))

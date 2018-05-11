@@ -1,7 +1,7 @@
 import { StoreComponentProvider } from "./export/store.component.provider";
 import { Global, Module, OnModuleInit, Inject } from "@nestjs/common";
-import { ConfigResolver } from "./graphql/resolver/config.resolver";
-import { FileResolver } from "./graphql/resolver/file.resolver";
+import { ConfigResolver } from "./resolver/config.resolver";
+import { FileResolver } from "./resolver/file.resolver";
 import { FileController } from "./controller/file.controller";
 import { ImageProcessUtil } from "./util/image.process.util";
 import { AudioConfig } from "./model/audio.config.entity";

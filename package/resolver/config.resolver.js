@@ -21,14 +21,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const exception_interceptor_1 = require("../../interceptor/exception.interceptor");
+const exception_interceptor_1 = require("../interceptor/exception.interceptor");
 const graphql_1 = require("@nestjs/graphql");
-const config_service_1 = require("../../service/config.service");
+const config_service_1 = require("../service/config.service");
 const http_1 = require("http");
 const typeorm_1 = require("@nestjs/typeorm");
-const bucket_entity_1 = require("../../model/bucket.entity");
-const kind_util_1 = require("../../util/kind.util");
-const file_util_1 = require("../../util/file.util");
+const bucket_entity_1 = require("../model/bucket.entity");
+const kind_util_1 = require("../util/kind.util");
+const file_util_1 = require("../util/file.util");
 const typeorm_2 = require("typeorm");
 const path = require("path");
 let ConfigResolver = class ConfigResolver {

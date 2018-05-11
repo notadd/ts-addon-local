@@ -22,8 +22,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const store_component_provider_1 = require("./export/store.component.provider");
 const common_1 = require("@nestjs/common");
-const config_resolver_1 = require("./graphql/resolver/config.resolver");
-const file_resolver_1 = require("./graphql/resolver/file.resolver");
+const config_resolver_1 = require("./resolver/config.resolver");
+const file_resolver_1 = require("./resolver/file.resolver");
 const file_controller_1 = require("./controller/file.controller");
 const image_process_util_1 = require("./util/image.process.util");
 const audio_config_entity_1 = require("./model/audio.config.entity");

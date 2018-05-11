@@ -20,18 +20,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const exception_interceptor_1 = require("../../interceptor/exception.interceptor");
+const exception_interceptor_1 = require("../interceptor/exception.interceptor");
 const graphql_1 = require("@nestjs/graphql");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("typeorm");
-const file_service_1 = require("../../service/file.service");
-const bucket_entity_1 = require("../../model/bucket.entity");
+const file_service_1 = require("../service/file.service");
+const bucket_entity_1 = require("../model/bucket.entity");
 const typeorm_2 = require("@nestjs/typeorm");
-const token_util_1 = require("../../util/token.util");
-const image_entity_1 = require("../../model/image.entity");
-const file_entity_1 = require("../../model/file.entity");
-const kind_util_1 = require("../../util/kind.util");
-const file_util_1 = require("../../util/file.util");
+const token_util_1 = require("../util/token.util");
+const image_entity_1 = require("../model/image.entity");
+const file_entity_1 = require("../model/file.entity");
+const kind_util_1 = require("../util/kind.util");
+const file_util_1 = require("../util/file.util");
 const http_1 = require("http");
 const path = require("path");
 let FileResolver = class FileResolver {
