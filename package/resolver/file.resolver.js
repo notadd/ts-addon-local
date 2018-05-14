@@ -177,11 +177,7 @@ let FileResolver = class FileResolver {
             if (!bucketName) {
                 throw new common_1.HttpException("缺少参数", 400);
             }
-            const bucket = yield this.bucketRepository.findOne({ name: bucketName });
-            if (!bucket) {
-                throw new common_1.HttpException("指定空间" + bucketName + "不存在", 401);
-            }
-            yield this.fileService.getAll(data, bucket);
+            yield this.fileService.getAll(data, bucketName);
             return data;
         });
     }

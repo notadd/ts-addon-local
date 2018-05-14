@@ -103,25 +103,36 @@ let FileService = class FileService {
             }
         });
     }
-    getAll(data, bucket) {
+    getAll(data, bucketName) {
         return __awaiter(this, void 0, void 0, function* () {
-            data.files = yield bucket.files;
-            data.images = yield bucket.images;
-            data.audios = yield bucket.audios;
-            data.videos = yield bucket.videos;
-            data.documents = yield bucket.documents;
+            const bucket = yield this.bucketRepository.createQueryBuilder("bucket")
+                .where({ name: bucketName })
+                .leftJoinAndSelect("bucket.files", "file")
+                .leftJoinAndSelect("bucket.images", "image")
+                .leftJoinAndSelect("bucket.audios", "audio")
+                .leftJoinAndSelect("bucket.videos", "video")
+                .leftJoinAndSelect("bucket.documents", "document")
+                .getOne();
+            if (!bucket) {
+                throw new common_1.HttpException("指定空间" + bucketName + "不存在", 401);
+            }
+            data.files = bucket.files;
+            data.images = bucket.images;
+            data.audios = bucket.audios;
+            data.videos = bucket.videos;
+            data.documents = bucket.documents;
             const tokenUtil = this.tokenUtil;
-            const addUrl = (value) => __awaiter(this, void 0, void 0, function* () {
+            const addUrl = value => {
                 value.url = "/" + bucket.name + "/" + value.name + "." + value.type;
                 if (bucket.publicOrPrivate === "private") {
-                    value.url += "?token=" + (yield tokenUtil.getToken(data.baseUrl + value.url, bucket));
+                    value.url += "?token=" + tokenUtil.getToken(data.baseUrl + value.url, bucket);
                 }
-            });
-            yield data.files.forEach(addUrl);
-            yield data.images.forEach(addUrl);
-            yield data.audios.forEach(addUrl);
-            yield data.videos.forEach(addUrl);
-            yield data.documents.forEach(addUrl);
+            };
+            data.files.forEach(addUrl);
+            data.images.forEach(addUrl);
+            data.audios.forEach(addUrl);
+            data.videos.forEach(addUrl);
+            data.documents.forEach(addUrl);
             return;
         });
     }

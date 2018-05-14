@@ -59,7 +59,7 @@ export class FileService {
         const type: string = rawName.substring(rawName.lastIndexOf(".") + 1);
         const kind: string = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const exist: Image|undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
+            const exist: Image | undefined = await this.imageRepository.findOne({ name: metadata.name, bucketId: bucket.id });
             // 如果处理后得到文件已存在，不保存，正确返回
             if (exist) {
                 return "/local/file/visit/" + bucket.name + "/" + exist.name + "." + exist.type;
@@ -90,24 +90,35 @@ export class FileService {
         }
     }
 
-    async getAll(data: any, bucket: Bucket) {
-        data.files = await bucket.files;
-        data.images = await bucket.images;
-        data.audios = await bucket.audios;
-        data.videos = await bucket.videos;
-        data.documents = await bucket.documents;
+    async getAll(data: any, bucketName: string) {
+        const bucket: Bucket | undefined = await this.bucketRepository.createQueryBuilder("bucket")
+            .where({ name: bucketName })
+            .leftJoinAndSelect("bucket.files", "file")
+            .leftJoinAndSelect("bucket.images", "image")
+            .leftJoinAndSelect("bucket.audios", "audio")
+            .leftJoinAndSelect("bucket.videos", "video")
+            .leftJoinAndSelect("bucket.documents", "document")
+            .getOne()
+        if (!bucket) {
+            throw new HttpException("指定空间" + bucketName + "不存在", 401);
+        }
+        data.files = bucket.files;
+        data.images = bucket.images;
+        data.audios = bucket.audios;
+        data.videos = bucket.videos;
+        data.documents = bucket.documents;
         const tokenUtil = this.tokenUtil;
-        const addUrl = async (value) => {
+        const addUrl = value => {
             value.url = "/" + bucket.name + "/" + value.name + "." + value.type;
             if (bucket.publicOrPrivate === "private") {
-                value.url += "?token=" + await tokenUtil.getToken(data.baseUrl + value.url, bucket);
+                value.url += "?token=" + tokenUtil.getToken(data.baseUrl + value.url, bucket);
             }
         };
-        await data.files.forEach(addUrl);
-        await data.images.forEach(addUrl);
-        await data.audios.forEach(addUrl);
-        await data.videos.forEach(addUrl);
-        await data.documents.forEach(addUrl);
+        data.files.forEach(addUrl);
+        data.images.forEach(addUrl);
+        data.audios.forEach(addUrl);
+        data.videos.forEach(addUrl);
+        data.documents.forEach(addUrl);
         return;
     }
 }

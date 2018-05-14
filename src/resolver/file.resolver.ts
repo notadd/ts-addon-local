@@ -228,11 +228,7 @@ export class FileResolver {
         if (!bucketName) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket | undefined = await this.bucketRepository.findOne({ name: bucketName });
-        if (!bucket) {
-            throw new HttpException("指定空间" + bucketName + "不存在", 401);
-        }
-        await this.fileService.getAll(data, bucket);
+        await this.fileService.getAll(data, bucketName);
         return data;
     }
 
