@@ -32,7 +32,7 @@ const image_entity_1 = require("../model/image.entity");
 const file_entity_1 = require("../model/file.entity");
 const kind_util_1 = require("../util/kind.util");
 const file_util_1 = require("../util/file.util");
-const http_1 = require("http");
+const express_1 = require("express");
 const path = require("path");
 let FileResolver = class FileResolver {
     constructor(fileUtil, kindUtil, tokenUtil, fileService, fileRepository, imageRepository, bucketRepository) {
@@ -241,7 +241,7 @@ __decorate([
 __decorate([
     graphql_1.Mutation("deleteFile"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_a = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _a || Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "deleteFile", null);
 FileResolver = __decorate([
@@ -263,5 +263,6 @@ FileResolver = __decorate([
         typeorm_1.Repository])
 ], FileResolver);
 exports.FileResolver = FileResolver;
+var _a;
 
 //# sourceMappingURL=file.resolver.js.map

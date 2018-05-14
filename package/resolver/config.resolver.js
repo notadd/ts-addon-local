@@ -24,12 +24,12 @@ const common_1 = require("@nestjs/common");
 const exception_interceptor_1 = require("../interceptor/exception.interceptor");
 const graphql_1 = require("@nestjs/graphql");
 const config_service_1 = require("../service/config.service");
-const http_1 = require("http");
 const typeorm_1 = require("@nestjs/typeorm");
 const bucket_entity_1 = require("../model/bucket.entity");
 const kind_util_1 = require("../util/kind.util");
 const file_util_1 = require("../util/file.util");
 const typeorm_2 = require("typeorm");
+const express_1 = require("express");
 const path = require("path");
 let ConfigResolver = class ConfigResolver {
     constructor(fileUtil, kindUtil, configService, bucketRepository) {
@@ -193,43 +193,43 @@ let ConfigResolver = class ConfigResolver {
 __decorate([
     graphql_1.Mutation("bucket"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_a = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _a || Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "bucket", null);
 __decorate([
     graphql_1.Mutation("imageFormat"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _b || Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "imageFormat", null);
 __decorate([
     graphql_1.Mutation("enableImageWatermark"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _c || Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "enableImageWatermark", null);
 __decorate([
     graphql_1.Mutation("imageWatermark"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_d = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _d || Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "imageWatermark", null);
 __decorate([
     graphql_1.Mutation("audioFormat"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _e || Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "audioFormat", null);
 __decorate([
     graphql_1.Mutation("videoFormat"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage, Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _f || Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "videoFormat", null);
 __decorate([
     graphql_1.Query("buckets"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [http_1.IncomingMessage]),
+    __metadata("design:paramtypes", [typeof (_g = typeof express_1.Request !== "undefined" && express_1.Request) === "function" && _g || Object]),
     __metadata("design:returntype", Promise)
 ], ConfigResolver.prototype, "buckets", null);
 ConfigResolver = __decorate([
@@ -245,5 +245,6 @@ ConfigResolver = __decorate([
         typeorm_2.Repository])
 ], ConfigResolver);
 exports.ConfigResolver = ConfigResolver;
+var _a, _b, _c, _d, _e, _f, _g;
 
 //# sourceMappingURL=config.resolver.js.map

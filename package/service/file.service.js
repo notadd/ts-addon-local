@@ -127,7 +127,7 @@ let FileService = class FileService {
     }
 };
 FileService = __decorate([
-    common_1.Component(),
+    common_1.Injectable(),
     __param(0, common_1.Inject(kind_util_1.KindUtil)),
     __param(1, common_1.Inject(token_util_1.TokenUtil)),
     __param(2, common_1.Inject(image_process_util_1.ImageProcessUtil)),

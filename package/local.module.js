@@ -66,7 +66,7 @@ let LocalModule = class LocalModule {
 LocalModule = __decorate([
     common_1.Global(),
     common_1.Module({
-        modules: [
+        imports: [
             typeorm_1.TypeOrmModule.forFeature([
                 bucket_entity_1.Bucket,
                 image_config_entity_1.ImageConfig,
@@ -82,7 +82,7 @@ LocalModule = __decorate([
         controllers: [
             file_controller_1.FileController,
         ],
-        components: [
+        providers: [
             config_resolver_1.ConfigResolver,
             config_service_1.ConfigService,
             file_resolver_1.FileResolver,

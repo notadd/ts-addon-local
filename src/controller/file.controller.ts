@@ -15,7 +15,6 @@ import {
 } from "@nestjs/common";
 import { ImagePostProcessInfo } from "../interface/file/image.process.info";
 import { LocalExceptionFilter } from "../exception/local.exception.filter";
-import { DownloadParamGuard } from "../guard/download.param.guard";
 import { ImageMetadata } from "../interface/file/image.metadata";
 import { UploadParamGuard } from "../guard/upload.param.guard";
 import { ImageProcessUtil } from "../util/image.process.util";
@@ -68,7 +67,6 @@ export class FileController {
 
     /* 下载文件接口，文件路径在url中，文件存在直接返回，不存在返回错误码404 */
     @Get("/download")
-    @UseGuards(DownloadParamGuard)
     async download(@Headers() headers: HeaderParam, @Response() res): Promise<any> {
         const { bucketName, fileName } = headers;
         if (!bucketName) {

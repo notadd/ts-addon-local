@@ -1,4 +1,5 @@
-import { CanActivate, ExecutionContext } from "@nestjs/common";
+import { CanActivate } from "@nestjs/common";
+import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context.host";
 export declare class UploadParamGuard implements CanActivate {
-    canActivate(req: any, context: ExecutionContext): Promise<boolean>;
+    canActivate(context: ExecutionContextHost): Promise<boolean>;
 }

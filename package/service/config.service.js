@@ -45,21 +45,24 @@ let ConfigService = class ConfigService {
     saveBucketConfig(body) {
         return __awaiter(this, void 0, void 0, function* () {
             let exist;
-            const newBucket = {
-                name: body.name,
-            };
             const directoryPath = this.baseDirectory + "/" + body.name;
             if (body.isPublic) {
-                exist = yield this.bucketRepository.findOneById(1);
+                exist = yield this.bucketRepository.findOne(1);
             }
             else {
-                exist = yield this.bucketRepository.findOneById(2);
-                newBucket.tokenExpire = Number.parseInt(body.tokenExpire);
-                newBucket.tokenSecretKey = body.tokenSecretKey;
+                exist = yield this.bucketRepository.findOne(2);
             }
             if (exist) {
+                if (body.isPublic) {
+                    exist.name = body.name;
+                }
+                else {
+                    exist.name = body.name;
+                    exist.tokenExpire = Number.parseInt(body.tokenExpire);
+                    exist.tokenSecretKey = body.tokenSecretKey;
+                }
                 try {
-                    yield this.bucketRepository.updateById(exist.id, newBucket);
+                    yield this.bucketRepository.save(exist);
                     if (!this.fileUtil.exist(directoryPath)) {
                         yield this.fileUtil.mkdir(directoryPath);
                     }
@@ -110,9 +113,10 @@ let ConfigService = class ConfigService {
                 throw new common_1.HttpException("空间配置不存在", 401);
             }
             try {
-                yield buckets.forEach((bucket) => __awaiter(this, void 0, void 0, function* () {
-                    yield this.imageConfigRepository.updateById(bucket.imageConfig.id, { format });
-                }));
+                for (let i = 0; i < buckets.length; i++) {
+                    buckets[i].imageConfig.format = format;
+                    yield this.imageConfigRepository.save(buckets[i].imageConfig);
+                }
             }
             catch (err) {
                 throw new common_1.HttpException("图片保存格式更新失败" + err.toString(), 410);
@@ -133,9 +137,10 @@ let ConfigService = class ConfigService {
                 watermarkEnable = 0;
             }
             try {
-                yield buckets.forEach((bucket) => __awaiter(this, void 0, void 0, function* () {
-                    yield this.imageConfigRepository.updateById(bucket.imageConfig.id, { watermarkEnable });
-                }));
+                for (let i = 0; i < buckets.length; i++) {
+                    buckets[i].imageConfig.watermarkEnable = watermarkEnable;
+                    yield this.imageConfigRepository.save(buckets[i].imageConfig);
+                }
             }
             catch (err) {
                 throw new common_1.HttpException("水印启用更新失败" + err.toString(), 410);
@@ -191,14 +196,13 @@ let ConfigService = class ConfigService {
                     }
                 }
                 try {
-                    yield this.imageConfigRepository.updateById(buckets[i].imageConfig.id, {
-                        watermarkSaveKey: "/storages/local/" + buckets[i].name + "/" + image.name + "." + image.type,
-                        watermarkGravity: obj.gravity,
-                        watermarkOpacity: obj.opacity,
-                        watermarkWs: obj.ws,
-                        watermarkX: obj.x,
-                        watermarkY: obj.y
-                    });
+                    buckets[i].imageConfig.watermarkSaveKey = "/storages/local/" + buckets[i].name + "/" + image.name + "." + image.type;
+                    buckets[i].imageConfig.watermarkGravity = obj.gravity;
+                    buckets[i].imageConfig.watermarkOpacity = obj.opacity;
+                    buckets[i].imageConfig.watermarkWs = obj.ws;
+                    buckets[i].imageConfig.watermarkX = obj.x;
+                    buckets[i].imageConfig.watermarkY = obj.y;
+                    yield this.imageConfigRepository.save(buckets[i].imageConfig);
                 }
                 catch (err) {
                     throw new common_1.HttpException("图片水印更新失败" + err.toString(), 410);
@@ -216,9 +220,10 @@ let ConfigService = class ConfigService {
                 throw new common_1.HttpException("空间配置不存在", 401);
             }
             try {
-                yield buckets.forEach((bucket) => __awaiter(this, void 0, void 0, function* () {
-                    yield this.audioConfigRepository.updateById(bucket.audioConfig.id, { format });
-                }));
+                for (let i = 0; i < buckets.length; i++) {
+                    buckets[i].audioConfig.format = format;
+                    yield this.audioConfigRepository.save(buckets[i].audioConfig);
+                }
             }
             catch (err) {
                 throw new common_1.HttpException("音频保存格式更新失败" + err.toString(), 410);
@@ -235,9 +240,11 @@ let ConfigService = class ConfigService {
                 throw new common_1.HttpException("空间配置不存在", 401);
             }
             try {
-                yield buckets.forEach((bucket) => __awaiter(this, void 0, void 0, function* () {
-                    yield this.videoConfigRepository.updateById(bucket.videoConfig.id, { format, resolution });
-                }));
+                for (let i = 0; i < buckets.length; i++) {
+                    buckets[i].videoConfig.format = format;
+                    buckets[i].videoConfig.resolution = resolution;
+                    yield this.videoConfigRepository.save(buckets[i].videoConfig);
+                }
             }
             catch (err) {
                 throw new common_1.HttpException("视频保存格式更新失败" + err.toString(), 410);
@@ -246,7 +253,7 @@ let ConfigService = class ConfigService {
     }
 };
 ConfigService = __decorate([
-    common_1.Component(),
+    common_1.Injectable(),
     __param(0, common_1.Inject(file_util_1.FileUtil)),
     __param(1, common_1.Inject(image_process_util_1.ImageProcessUtil)),
     __param(2, typeorm_1.InjectRepository(image_entity_1.Image)),

@@ -634,7 +634,7 @@ let ImageProcessUtil = class ImageProcessUtil {
     }
 };
 ImageProcessUtil = __decorate([
-    common_1.Component(),
+    common_1.Injectable(),
     __param(0, common_1.Inject(kind_util_1.KindUtil)),
     __param(1, common_1.Inject(file_util_1.FileUtil)),
     __metadata("design:paramtypes", [kind_util_1.KindUtil,

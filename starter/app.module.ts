@@ -1,12 +1,11 @@
-import { MiddlewaresConsumer, Module, NestModule, RequestMethod, } from "@nestjs/common";
-import { GraphQLFactory, GraphQLModule } from "@nestjs/graphql";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { MiddlewareConsumer, Module, NestModule, RequestMethod, Inject } from "@nestjs/common";
 import { graphiqlExpress, graphqlExpress } from "apollo-server-express";
+import { GraphQLFactory, GraphQLModule } from "@nestjs/graphql";
 import { LocalModule } from "../src/local.module";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 @Module({
-    modules: [GraphQLModule, LocalModule, TypeOrmModule.forRoot({
-        name: "local",
+    imports: [GraphQLModule, LocalModule, TypeOrmModule.forRoot({
         type: "postgres",
         host: "localhost",
         port: 5433,
@@ -22,16 +21,17 @@ import { LocalModule } from "../src/local.module";
 })
 export class ApplicationModule implements NestModule {
 
-    constructor(private readonly graphQLFactory: GraphQLFactory) {
-    }
+    constructor( 
+        @Inject(GraphQLFactory) private readonly graphQLFactory: GraphQLFactory
+    ) { }
 
-    configure(consumer: MiddlewaresConsumer) {
+    configure(consumer: MiddlewareConsumer) {
         const typeDefs = this.graphQLFactory.mergeTypesByPaths("./**/*.types.graphql");
         const schema = this.graphQLFactory.createSchema({ typeDefs });
         consumer
             .apply(graphiqlExpress({ endpointURL: "/graphql" }))
-            .forRoutes({ path: "/graphiql", method: RequestMethod.GET })
+            .forRoutes("/graphiql")
             .apply(graphqlExpress(req => ({ schema, rootValue: req })))
-            .forRoutes({ path: "/graphql", method: RequestMethod.ALL });
+            .forRoutes("/graphql");
     }
 }

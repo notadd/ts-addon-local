@@ -9,11 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const common_1 = require("@nestjs/common");
 const allow_extension_1 = require("./allow.extension");
+const common_1 = require("@nestjs/common");
 let KindUtil = class KindUtil {
-    constructor() {
-    }
+    constructor() { }
     getKind(type) {
         if (allow_extension_1.AllowedExtensions.image.indexOf(type) !== -1) {
             return "image";
@@ -36,7 +35,7 @@ let KindUtil = class KindUtil {
     }
 };
 KindUtil = __decorate([
-    common_1.Component(),
+    common_1.Injectable(),
     __metadata("design:paramtypes", [])
 ], KindUtil);
 exports.KindUtil = KindUtil;

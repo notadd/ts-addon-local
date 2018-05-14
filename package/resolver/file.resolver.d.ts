@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { DownloadProcessData } from "../interface/file/download.process.data";
 import { UploadProcessBody } from "../interface/file/upload.process.body";
 import { UploadProcessData } from "../interface/file/upload.process.data";
@@ -16,7 +15,7 @@ import { Image } from "../model/image.entity";
 import { File } from "../model/file.entity";
 import { KindUtil } from "../util/kind.util";
 import { FileUtil } from "../util/file.util";
-import { IncomingMessage } from "http";
+import { Request } from "express";
 export declare class FileResolver {
     private readonly fileUtil;
     private readonly kindUtil;
@@ -30,5 +29,5 @@ export declare class FileResolver {
     uploadProcess(req: any, body: UploadProcessBody): Promise<UploadProcessData>;
     getOne(req: any, body: OneBody): Promise<OneData>;
     files(req: any, body: AllBody): Promise<AllData>;
-    deleteFile(req: IncomingMessage, body: FileLocationBody): Promise<CommonData>;
+    deleteFile(req: Request, body: FileLocationBody): Promise<CommonData>;
 }

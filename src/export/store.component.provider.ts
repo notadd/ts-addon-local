@@ -22,8 +22,7 @@ export class StoreComponent {
         private readonly imageProcessUtil: ImageProcessUtil,
         private readonly imageRepository: Repository<Image>,
         private readonly bucketRepository: Repository<Bucket>
-    ) {
-    }
+    ) {}
 
     async delete(bucketName: string, name: string, type: string): Promise<void> {
         // 验证参数

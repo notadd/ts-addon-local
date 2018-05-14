@@ -22,7 +22,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const local_exception_filter_1 = require("../exception/local.exception.filter");
-const download_param_guard_1 = require("../guard/download.param.guard");
 const upload_param_guard_1 = require("../guard/upload.param.guard");
 const image_process_util_1 = require("../util/image.process.util");
 const typeorm_1 = require("typeorm");
@@ -52,6 +51,12 @@ let FileController = class FileController {
     download(headers, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { bucketName, fileName } = headers;
+            if (!bucketName) {
+                throw new common_1.HttpException("缺少参数bucketName", 400);
+            }
+            if (!fileName) {
+                throw new common_1.HttpException("缺少参数fileName", 400);
+            }
             const realPath = this.baseDirectory + "/" + bucketName + "/" + fileName;
             if (!this.fileUtil.exist(realPath)) {
                 throw new common_1.HttpException("请求下载的文件不存在", 404);
@@ -159,7 +164,6 @@ let FileController = class FileController {
 };
 __decorate([
     common_1.Get("/download"),
-    common_1.UseGuards(download_param_guard_1.DownloadParamGuard),
     __param(0, common_1.Headers()), __param(1, common_1.Response()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),

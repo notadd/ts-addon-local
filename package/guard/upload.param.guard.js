@@ -17,8 +17,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const formidable = require("formidable");
 let UploadParamGuard = class UploadParamGuard {
-    canActivate(req, context) {
+    canActivate(context) {
         return __awaiter(this, void 0, void 0, function* () {
+            const req = context.switchToHttp().getRequest();
             let file = {}, obj = {};
             let ex = "";
             yield new Promise((resolve, reject) => {
@@ -60,7 +61,7 @@ let UploadParamGuard = class UploadParamGuard {
     }
 };
 UploadParamGuard = __decorate([
-    common_1.Guard()
+    common_1.Injectable()
 ], UploadParamGuard);
 exports.UploadParamGuard = UploadParamGuard;
 

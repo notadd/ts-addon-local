@@ -1,16 +1,4 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -20,17 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const typeorm_utils_1 = require("@nestjs/typeorm/typeorm.utils");
 const common_1 = require("@nestjs/common");
 const image_process_util_1 = require("../util/image.process.util");
-const typeorm_1 = require("typeorm");
+const typeorm_1 = require("@nestjs/typeorm");
 const bucket_entity_1 = require("../model/bucket.entity");
 const image_entity_1 = require("../model/image.entity");
 const token_util_1 = require("../util/token.util");
 const file_util_1 = require("../util/file.util");
 const kind_util_1 = require("../util/kind.util");
 const path = require("path");
-let StoreComponent = class StoreComponent {
+class StoreComponent {
     constructor(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository) {
         this.kindUtil = kindUtil;
         this.fileUtil = fileUtil;
@@ -169,21 +156,7 @@ let StoreComponent = class StoreComponent {
             return url;
         });
     }
-};
-StoreComponent = __decorate([
-    __param(0, common_1.Inject(kind_util_1.KindUtil)),
-    __param(1, common_1.Inject(file_util_1.FileUtil)),
-    __param(2, common_1.Inject(token_util_1.TokenUtil)),
-    __param(3, common_1.Inject(image_process_util_1.ImageProcessUtil)),
-    __param(4, common_1.Inject("LocalModule.ImageRepository")),
-    __param(5, common_1.Inject("LocalModule.BucketRepository")),
-    __metadata("design:paramtypes", [kind_util_1.KindUtil,
-        file_util_1.FileUtil,
-        token_util_1.TokenUtil,
-        image_process_util_1.ImageProcessUtil,
-        typeorm_1.Repository,
-        typeorm_1.Repository])
-], StoreComponent);
+}
 exports.StoreComponent = StoreComponent;
 exports.StoreComponentToken = "StoreComponentToken";
 exports.StoreComponentProvider = {
@@ -191,7 +164,7 @@ exports.StoreComponentProvider = {
     useFactory: (kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository) => {
         return new StoreComponent(kindUtil, fileUtil, tokenUtil, imageProcessUtil, imageRepository, bucketRepository);
     },
-    inject: [kind_util_1.KindUtil, file_util_1.FileUtil, token_util_1.TokenUtil, image_process_util_1.ImageProcessUtil, typeorm_utils_1.getRepositoryToken(image_entity_1.Image), typeorm_utils_1.getRepositoryToken(bucket_entity_1.Bucket)]
+    inject: [kind_util_1.KindUtil, file_util_1.FileUtil, token_util_1.TokenUtil, image_process_util_1.ImageProcessUtil, typeorm_1.getRepositoryToken(image_entity_1.Image), typeorm_1.getRepositoryToken(bucket_entity_1.Bucket)]
 };
 
 //# sourceMappingURL=store.component.provider.js.map

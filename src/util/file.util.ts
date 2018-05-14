@@ -5,8 +5,7 @@ import * as fs from "fs";
 @Injectable()
 export class FileUtil {
 
-    constructor() {
-    }
+    constructor() {}
 
     async write(path: string, buffer: Buffer): Promise<void> {
         let ex: any = "";

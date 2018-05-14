@@ -23,7 +23,7 @@ import * as path from "path";
 
 @Global()
 @Module({
-    modules: [
+    imports: [
         TypeOrmModule.forFeature([
             Bucket,
             ImageConfig,
@@ -39,7 +39,7 @@ import * as path from "path";
     controllers: [
         FileController,
     ],
-    Injectables: [
+    providers: [
         ConfigResolver,
         ConfigService,
         FileResolver,
@@ -58,6 +58,7 @@ export class LocalModule implements OnModuleInit {
 
     constructor(@Inject(FileUtil) private readonly fileUtil: FileUtil) { }
 
+    /* 本地存储模块启动时会检查执行目录，创建目录 */
     async onModuleInit() {
         const storages: string = path.resolve(process.cwd(), "storages");
         const local: string = path.resolve(process.cwd(), "storages", "local");

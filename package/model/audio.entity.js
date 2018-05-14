@@ -20,9 +20,7 @@ __decorate([
 ], Audio.prototype, "bucketId", void 0);
 __decorate([
     typeorm_1.ManyToOne(type => bucket_entity_1.Bucket, bucket => bucket.audios, {
-        cascadeInsert: false,
-        cascadeUpdate: false,
-        cascadeRemove: false,
+        cascade: false,
         nullable: false,
         lazy: false,
     }),
@@ -30,9 +28,7 @@ __decorate([
     __metadata("design:type", bucket_entity_1.Bucket)
 ], Audio.prototype, "bucket", void 0);
 Audio = __decorate([
-    typeorm_1.Entity({
-        name: "audio",
-    })
+    typeorm_1.Entity("audio")
 ], Audio);
 exports.Audio = Audio;
 

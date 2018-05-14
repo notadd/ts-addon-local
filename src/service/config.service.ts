@@ -35,21 +35,23 @@ export class ConfigService {
 
     async saveBucketConfig(body: BucketConfig): Promise<void> {
         let exist: Bucket | undefined;
-        const newBucket: any = {
-            name: body.name,
-        };
         /* 空间目录 */
         const directoryPath: string = this.baseDirectory + "/" + body.name;
         if (body.isPublic) {
-            exist = await this.bucketRepository.findOneById(1);
+            exist = await this.bucketRepository.findOne(1);
         } else {
-            exist = await this.bucketRepository.findOneById(2);
-            newBucket.tokenExpire = Number.parseInt(body.tokenExpire as any);
-            newBucket.tokenSecretKey = body.tokenSecretKey;
+            exist = await this.bucketRepository.findOne(2);
         }
         if (exist) {
+            if (body.isPublic) {
+                exist.name = body.name;
+            } else {
+                exist.name = body.name;
+                exist.tokenExpire = Number.parseInt(body.tokenExpire as any);
+                exist.tokenSecretKey = body.tokenSecretKey;
+            }
             try {
-                await this.bucketRepository.updateById(exist.id, newBucket);
+                await this.bucketRepository.save(exist);
                 // 创建新目录，暂定不删除旧目录,只是新建这次配置的目录
                 if (!this.fileUtil.exist(directoryPath)) {
                     await this.fileUtil.mkdir(directoryPath);
@@ -97,9 +99,10 @@ export class ConfigService {
             throw new HttpException("空间配置不存在", 401);
         }
         try {
-            await buckets.forEach(async (bucket) => {
-                await this.imageConfigRepository.updateById(bucket.imageConfig.id, { format });
-            });
+            for (let i = 0; i < buckets.length; i++) {
+                buckets[i].imageConfig.format = format;
+                await this.imageConfigRepository.save(buckets[i].imageConfig);
+            }
         } catch (err) {
             throw new HttpException("图片保存格式更新失败" + err.toString(), 410);
         }
@@ -117,9 +120,10 @@ export class ConfigService {
             watermarkEnable = 0;
         }
         try {
-            await buckets.forEach(async (bucket) => {
-                await this.imageConfigRepository.updateById(bucket.imageConfig.id, { watermarkEnable });
-            });
+            for (let i = 0; i < buckets.length; i++) {
+                buckets[i].imageConfig.watermarkEnable = watermarkEnable;
+                await this.imageConfigRepository.save(buckets[i].imageConfig);
+            }
         } catch (err) {
             throw new HttpException("水印启用更新失败" + err.toString(), 410);
         }
@@ -176,15 +180,13 @@ export class ConfigService {
             // 更新图片配置，这里的水印图片路径为图片的绝对路径
             // 不管图片是否已经存在，图片配置都需要更新
             try {
-                await this.imageConfigRepository.updateById(buckets[i].imageConfig.id, {
-                    // 水印路径为相对路径
-                    watermarkSaveKey: "/storages/local/" + buckets[i].name + "/" + image.name + "." + image.type,
-                    watermarkGravity: obj.gravity,
-                    watermarkOpacity: obj.opacity,
-                    watermarkWs: obj.ws,
-                    watermarkX: obj.x,
-                    watermarkY: obj.y
-                });
+                buckets[i].imageConfig.watermarkSaveKey = "/storages/local/" + buckets[i].name + "/" + image.name + "." + image.type;
+                buckets[i].imageConfig.watermarkGravity = obj.gravity;
+                buckets[i].imageConfig.watermarkOpacity = obj.opacity;
+                buckets[i].imageConfig.watermarkWs = obj.ws;
+                buckets[i].imageConfig.watermarkX = obj.x;
+                buckets[i].imageConfig.watermarkY = obj.y;
+                await this.imageConfigRepository.save(buckets[i].imageConfig);
             } catch (err) {
                 throw new HttpException("图片水印更新失败" + err.toString(), 410);
             }
@@ -201,9 +203,10 @@ export class ConfigService {
             throw new HttpException("空间配置不存在", 401);
         }
         try {
-            await buckets.forEach(async (bucket) => {
-                await this.audioConfigRepository.updateById(bucket.audioConfig.id, { format });
-            });
+            for (let i = 0; i < buckets.length; i++) {
+                buckets[i].audioConfig.format = format;
+                await this.audioConfigRepository.save(buckets[i].audioConfig);
+            }
         } catch (err) {
             throw new HttpException("音频保存格式更新失败" + err.toString(), 410);
         }
@@ -218,9 +221,11 @@ export class ConfigService {
             throw new HttpException("空间配置不存在", 401);
         }
         try {
-            await buckets.forEach(async (bucket) => {
-                await this.videoConfigRepository.updateById(bucket.videoConfig.id, { format, resolution });
-            });
+            for (let i = 0; i < buckets.length; i++) {
+                buckets[i].videoConfig.format = format;
+                buckets[i].videoConfig.resolution = resolution;
+                await this.videoConfigRepository.save(buckets[i].videoConfig);
+            }
         } catch (err) {
             throw new HttpException("视频保存格式更新失败" + err.toString(), 410);
         }

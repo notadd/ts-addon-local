@@ -1,11 +1,10 @@
-import { Injectable } from "@nestjs/common";
 import { AllowedExtensions } from "./allow.extension";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class KindUtil {
 
-    constructor() {
-    }
+    constructor() {}
 
     getKind(type: string) {
         if (AllowedExtensions.image.indexOf(type) !== -1) {

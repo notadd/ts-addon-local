@@ -20,8 +20,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const fs = require("fs");
 let FileUtil = class FileUtil {
-    constructor() {
-    }
+    constructor() { }
     write(path, buffer) {
         return __awaiter(this, void 0, void 0, function* () {
             let ex = "";
@@ -147,7 +146,7 @@ let FileUtil = class FileUtil {
     }
 };
 FileUtil = __decorate([
-    common_1.Component(),
+    common_1.Injectable(),
     __metadata("design:paramtypes", [])
 ], FileUtil);
 exports.FileUtil = FileUtil;

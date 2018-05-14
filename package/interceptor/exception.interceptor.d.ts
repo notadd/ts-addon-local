@@ -1,6 +1,7 @@
-import { NestInterceptor, ExecutionContext } from "@nestjs/common";
-import { Observable } from "rxjs/Observable";
+import { NestInterceptor } from "@nestjs/common";
+import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context.host";
+import { Observable } from "rxjs";
 import "rxjs/add/operator/catch";
 export declare class ExceptionInterceptor implements NestInterceptor {
-    intercept(dataOrRequest: any, context: ExecutionContext, stream$: Observable<any>): Observable<any>;
+    intercept(context: ExecutionContextHost, stream$: Observable<any>): Observable<any>;
 }

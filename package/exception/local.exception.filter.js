@@ -8,9 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 let LocalExceptionFilter = class LocalExceptionFilter {
-    catch(exception, response) {
+    catch(exception, host) {
         const status = exception.getStatus();
         const message = exception.getResponse();
+        const response = host.switchToHttp().getResponse();
         response
             .status(status)
             .json({
