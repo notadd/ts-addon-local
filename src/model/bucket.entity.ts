@@ -8,10 +8,9 @@ import { Image } from "./image.entity";
 import { VideoConfig } from "./video.config.entity";
 import { Video } from "./video.entity";
 
-@Entity({
-    name: "bucket",
-})
+@Entity("bucket")
 export class Bucket {
+
     // 主键，需要设置插入，1默认为公有空间配置，2默认为私有空间配置
     @PrimaryColumn()
     id: number;
@@ -39,103 +38,66 @@ export class Bucket {
     tokenSecretKey: string;
 
     // token过期时间，单位秒
-    @Column({
-        nullable: true,
-    })
+    @Column({ nullable: true })
     tokenExpire: number;
 
     /*
     这里lazy:false的意思不是每个Bucket查询出来的时候就会包含imageConfig
     它的意思只是在于获取的属性是否是Promise，而要查询出来的Bucket包含imageConfig，必须使用find({relation:xxxx})
     */
-    @OneToOne(
-        type => ImageConfig,
-        imageConfig => imageConfig.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            cascadeRemove: true,
-            lazy: false,
-        },
-    )
+    @OneToOne(type => ImageConfig, imageConfig => imageConfig.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
     imageConfig: ImageConfig;
 
-    @OneToOne(
-        type => AudioConfig,
-        audioConfig => audioConfig.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            cascadeRemove: true,
-            lazy: false,
-        },
-    )
+    @OneToOne(type => AudioConfig, audioConfig => audioConfig.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
     audioConfig: AudioConfig;
 
-    @OneToOne(
-        type => VideoConfig,
-        videoConfig => videoConfig.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            cascadeRemove: true,
-            lazy: false,
-        },
-    )
+    @OneToOne(type => VideoConfig, videoConfig => videoConfig.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
     videoConfig: VideoConfig;
 
-    @OneToMany(
-        type => File,
-        file => file.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            lazy: true,
-        },
-    )
-    files?: Promise<Array<File>>;
+    @OneToMany(type => File, file => file.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
+    files: Array<File>;
 
-    @OneToMany(
-        type => Image,
-        image => image.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            lazy: true,
-        },
-    )
-    images?: Promise<Array<Image>>;
+    @OneToMany(type => Image, image => image.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false,
+    })
+    images: Array<Image>;
 
-    @OneToMany(
-        type => Audio,
-        audio => audio.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            lazy: true,
-        },
-    )
-    audios?: Promise<Array<Audio>>;
+    @OneToMany(type => Audio, audio => audio.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
+    audios: Array<Audio>;
 
-    @OneToMany(
-        type => Video,
-        video => video.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            lazy: true,
-        },
-    )
-    videos?: Promise<Array<Video>>;
+    @OneToMany(type => Video, video => video.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
+    videos: Array<Video>;
 
-    @OneToMany(
-        type => Document,
-        document => document.bucket,
-        {
-            cascadeInsert: true,
-            cascadeUpdate: true,
-            lazy: true,
-        },
-    )
-    documents?: Promise<Array<Document>>;
+    @OneToMany(type => Document, document => document.bucket, {
+        cascade: ["insert"],
+        lazy: false,
+        eager: false
+    })
+    documents: Array<Document>;
 }
