@@ -1,14 +1,12 @@
-import { ExceptionFilter, Catch, HttpException } from "@nestjs/common";
+import { ExceptionFilter, Catch, HttpException, ArgumentsHost } from "@nestjs/common";
 
-/*错误码表
-
-*/
 @Catch(HttpException)
-export class LocalExceptionFilter implements ExceptionFilter {
+export class LocalExceptionFilter implements ExceptionFilter<HttpException> {
 
-    catch(exception: HttpException, response) {
+    catch(exception, host: ArgumentsHost) {
         const status = exception.getStatus();
         const message = exception.getResponse();
+        const response = host.switchToHttp().getResponse();
         response
             .status(status)
             .json({

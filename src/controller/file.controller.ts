@@ -40,7 +40,7 @@ import * as mime from "mime";
   访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
 */
 @Controller("local/file")
-@UseFilters(new LocalExceptionFilter())
+@UseFilters(LocalExceptionFilter)
 export class FileController {
 
     private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
