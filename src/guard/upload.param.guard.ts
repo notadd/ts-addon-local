@@ -1,12 +1,14 @@
 import { Guard, CanActivate, ExecutionContext, HttpException } from "@nestjs/common";
 import { UploadFile } from "../interface/file/upload.file";
+import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context.host";
 import { UploadForm } from "../interface/file/upload.form";
-import { Observable } from "rxjs/Observable";
 import * as formidable from "formidable";
+import { Observable } from "rxjs";
 
 @Guard()
 export class UploadParamGuard implements CanActivate {
-    async canActivate(req, context: ExecutionContext): Promise<boolean> {
+    async canActivate(context: ExecutionContextHost): Promise<boolean> {
+        const req = context.switchToHttp().getRequest();
         // 解析from-data请求，获取上传表单中文件、其他字段
         let file: UploadFile = {} as any, obj: UploadForm = {} as any;
         let ex: any = "";
