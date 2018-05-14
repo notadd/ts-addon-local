@@ -98,7 +98,7 @@ export class FileService {
             .leftJoinAndSelect("bucket.audios", "audio")
             .leftJoinAndSelect("bucket.videos", "video")
             .leftJoinAndSelect("bucket.documents", "document")
-            .getOne()
+            .getOne();
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
