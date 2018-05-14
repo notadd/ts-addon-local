@@ -1,8 +1,8 @@
-import { Component, HttpException } from "@nestjs/common";
+import { Injectable, HttpException } from "@nestjs/common";
 import * as fs from "fs";
 
 /* 异步操作文件的封装工具类 */
-@Component()
+@Injectable()
 export class FileUtil {
 
     constructor() {

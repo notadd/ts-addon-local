@@ -1,5 +1,5 @@
 import { EnableImageWatermark } from "../interface/config/enable.image.watermark";
-import { Component, HttpException, Inject } from "@nestjs/common";
+import { Injectable, HttpException, Inject } from "@nestjs/common";
 import { BucketConfig } from "../interface/config/bucket.config";
 import { ImageMetadata } from "../interface/file/image.metadata";
 import { AudioFormat } from "../interface/config/audio.format";
@@ -17,7 +17,7 @@ import { Repository } from "typeorm";
 import * as  path from "path";
 import * as fs from "fs";
 
-@Component()
+@Injectable()
 export class ConfigService {
 
     private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");

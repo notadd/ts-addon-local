@@ -1,4 +1,4 @@
-import { Component, HttpException, Inject } from "@nestjs/common";
+import { Injectable, HttpException, Inject } from "@nestjs/common";
 import * as crypto from "crypto";
 import * as gm from "gm";
 import * as path from "path";
@@ -10,7 +10,7 @@ import { FileUtil } from "./file.util";
 import { KindUtil } from "./kind.util";
 
 /* 图片处理工具类 */
-@Component()
+@Injectable()
 export class ImageProcessUtil {
 
     private readonly gravity: Set<string>;

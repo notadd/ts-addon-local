@@ -1,4 +1,4 @@
-import { Component, HttpException, Inject } from "@nestjs/common";
+import { Injectable, HttpException, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ImageMetadata } from "../interface/file/image.metadata";
@@ -15,7 +15,7 @@ import { KindUtil } from "../util/kind.util";
 import { TokenUtil } from "../util/token.util";
 
 /* 文件Service*/
-@Component()
+@Injectable()
 export class FileService {
 
     constructor(

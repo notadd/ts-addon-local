@@ -1,6 +1,6 @@
 import { ImagePostProcessInfo, ImagePreProcessInfo } from "../interface/file/image.process.info";
 import { getRepositoryToken } from "@nestjs/typeorm/typeorm.utils";
-import { HttpException, Component, Inject } from "@nestjs/common";
+import { HttpException, Injectable, Inject } from "@nestjs/common";
 import { ImageMetadata } from "../interface/file/image.metadata";
 import { ImageProcessUtil } from "../util/image.process.util";
 import { Repository, Connection } from "typeorm";

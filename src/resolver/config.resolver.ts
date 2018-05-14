@@ -1,4 +1,4 @@
-import { Component, UseGuards, UseFilters, HttpException, Inject, UseInterceptors } from "@nestjs/common";
+import { Injectable, UseGuards, UseFilters, HttpException, Inject, UseInterceptors } from "@nestjs/common";
 import { EnableImageWatermark } from "../interface/config/enable.image.watermark";
 import { ExceptionInterceptor } from "../interceptor/exception.interceptor";
 import { LocalExceptionFilter } from "../exception/local.exception.filter";

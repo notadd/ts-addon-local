@@ -39,7 +39,7 @@ import * as path from "path";
     controllers: [
         FileController,
     ],
-    components: [
+    Injectables: [
         ConfigResolver,
         ConfigService,
         FileResolver,

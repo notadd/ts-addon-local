@@ -1,7 +1,7 @@
-import { Component } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AllowedExtensions } from "./allow.extension";
 
-@Component()
+@Injectable()
 export class KindUtil {
 
     constructor() {
