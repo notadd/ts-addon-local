@@ -1,11 +1,11 @@
-import { Guard, CanActivate, ExecutionContext, HttpException } from "@nestjs/common";
-import { UploadFile } from "../interface/file/upload.file";
+import { Injectable, CanActivate, ExecutionContext, HttpException } from "@nestjs/common";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context.host";
+import { UploadFile } from "../interface/file/upload.file";
 import { UploadForm } from "../interface/file/upload.form";
 import * as formidable from "formidable";
 import { Observable } from "rxjs";
 
-@Guard()
+@Injectable()
 export class UploadParamGuard implements CanActivate {
     async canActivate(context: ExecutionContextHost): Promise<boolean> {
         const req = context.switchToHttp().getRequest();

@@ -37,6 +37,7 @@
         "reflect-metadata": "^0.1.10",
         "request": "^2.83.0",
         "rxjs": "^6.1.0",
+        "rxjs-compat": "^6.1.0",
         "sharp": "^0.20.1",
         "typeorm": "^0.2.5",
         "typescript": "^2.5.2"
