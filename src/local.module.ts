@@ -9,7 +9,7 @@ import { ImageConfig } from "./model/image.config.entity";
 import { VideoConfig } from "./model/video.config.entity";
 import { ConfigService } from "./service/config.service";
 import { FileService } from "./service/file.service";
-import { Document } from "./model/document.entity";
+import { Document as DocumentEntity } from "./model/document.entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Bucket } from "./model/bucket.entity";
 import { TokenUtil } from "./util/token.util";
@@ -18,7 +18,7 @@ import { Image } from "./model/image.entity";
 import { Video } from "./model/video.entity";
 import { FileUtil } from "./util/file.util";
 import { KindUtil } from "./util/kind.util";
-import { File } from "./model/file.entity";
+import { File as FileEntity } from "./model/file.entity";
 import * as path from "path";
 
 @Global()
@@ -29,8 +29,8 @@ import * as path from "path";
             ImageConfig,
             AudioConfig,
             VideoConfig,
-            File,
-            Document,
+            FileEntity,
+            DocumentEntity,
             Audio,
             Video,
             Image,
