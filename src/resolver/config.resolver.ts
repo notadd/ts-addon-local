@@ -8,16 +8,16 @@ import { BucketsData } from "../interface/config/buckets.data";
 import { ImageFormat } from "../interface/config/image.format";
 import { AudioFormat } from "../interface/config/audio.format";
 import { VideoFormat } from "../interface/config/video.format";
-import { UploadFile } from "../interface/file/upload.file";
 import { Resolver, Query, Mutation } from "@nestjs/graphql";
+import { UploadFile } from "../interface/file/upload.file";
 import { ConfigService } from "../service/config.service";
-import { IncomingMessage, IncomingHttpHeaders } from "http";
-import { CommonData } from "../interface/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { CommonData } from "../interface/common";
 import { Bucket } from "../model/bucket.entity";
 import { KindUtil } from "../util/kind.util";
 import { FileUtil } from "../util/file.util";
 import { Repository } from "typeorm";
+import { Request } from "express";
 import * as path from "path";
 
 /* 本地存储配置的resolver */
@@ -51,7 +51,7 @@ export class ConfigResolver {
 
     /* 空间配置的resolver，与云存储不同，只配置空间名即可，空间名即是store目录下的空间目录名，私有空间要配置token超时与密钥 */
     @Mutation("bucket")
-    async bucket(req: IncomingMessage, body: BucketConfig): Promise<CommonData> {
+    async bucket(req: Request, body: BucketConfig): Promise<CommonData> {
         const { isPublic, name, tokenExpire, tokenSecretKey } = body;
         // 验证参数存在
         if (isPublic === undefined || isPublic === null || !name) {
@@ -75,7 +75,7 @@ export class ConfigResolver {
 
     /* 图片保存格式配置*/
     @Mutation("imageFormat")
-    async imageFormat(req: IncomingMessage, body: ImageFormat): Promise<CommonData> {
+    async imageFormat(req: Request, body: ImageFormat): Promise<CommonData> {
         const format: string = body.format;
         // 验证参数
         if (format === undefined || format.length === 0) {
@@ -91,7 +91,7 @@ export class ConfigResolver {
 
     /* 图片水印启用配置 */
     @Mutation("enableImageWatermark")
-    async enableImageWatermark(req: IncomingMessage, body: EnableImageWatermark): Promise<CommonData> {
+    async enableImageWatermark(req: Request, body: EnableImageWatermark): Promise<CommonData> {
         // 验证参数
         const enable: boolean = body.enable;
         // 验证参数存在
@@ -109,7 +109,7 @@ export class ConfigResolver {
 
     /* 图片水印配置,其中水印图片以base64编码传输 */
     @Mutation("imageWatermark")
-    async imageWatermark(req: IncomingMessage, body: ImageWatermark): Promise<CommonData> {
+    async imageWatermark(req: Request, body: ImageWatermark): Promise<CommonData> {
         // 水印图片临时保存路径
         let tempPath = "";
         try {
@@ -173,7 +173,7 @@ export class ConfigResolver {
 
     /* 音频保存格式配置*/
     @Mutation("audioFormat")
-    async audioFormat(req: IncomingMessage, body: AudioFormat): Promise<CommonData> {
+    async audioFormat(req: Request, body: AudioFormat): Promise<CommonData> {
         const format: string = body.format;
         if (!format) {
             throw new HttpException("缺少参数", 400);
@@ -188,7 +188,7 @@ export class ConfigResolver {
 
     /* 视频保存配置*/
     @Mutation("videoFormat")
-    async videoFormat(req: IncomingMessage, body: VideoFormat): Promise<CommonData> {
+    async videoFormat(req: Request, body: VideoFormat): Promise<CommonData> {
         // 视频编码、分辨率
         const { format, resolution } = body;
         if (!format || !resolution) {
@@ -207,7 +207,7 @@ export class ConfigResolver {
 
     /* 获取所有空间信息字段 */
     @Query("buckets")
-    async buckets(req: IncomingMessage): Promise<BucketsData> {
+    async buckets(req: Request): Promise<BucketsData> {
         // 查询出所有空间的三个字段，其他字段保密
         const buckets: Array<Bucket> = await this.bucketRepository.createQueryBuilder("bucket")
             .select(["bucket.id", "bucket.publicOrPrivate", "bucket.name"])

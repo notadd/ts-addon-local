@@ -22,7 +22,7 @@ import { Image } from "../model/image.entity";
 import { File } from "../model/file.entity";
 import { KindUtil } from "../util/kind.util";
 import { FileUtil } from "../util/file.util";
-import { IncomingMessage } from "http";
+import { Request } from "express";
 import * as path from "path";
 
 /*文件Resolver，包含了文件下载预处理、上传预处理
@@ -53,7 +53,7 @@ export class FileResolver {
              data.url：下载时的url
              data.method： 下载方法
              data.headers:下载文件头信息，这里其实不需要，但是为了与又拍云统一，返回null
-  */
+    */
     @Query("downloadProcess")
     async downloadProcess(req: any, body: FileLocationBody): Promise<DownloadProcessData> {
         const data: DownloadProcessData = {
@@ -126,7 +126,7 @@ export class FileResolver {
         if (!bucketName || !contentName) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket | undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
@@ -164,7 +164,7 @@ export class FileResolver {
         if (!bucketName || !name || !type) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket|undefined = await this.bucketRepository.createQueryBuilder("bucket")
+        const bucket: Bucket | undefined = await this.bucketRepository.createQueryBuilder("bucket")
             .leftJoinAndSelect("bucket.imageConfig", "imageConfig")
             .leftJoinAndSelect("bucket.audioConfig", "audioConfig")
             .leftJoinAndSelect("bucket.videoConfig", "videoConfig")
@@ -176,7 +176,7 @@ export class FileResolver {
         // 根据文件种类处理
         const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const image: Image|undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
+            const image: Image | undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
                 throw new HttpException("指定图片" + name + "." + type + "不存在", 404);
             }
@@ -228,7 +228,7 @@ export class FileResolver {
         if (!bucketName) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket | undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
@@ -245,20 +245,20 @@ export class FileResolver {
                data.message：响应信息
     */
     @Mutation("deleteFile")
-    async deleteFile(req: IncomingMessage, body: FileLocationBody): Promise<CommonData> {
+    async deleteFile(req: Request, body: FileLocationBody): Promise<CommonData> {
         // 验证参数
         const { bucketName, type, name } = body;
         if (!bucketName || !name || !type) {
             throw new HttpException("缺少参数", 400);
         }
-        const bucket: Bucket|undefined = await this.bucketRepository.findOne({ name: bucketName });
+        const bucket: Bucket | undefined = await this.bucketRepository.findOne({ name: bucketName });
         if (!bucket) {
             throw new HttpException("指定空间" + bucketName + "不存在", 401);
         }
         // 根据文件种类，查找、删除数据库
         const kind = this.kindUtil.getKind(type);
         if (kind === "image") {
-            const image: Image|undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
+            const image: Image | undefined = await this.imageRepository.findOne({ name, bucketId: bucket.id });
             if (!image) {
                 throw new HttpException("文件" + name + "不存在于数据库中", 404);
             }
