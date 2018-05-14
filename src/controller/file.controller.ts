@@ -40,7 +40,7 @@ import * as mime from "mime";
   访问、下载在浏览器的默认效果不同，其中访问私有空间文件需要token
 */
 @Controller("local/file")
-@UseFilters(LocalExceptionFilter)
+@UseFilters(new LocalExceptionFilter())
 export class FileController {
 
     private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
@@ -71,6 +71,12 @@ export class FileController {
     @UseGuards(DownloadParamGuard)
     async download(@Headers() headers: HeaderParam, @Response() res): Promise<any> {
         const { bucketName, fileName } = headers;
+        if (!bucketName) {
+            throw new HttpException("缺少参数bucketName", 400);
+        }
+        if (!fileName) {
+            throw new HttpException("缺少参数fileName", 400);
+        }
         // 文件绝对路径，这里并不查询数据库，直接从文件夹获取
         const realPath: string = this.baseDirectory + "/" + bucketName + "/" + fileName;
         // 文件不存在，返回404

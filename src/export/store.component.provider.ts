@@ -1,8 +1,8 @@
 import { ImagePostProcessInfo, ImagePreProcessInfo } from "../interface/file/image.process.info";
-import { getRepositoryToken } from "@nestjs/typeorm/typeorm.utils";
 import { HttpException, Injectable, Inject } from "@nestjs/common";
 import { ImageMetadata } from "../interface/file/image.metadata";
 import { ImageProcessUtil } from "../util/image.process.util";
+import { getRepositoryToken } from "@nestjs/typeorm";
 import { Repository, Connection } from "typeorm";
 import { Bucket } from "../model/bucket.entity";
 import { Image } from "../model/image.entity";
@@ -16,12 +16,12 @@ export class StoreComponent {
     private readonly baseDirectory = path.resolve(process.cwd(), "storages", "local");
 
     constructor(
-        @Inject(KindUtil) private readonly kindUtil: KindUtil,
-        @Inject(FileUtil) private readonly fileUtil: FileUtil,
-        @Inject(TokenUtil) private readonly tokenUtil: TokenUtil,
-        @Inject(ImageProcessUtil) private readonly imageProcessUtil: ImageProcessUtil,
-        @Inject("LocalModule.ImageRepository") private readonly imageRepository: Repository<Image>,
-        @Inject("LocalModule.BucketRepository") private readonly bucketRepository: Repository<Bucket>
+        private readonly kindUtil: KindUtil,
+        private readonly fileUtil: FileUtil,
+        private readonly tokenUtil: TokenUtil,
+        private readonly imageProcessUtil: ImageProcessUtil,
+        private readonly imageRepository: Repository<Image>,
+        private readonly bucketRepository: Repository<Bucket>
     ) {
     }
 
