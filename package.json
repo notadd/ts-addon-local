@@ -24,7 +24,7 @@
     "@nestjs/graphql": "6.0.5",
     "@nestjs/microservices": "5.7.4",
     "@nestjs/testing": "5.7.4",
-    "@nestjs/typeorm": "3.1.0",
+    "@nestjs/typeorm": "6.1.0",
     "@nestjs/websockets": "5.7.4",
     "apollo-server-express": "1.4.0",
     "formidable": "1.2.1",
