@@ -42,7 +42,7 @@
     "sharp": "0.22.1",
     "typeorm": "0.2.17",
     "typescript": "3.4.5",
-    "snyk": "1.163.3"
+    "snyk": "1.164.0"
   },
   "devDependencies": {
     "@notadd/gulp-typescript": "4.0.2",
