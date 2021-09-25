@@ -19,7 +19,7 @@
   "author": "czy12345",
   "license": "Apache-2.0",
   "dependencies": {
-    "@nestjs/common": "6.2.2",
+    "@nestjs/common": "8.0.7",
     "@nestjs/core": "6.2.2",
     "@nestjs/graphql": "6.2.1",
     "@nestjs/microservices": "6.2.2",
